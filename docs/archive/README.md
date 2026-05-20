@@ -15,3 +15,8 @@ Archived groups:
 - `BASE_TOOL_DECISION.md` — Vibe Kanban base decision source
 - `IMPLEMENTATION_MAPPING.md` — Vibe Kanban implementation mapping source
 - `CLI_RUNNER_RESEARCH.md` — older runner research superseded by `../T018_AGENT_EXECUTION_RUNNER_SPIKE.md`
+- `T016_PLAN_KANBAN_MODEL.md` — completed T016 design note
+- `T018_AGENT_EXECUTION_RUNNER_SPIKE.md` — completed T018 design note
+- `AGENT_EXECUTION_PLAN.md` and `EVOLUTION_STRATEGY.md` — future/expanded planning notes
+- `COMPLETION_REPORT.md`, `DESIGN_REDESIGN_SESSION.md`, `PHASE-7-PLAN.md`, `T028-IMPLEMENTATION.md`, `UX_RESEARCH.md` — completed or superseded UI/session notes
+- `ROADMAP_VISUAL.html` — historical visual roadmap snapshot

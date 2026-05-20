@@ -136,7 +136,7 @@
           "components/runner/RunnerLogView.tsx",
           "lib/storage/execution-log-store.ts",
           "data/execution-logs.json",
-          "docs/T018_AGENT_EXECUTION_RUNNER_SPIKE.md"
+          "docs/archive/T018_AGENT_EXECUTION_RUNNER_SPIKE.md"
         ],
         "diffSummary": "Agent Execution Runner 전체 구현 완료. Claude Code CLI spawn, SSE 로그 스트리밍, git 브랜치 자동 생성, 실행 로그 저장, RunnerLogView UI 포함.",
         "completionJudgment": "completed",

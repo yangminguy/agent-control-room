@@ -66,6 +66,9 @@ Included:
 - plan/kanban task model
 - HTML implementation plan view
 - Claude Code execution runner foundation
+- git diff and outcome analysis
+- manual agent status and handoff fallback
+- human-approved loop continuation
 
 Excluded for now:
 - automatic merge
@@ -73,7 +76,7 @@ Excluded for now:
 - Slack alerts
 - multi-user collaboration
 - token usage automatic detection
-- fully autonomous execution loop
+- fully autonomous execution without user approval
 - deep Vibe Kanban fork/custom UI
 
 ## 6. Agent Routing Defaults
@@ -103,16 +106,18 @@ Implemented:
 - T016 Plan & Kanban data model
 - T017 HTML plan view at `/plan`
 - T018 Agent Execution Runner foundation
+- T019 Git Diff & Outcome Analyzer
+- T020 Multi-Agent Router Enhancement
+- T021 Token / Rate Limit Handoff
+- T022 human-approved Autonomous Execution Loop
 
 Current focus:
-- T019 Git Diff & Outcome Analyzer
+- MVP refinement: loop UX, error recovery, and real Vibe Kanban issue creation
 
 Known remaining work:
-- project/task selection in session reports
 - real Vibe Kanban issue/workspace bridge without mock fallback
-- direct `RunnerLogView` wiring inside `/plan` cards
-- diff analysis and completion judgment
-- multi-agent routing enhancement
+- loop feedback polish and clearer failure states
+- production hardening before deployment
 
 ## 8. Acceptance Standard
 
@@ -144,8 +149,9 @@ Supporting docs:
 - `docs/ROADMAP.md`
 - `docs/TASK_MODEL.md`
 - `docs/VIBE_KANBAN_INTEGRATION.md`
-- `docs/T016_PLAN_KANBAN_MODEL.md`
-- `docs/T018_AGENT_EXECUTION_RUNNER_SPIKE.md`
+- `docs/PROMPT_TEMPLATES.md`
+- `docs/DESIGN_SYSTEM.md`
+- `docs/E2E_TEST_GUIDE.md`
 
 ## 10. Non-Goals
 

@@ -25,6 +25,7 @@ Open the local URL printed by Next.js.
 ## Files
 
 - `CLAUDE.md` — Main AI coding context file
+- `docs/README.md` — Active vs archived documentation map
 - `docs/PRD.md` — Current concise product requirements
 - `docs/ARCHITECTURE.md` — System architecture and module design
 - `docs/TASKS.md` — Current task status and next task
@@ -35,6 +36,7 @@ Open the local URL printed by Next.js.
 - `docs/TASK_MODEL.md` — Plan, task, kanban, diff, and execution log models
 - `docs/VIBE_KANBAN_INTEGRATION.md` — Vibe Kanban bridge notes
 - `docs/PROMPT_TEMPLATES.md` — Reusable prompts for Claude Code, Codex, Antigravity
+- `docs/DESIGN_SYSTEM.md` — Current UI design rules
 - `docs/archive/` — Historical long-form research and superseded docs
 
 ## Recommended Start

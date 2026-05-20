@@ -47,14 +47,14 @@
 
 ---
 
-## Phase 3: Semi-Automated Execution 🚧 CURRENT
+## Phase 3: Semi-Automated Execution ✅ DONE
 
 **Goal**: 사용자가 확인 후 버튼을 누르면 에이전트가 실행되고, 결과를 자동 분석해 계획을 갱신한다.
 
 | Task | Status | Recommended Agent |
 |---|---|---|
 | T018 Agent Execution Runner | DONE | Claude Code |
-| T019 Git Diff & Outcome Analyzer | TODO | Claude Code |
+| T019 Git Diff & Outcome Analyzer | DONE | Claude Code |
 
 **Execution flow**:
 ```text
@@ -71,14 +71,14 @@ User approves prompt
 
 ---
 
-## Phase 4: Multi-Agent Routing
+## Phase 4: Multi-Agent Routing ✅ DONE
 
 **Goal**: 여러 AI 에이전트를 목적에 따라 자동으로 선택하고, 한 에이전트가 막히면 다른 에이전트로 자동 전환한다.
 
 | Task | Status | Recommended Agent |
 |---|---|---|
-| T020 Multi-Agent Router Enhancement | TODO | Claude Code |
-| T021 Token / Rate Limit Handoff | TODO | Codex |
+| T020 Multi-Agent Router Enhancement | DONE | Claude Code |
+| T021 Token / Rate Limit Handoff | DONE | Codex |
 
 **Routing logic**:
 ```text
@@ -90,13 +90,13 @@ if preferred agent = cooling_down → auto fallback + generate handoff
 
 ---
 
-## Phase 5: Autonomous Loop
+## Phase 5: Human-Approved Loop ✅ DONE
 
-**Goal**: 사용자의 승인 한 번으로 기능 완성까지 AI가 반복 실행한다.
+**Goal**: 실행 결과를 분석한 뒤 사용자가 Continue/Stop을 선택해 다음 작업으로 이어간다.
 
 | Task | Status |
 |---|---|
-| T022 Autonomous Execution Loop | TODO |
+| T022 Autonomous Execution Loop | DONE |
 
 **Loop**:
 ```text
@@ -115,10 +115,8 @@ Goal input
 ## Current Priority Queue
 
 ```text
-1. T019 — Git Diff & Outcome Analyzer (Claude Code)
-2. Wire RunnerLogView into /plan task cards (Codex or Antigravity)
-3. T020 — Multi-Agent Router Enhancement (Claude Code)
-4. T021 — Token / Rate Limit Handoff (Codex)
-5. Real Vibe Kanban issue/workspace bridge (Codex)
-6. T022 — Autonomous Execution Loop (Claude Code)
+1. MVP Refinement — loop UX polish and clearer error recovery
+2. Real Vibe Kanban issue/workspace bridge (Codex)
+3. Production hardening — security audit, deployment checks, and persistent storage plan
+4. UI polish guided by `DESIGN_SYSTEM.md`
 ```

@@ -1,16 +1,16 @@
 # DECISIONS.md — Agent Control Room
 
-## Decision 001 — MVP is prompt-first, not automation-first
-Status: Accepted
+## Decision 001 — MVP is prompt-first, not autonomy-first
+Status: Amended by Decision 013
 
 ### Decision
-MVP 1 will focus on generating technical translations, task breakdowns, agent recommendations, prompts, handoffs, and session reports. It will not execute Claude Code, Codex, or Antigravity automatically.
+MVP 1 started with technical translations, task breakdowns, agent recommendations, prompts, handoffs, and session reports. It should not execute Claude Code, Codex, or Antigravity without an explicit user action.
 
 ### Reason
-The PRD identifies context loss, task decomposition, prompt quality, and handoff quality as the core problems. Automatic execution adds risk and complexity before the core workflow is validated.
+The PRD identifies context loss, task decomposition, prompt quality, and handoff quality as the core problems. Fully automatic execution adds risk and complexity before the core workflow is validated.
 
 ### Consequence
-The user manually copies prompts into external tools during MVP 1.
+The user can manually copy prompts into external tools. A limited Claude Code runner is allowed only behind explicit user approval.
 
 ---
 
@@ -165,3 +165,17 @@ The current code already converts generated Agent Control Room tasks into Vibe K
 
 ### Consequence
 The next implementation should add a small isolated MCP or local HTTP client/route around the existing draft helper, not rewrite the prompt generator, task model, or Direction to Prompt flow.
+
+---
+
+## Decision 013 — Keep execution human-approved
+Status: Accepted
+
+### Decision
+The app may support narrow execution helpers, starting with the Claude Code runner, but every run and every continuation must be user-approved. Codex and Antigravity remain manual/copy-ready unless explicitly implemented later.
+
+### Reason
+The product has moved beyond prompt-only planning, but the user still needs control over context, risk, and tool choice.
+
+### Consequence
+Runner, analyzer, and loop features should prepare the next step and ask the user to continue instead of creating a fully autonomous coding loop.

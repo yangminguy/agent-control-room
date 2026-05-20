@@ -1,5 +1,6 @@
 node_modules/
 .next/
+tsconfig.tsbuildinfo
 .env
 .env.local
 .env.*.local
@@ -11,3 +12,5 @@ build/
 data/execution-logs.json
 data/agent-statuses.json
 .vercel
+external/vibe-kanban/node_modules/
+external/vibe-kanban/target/

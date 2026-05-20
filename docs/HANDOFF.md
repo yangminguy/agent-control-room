@@ -1,7 +1,7 @@
 # HANDOFF.md — Agent Control Room
 
 ## Current Handoff Status
-Phase 1-3 implementation complete. Agent Control Room now has full manual orchestration, structured planning, and semi-automated execution with diff analysis.
+Phases 1-5 implementation complete. Agent Control Room now has manual orchestration, structured planning, semi-automated Claude execution, diff analysis, manual agent-status handoff, and a human-approved Continue/Stop loop.
 
 Implemented:
 - Next.js App Router project scaffold.
@@ -26,6 +26,7 @@ Implemented:
 - T019 Git Diff & Outcome Analyzer implemented with `lib/analyzer/git-diff-analyzer.ts` and `/api/analyzer` endpoint.
 - `/plan` task cards now wire `RunnerLogView` directly for Claude Code and Codex tasks.
 - T021 Token / Rate Limit Handoff implemented at `/agent-status` with manual status updates, fallback recommendation, and copy-ready handoff preview.
+- T022 Autonomous Execution Loop implemented with analyzer-triggered Continue/Stop flow and `/api/loop-continue`.
 
 Verified:
 - `npm run typecheck`
@@ -75,10 +76,9 @@ Previous session changed files (T016-T018):
 - `docs/PRD.md`
 
 Remaining issues:
-- First MCP/API bridge to actually create Vibe Kanban issues is not implemented yet.
-- No `/api` route, MCP client, or local HTTP client currently calls Vibe Kanban issue creation.
+- Real Vibe Kanban issue creation still falls back to mock mode unless `VIBE_KANBAN_URL` is configured and reachable.
+- Loop UX and error recovery need refinement.
 - `data/feature-plans.json` currently uses `project-agent-control-room` while `data/projects.json` uses `agent-control-room`; UI handles both ids, but the seed data should be reconciled later.
-- T022 Autonomous Execution Loop is next focus.
 - `npm install` reported 5 audit vulnerabilities.
 - Upstream Vibe Kanban says it is sunsetting; avoid deep fork work until the bridge proves useful.
 

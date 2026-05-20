@@ -3,7 +3,7 @@
 ## Project Summary
 Agent Control Room is a personal AI development orchestration system for a PM/non-developer user. It converts product direction into technical tasks, recommends the right AI coding tool, generates execution prompts, and creates handoffs between Claude Code, Codex, and Antigravity.
 
-The first MVP is not an autonomous coding runner. It is a web-based Prompt & Handoff Orchestrator.
+The MVP is a human-in-the-loop Prompt & Handoff Orchestrator. It now includes a limited Claude Code execution runner, but the product should keep user approval and review at the center.
 
 ## Product Principle
 The product must reduce context loss and decision burden. It should help the user answer:
@@ -31,14 +31,13 @@ Included:
 - Next task recommendation
 
 Excluded:
-- Claude Code automatic execution
 - Codex automatic execution
 - Antigravity automatic execution
 - Token usage automatic detection
 - Slack integration
 - GitHub PR automation
 - Auto-merge
-- Automatic code execution analysis
+- fully autonomous code execution without user approval
 
 ## Current Implementation Status
 As of 2026-05-20, the codebase implements:
@@ -54,13 +53,15 @@ As of 2026-05-20, the codebase implements:
 - Plan & Kanban data model (`FeaturePlan`, `PlanTask`, `KanbanCard`, `SubAgentTrack`, `ExecutionLog`).
 - `/plan` HTML Implementation Plan View with Kanban board/card UI and manual task status updates.
 - Agent Execution Runner foundation: git branch creation, Claude Code CLI spawn, SSE log streaming, execution log storage, and `RunnerLogView`.
+- T019 Git Diff & Outcome Analyzer.
+- T020 Multi-Agent Router Enhancement.
+- T021 Token / Rate Limit Handoff.
+- T022 human-approved Autonomous Execution Loop.
 
 Still missing:
 
-- Project/task selection in session reports.
-- Actual Vibe Kanban issue creation through MCP or local HTTP API.
-- Direct `RunnerLogView` wiring inside each `/plan` task card.
-- T019 Git Diff & Outcome Analyzer.
+- Real Vibe Kanban issue creation through MCP or local HTTP API.
+- Loop UX polish, error recovery, and production hardening.
 
 ## Recommended Tech Stack
 Use this unless the user explicitly changes direction.
@@ -121,16 +122,17 @@ If preferred agent status is `cooling_down`, `limited`, or `blocked`, recommend 
 For any implementation task, read in this order:
 
 1. `CLAUDE.md`
-2. `docs/PRD.md`
-3. `docs/ARCHITECTURE.md`
-4. `docs/TASKS.md`
-5. `docs/AGENT_STATE.md`
-6. `docs/HANDOFF.md`
-7. `docs/DECISIONS.md`
+2. `docs/README.md`
+3. `docs/PRD.md`
+4. `docs/ARCHITECTURE.md`
+5. `docs/TASKS.md`
+6. `docs/AGENT_STATE.md`
+7. `docs/HANDOFF.md`
+8. `docs/DECISIONS.md`
 
 ## Coding Rules
 - Keep MVP small and explicit.
-- Do not build automatic tool execution in MVP 1.
+- Do not expand automatic tool execution beyond explicitly supported, human-approved runner flows.
 - Do not add multi-user collaboration unless requested.
 - Do not invent token usage integrations.
 - Prefer structured markdown and deterministic templates.
