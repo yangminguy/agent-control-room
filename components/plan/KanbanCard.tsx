@@ -117,11 +117,13 @@ export function KanbanCard({
   const [copiedNext, setCopiedNext] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<DiffAnalysisOutput | null>(null);
   const [branchName, setBranchName] = useState<string>("");
   const [showLoopApproval, setShowLoopApproval] = useState(false);
-  const [loopMessage, setLoopMessage] = useState<string | null>(null);
+  const [loopMessage, setLoopMessage] = useState<{ text: string; type: "success" | "error" | "info" } | null>(null);
   const [isPreparingNext, setIsPreparingNext] = useState(false);
+  const [lastAnalyzedBranch, setLastAnalyzedBranch] = useState<string>("");
 
   const cfg = STATUS_CONFIG[task.status];
 
@@ -147,6 +149,38 @@ export function KanbanCard({
     } else {
       setCopiedNext(true);
       setTimeout(() => setCopiedNext(false), 2000);
+    }
+  };
+
+  const runAnalyzer = async (bn: string) => {
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    setAnalysisResult(null);
+
+    try {
+      const res = await fetch("/api/analyzer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId, taskId: task.id, cwd: projectPath }),
+      });
+      const data = await res.json() as { analysis?: DiffAnalysisOutput; updatedTask?: PlanTask; error?: string };
+
+      if (!res.ok) {
+        throw new Error(data.error || "Analyzer request failed.");
+      }
+
+      if (data.analysis) {
+        setAnalysisResult(data.analysis);
+        if (data.updatedTask) {
+          onTaskUpdate?.(data.updatedTask);
+        }
+      } else {
+        throw new Error("분석 결과가 없습니다.");
+      }
+    } catch (err) {
+      setAnalysisError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -178,12 +212,21 @@ export function KanbanCard({
 
       if (data.targetTask) {
         onTaskUpdate?.(data.targetTask);
-        setLoopMessage(`${data.targetTask.title} 작업이 Ready 상태로 준비되었습니다.`);
+        setLoopMessage({
+          text: `다음 작업 준비 완료: "${data.targetTask.title}"`,
+          type: "success",
+        });
       } else {
-        setLoopMessage("이어갈 다음 작업이 없습니다. 현재 계획을 검토하세요.");
+        setLoopMessage({
+          text: "이어갈 다음 작업이 없습니다. 현재 계획을 검토하세요.",
+          type: "info",
+        });
       }
     } catch (error) {
-      setLoopMessage(error instanceof Error ? error.message : String(error));
+      setLoopMessage({
+        text: `다음 작업 준비 실패: ${error instanceof Error ? error.message : String(error)}`,
+        type: "error",
+      });
     } finally {
       setIsPreparingNext(false);
     }
@@ -302,30 +345,12 @@ export function KanbanCard({
                   onComplete={(status, bn) => {
                     const newStatus = status === "done" ? "done" : "blocked";
                     onStatusChange(task.id, newStatus);
-                    
+
                     if (status === "done" && bn) {
                       setBranchName(bn);
-                      setIsAnalyzing(true);
+                      setLastAnalyzedBranch(bn);
                       setShowLoopApproval(true);
-                      fetch("/api/analyzer", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ planId, taskId: task.id, cwd: projectPath }),
-                      })
-                        .then((res) => res.json())
-                        .then((data) => {
-                          if (data.analysis) {
-                            setAnalysisResult(data.analysis);
-                            if (data.updatedTask) {
-                              onTaskUpdate?.(data.updatedTask);
-                            }
-                          }
-                          setIsAnalyzing(false);
-                        })
-                        .catch((err) => {
-                          console.error("Analyzer error:", err);
-                          setIsAnalyzing(false);
-                        });
+                      runAnalyzer(bn);
                     }
                   }}
                 />
@@ -402,35 +427,62 @@ export function KanbanCard({
                   <Loader2 className="h-4 w-4 animate-spin" />
                   실행 결과를 분석하는 중입니다.
                 </div>
+              ) : analysisError ? (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs text-red-600">
+                    분석 실패: {analysisError}
+                  </p>
+                  <button
+                    onClick={() => runAnalyzer(lastAnalyzedBranch)}
+                    className="inline-flex items-center gap-1 rounded border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    Retry 분석
+                  </button>
+                </div>
               ) : analysisResult ? (
                 <div className="mt-3 space-y-3">
-                  <p
-                    className={`text-sm font-semibold ${
-                      JUDGMENT_CONFIG[analysisResult.completionJudgment].color
-                    }`}
-                  >
-                    {JUDGMENT_CONFIG[analysisResult.completionJudgment].label}
-                  </p>
-                  <pre className="max-h-36 overflow-auto whitespace-pre-wrap rounded border border-border bg-surface-2 p-3 text-xs leading-relaxed text-text-secondary">
-                    {analysisResult.nextPrompt}
-                  </pre>
+                  {/* 판정 배지 + 이유 요약 */}
+                  <div className="flex items-center gap-2">
+                    <p
+                      className={`text-sm font-semibold ${
+                        JUDGMENT_CONFIG[analysisResult.completionJudgment].color
+                      }`}
+                    >
+                      {JUDGMENT_CONFIG[analysisResult.completionJudgment].label}
+                    </p>
+                    {analysisResult.diffSummary && (
+                      <span className="text-xs text-gray-500 truncate">
+                        — {analysisResult.diffSummary}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* 다음 프롬프트 미리보기 */}
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">다음 작업 프롬프트</p>
+                    <pre className="max-h-36 overflow-auto whitespace-pre-wrap rounded border border-border bg-surface-2 p-3 text-xs leading-relaxed text-text-secondary">
+                      {analysisResult.nextPrompt}
+                    </pre>
+                  </div>
+
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={handleLoopContinue}
                       disabled={isPreparingNext}
-                      className="inline-flex items-center gap-1 rounded bg-pink-primary px-3 py-1.5 text-xs font-medium text-background hover:bg-pink-soft disabled:bg-gray-600"
+                      className="inline-flex items-center gap-1 rounded bg-pink-primary px-3 py-1.5 text-xs font-medium text-background hover:bg-pink-soft disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       {isPreparingNext ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
                         <ChevronRight className="h-3.5 w-3.5" />
                       )}
-                      Continue
+                      {isPreparingNext ? "다음 작업 준비 중..." : "Continue"}
                     </button>
                     <button
                       onClick={() => {
                         setShowLoopApproval(false);
-                        setLoopMessage("현재 결과를 보존하고 루프를 중단했습니다.");
+                        setLoopMessage({ text: "현재 결과가 저장되었습니다.", type: "success" });
                       }}
                       className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
                     >
@@ -438,16 +490,30 @@ export function KanbanCard({
                     </button>
                   </div>
                 </div>
-              ) : (
-                <p className="mt-3 text-xs text-red-500">
-                  분석 결과를 가져오지 못했습니다. Diff Analyzer를 다시 확인하세요.
-                </p>
-              )}
+              ) : null}
 
+              {/* 피드백 배너 */}
               {loopMessage && (
-                <p className="mt-3 rounded border border-gray-200 bg-white p-2 text-xs text-gray-600">
-                  {loopMessage}
-                </p>
+                <div
+                  className={`mt-3 rounded border p-2 text-xs flex items-center justify-between gap-2 ${
+                    loopMessage.type === "success"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                      : loopMessage.type === "error"
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : "border-gray-200 bg-white text-gray-600"
+                  }`}
+                >
+                  <span>{loopMessage.text}</span>
+                  {loopMessage.type === "error" && (
+                    <button
+                      onClick={handleLoopContinue}
+                      className="shrink-0 inline-flex items-center gap-1 rounded border border-red-300 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      Retry
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           )}

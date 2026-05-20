@@ -4,9 +4,10 @@ import type { PlanTaskStatus } from "@/lib/types";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { planId: string; taskId: string } },
+  { params }: { params: Promise<{ planId: string; taskId: string }> },
 ) {
   try {
+    const { planId, taskId } = await params;
     const body = await req.json();
     const status = body.status as PlanTaskStatus;
 
@@ -25,8 +26,8 @@ export async function PATCH(
     }
 
     const updatedPlan = await updatePlanTaskStatus(
-      params.planId,
-      params.taskId,
+      planId,
+      taskId,
       status,
     );
 
