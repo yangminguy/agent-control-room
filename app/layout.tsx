@@ -13,20 +13,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
-      <body>
-        <header className="border-b bg-white">
-          <nav className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-3 text-sm font-medium text-gray-600">
-            <Link href="/" className="text-gray-950 hover:text-blue-700">
+    <html lang="ko" className="dark">
+      <body className="bg-background text-text-primary">
+        <header className="border-b border-border bg-surface">
+          <nav className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-3 text-sm font-medium text-text-secondary">
+            <Link href="/" className="font-semibold text-text-primary hover:text-pink-primary">
               Agent Control Room
             </Link>
-            <Link href="/agent-status" className="hover:text-blue-700">
+            <Link href="/agent-status" className="hover:text-pink-primary">
               Agent Status
             </Link>
-            <Link href="/handoffs" className="hover:text-blue-700">
+            <Link href="/handoffs" className="hover:text-pink-primary">
               Handoffs
             </Link>
-            <Link href="/reports" className="hover:text-blue-700">
+            <Link href="/reports" className="hover:text-pink-primary">
               Reports
             </Link>
           </nav>

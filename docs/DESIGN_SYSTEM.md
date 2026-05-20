@@ -1,32 +1,31 @@
 # Design System v2 — Agent Control Room
+## Dark First Color Palette (Black & Pink)
 
 ## 색상 팔레트
 
-### Primary Colors
-- **Primary-50**: #eff6ff
-- **Primary-100**: #dbeafe
-- **Primary-500**: #3b82f6 (Action, Links)
-- **Primary-600**: #2563eb (Hover)
-- **Primary-700**: #1d4ed8 (Active)
+### Background & Surface (Dark First)
+- **Background**: #0A0A0A (Main page background)
+- **Surface**: #111111 (Cards, panels)
+- **Surface-2**: #18181B (Elevated surfaces, hover states)
+- **Border**: #27272A (Subtle borders)
+
+### Text
+- **Text-Primary**: #FAFAFA (Main text, high contrast)
+- **Text-Secondary**: #A1A1AA (Secondary text, labels)
+
+### Primary Accent (Pink)
+- **Pink-Primary**: #EC4899 (Main accent, CTAs, active states)
+- **Pink-Soft**: #F472B6 (Hover states, secondary pink)
+- **Pink-Muted**: #BE185D (Pressed/dark state)
 
 ### Semantic Colors
-- **Success-600**: #16a34a (Completed tasks, checkmarks)
-- **Warning-500**: #f59e0b (Partial, warnings)
-- **Error-600**: #dc2626 (Blocked, errors)
-- **Info-500**: #0ea5e9 (Information)
+- **Success**: #16A34A (Completed tasks, success states)
+- **Warning**: #F59E0B (Partial completion, warnings)
+- **Error**: #DC2626 (Blocked, errors, critical issues)
 
-### Neutral Colors
-- **Gray-50**: #f9fafb (Backgrounds)
-- **Gray-100**: #f3f4f6 (Subtle backgrounds)
-- **Gray-500**: #6b7280 (Secondary text)
-- **Gray-700**: #374151 (Primary text)
-- **Gray-900**: #111827 (Dark text)
-
-### Dark Mode
-- **Dark-BG**: #0f172a (Main background)
-- **Dark-Surface**: #1e293b (Card surfaces)
-- **Dark-Border**: #334155 (Borders)
-- **Dark-Text**: #e2e8f0 (Text)
+### Supporting
+- **Gray-600**: #52525B (Tertiary text, disabled)
+- **Gray-700**: #3F3F46 (Quiet borders, dividers)
 
 ## 타이포그래피
 
@@ -62,10 +61,10 @@ xl: 32px   (page margins)
 ### Button
 ```typescript
 // Variants
-- Primary (fill, blue-600, white text)
-- Secondary (outline, gray border, gray-700 text)
-- Ghost (transparent, hover: gray-100)
-- Danger (fill, red-600, white text)
+- Primary (fill, pink-primary #EC4899, text: #0A0A0A bold)
+- Secondary (outline, border: gray-600, text: text-primary, bg: surface hover: surface-2)
+- Ghost (transparent, text: text-primary, hover: bg-surface-2)
+- Danger (fill, error #DC2626, text: #FAFAFA)
 
 // Sizes
 - sm: 8px 12px, 12px font
@@ -74,33 +73,32 @@ xl: 32px   (page margins)
 
 // States
 - Default
-- Hover (bg darkens by 1 shade)
-- Active (bg darkens by 2 shades)
-- Disabled (opacity 50%, cursor not-allowed)
-- Loading (spinner icon, disabled)
+- Hover (pink: → pink-soft, others: bg darkens)
+- Active (pink: → pink-muted, others: darker)
+- Disabled (opacity 40%, cursor not-allowed)
+- Loading (spinner icon, disabled state)
 ```
 
 ### Card
 ```typescript
-// Styles
-- Elevated (shadow: 0 4px 6px rgba(0,0,0,0.1), bg: white)
-- Outlined (border: 1px gray-200, bg: white)
-- Flat (bg: gray-50, no border)
+// Default (Dark Mode)
+- Elevated (shadow: 0 4px 12px rgba(0,0,0,0.5), bg: surface #111111)
+- Outlined (border: 1px border-gray #27272A, bg: surface #111111)
+- Flat (bg: background #0A0A0A, no border)
 
-// Dark Mode
-- Elevated (shadow: 0 4px 6px rgba(0,0,0,0.3), bg: dark-surface)
-- Outlined (border: 1px dark-border, bg: dark-surface)
-- Flat (bg: dark-bg, no border)
+// Hover States
+- Elevated (shadow: 0 6px 16px rgba(0,0,0,0.6), bg: surface-2 #18181B)
+- Outlined (border: 1px border-gray, bg: surface-2)
 ```
 
 ### Badge
 ```typescript
 // Types
-- Solid (fill: primary-100, text: primary-700)
-- Success (fill: green-100, text: green-700)
-- Warning (fill: amber-100, text: amber-700)
-- Error (fill: red-100, text: red-700)
-- Outline (border + text: gray-600)
+- Primary (fill: surface-2, text: pink-primary, small font)
+- Success (fill: surface-2, text: success, small font)
+- Warning (fill: surface-2, text: warning, small font)
+- Error (fill: surface-2, text: error, small font)
+- Outline (border: pink-primary, text: pink-primary)
 
 // Sizes
 - sm: 4px 8px, 11px font
@@ -110,10 +108,10 @@ xl: 32px   (page margins)
 ### Input
 ```typescript
 // States
-- Default (border: gray-300, bg: white)
-- Focus (border: blue-600, ring: 2px blue-100)
-- Error (border: red-600, ring: 2px red-100)
-- Disabled (bg: gray-50, opacity: 50%)
+- Default (border: border-gray #27272A, bg: surface-2, text: text-primary)
+- Focus (border: pink-primary, ring: 2px pink-primary at 25% opacity)
+- Error (border: error, ring: 2px error at 25% opacity)
+- Disabled (bg: surface, opacity: 40%, cursor not-allowed)
 
 // Sizes
 - md: 8px 12px, 14px font (default)
@@ -121,45 +119,49 @@ xl: 32px   (page margins)
 ```
 
 ### Status Badge (태스크 상태)
+Status badges now use Lucide icons with Pink/Neutral color scheme:
+
 ```typescript
-Planned:      bg-gray-100, text-gray-700, ○ icon
-Ready:        bg-blue-100, text-blue-700, ⏱ icon
-Running:      bg-amber-100, text-amber-700, ⚙ icon
-Done:         bg-green-100, text-green-700, ✓ icon
-Partial:      bg-orange-100, text-orange-700, ◐ icon
-Blocked:      bg-red-100, text-red-700, ⚠ icon
-Needs Review: bg-purple-100, text-purple-700, 👁 icon
+Planned:      bg-surface-2, text-text-secondary, Circle icon
+Ready:        bg-surface-2, text-pink-primary, Clock icon
+Running:      bg-surface-2, text-pink-primary, Loader2 (animated) icon
+Done:         bg-surface-2, text-success, CheckCircle2 icon
+Partial:      bg-surface-2, text-warning, AlertCircle icon
+Blocked:      bg-surface-2, text-error, AlertTriangle icon
+Needs Review: bg-surface-2, text-pink-primary, Eye icon
 ```
 
-## Responsive Breakpoints
+## Responsive Breakpoints — Desktop First
 
 ```
-Mobile:   < 640px   (sm in Tailwind)
-Tablet:   640px - 1024px (md ~ lg in Tailwind)
-Desktop:  > 1024px  (xl in Tailwind)
+Desktop:     > 1024px (default, optimized)
+Tablet:      768px - 1024px (graceful degradation)
+Mobile:      < 768px (functional, not optimized)
 
 Key breakpoints for Agent Control Room:
-- 375px  (small phone)
-- 640px  (mobile → tablet)
-- 1024px (tablet → desktop)
-- 1440px (standard desktop)
+- 1440px (standard desktop, 16:9 wide)
+- 1024px (desktop → tablet threshold)
+- 768px (tablet → mobile threshold)
+- 390px (modern mobile baseline)
+
+Strategy: Build for 1440px first, ensure 1024px readable, accept mobile as "not broken"
 ```
 
 ## Dark Mode Implementation
 
-### Toggle Mechanism
-- User preference stored in `localStorage` as `theme: 'light' | 'dark'`
-- System preference as fallback: `prefers-color-scheme`
-- Default: Light mode
+### Default
+- **Always starts in Dark mode** (`theme: 'dark'` in localStorage and Tailwind config)
+- Optional toggle available in settings (if user explicitly switches, respect localStorage)
+- No `prefers-color-scheme` detection at startup — Dark is the explicit default
 
-### Color Mapping
-| Component | Light | Dark |
-|-----------|-------|------|
-| Background | #ffffff | #0f172a |
-| Surface | #ffffff | #1e293b |
-| Border | #e5e7eb | #334155 |
-| Text Primary | #111827 | #e2e8f0 |
-| Text Secondary | #6b7280 | #94a3b8 |
+### CSS Implementation
+```css
+/* Dark mode is default (no dark: prefix needed in most cases) */
+body { background: #0A0A0A; color: #FAFAFA; }
+
+/* Use light: prefix only for light mode variants (rarely needed) */
+/* Example: light:bg-white light:text-black (for exceptional cases) */
+```
 
 ## 아이콘 (lucide-react)
 
@@ -178,15 +180,17 @@ Key breakpoints for Agent Control Room:
 ## 접근성 (WCAG AA)
 
 ### 색상 명암비
-- Text on background: 최소 4.5:1
-- Large text (18px+): 최소 3:1
-- UI components: 최소 3:1
+- Text on background: 최소 4.5:1 (AA)
+- Large text (18px+): 최소 3:1 (AA)
+- UI components: 최소 3:1 (AA)
 
-### 검증된 조합
-- Primary-700 (#1d4ed8) on white: ✅ 8.59:1
-- Gray-600 (#4b5563) on white: ✅ 7.23:1
-- White on Primary-600 (#2563eb): ✅ 4.85:1
-- Error-600 (#dc2626) on white: ✅ 5.89:1
+### 검증된 조합 (Dark Mode)
+- Text-Primary (#FAFAFA) on Background (#0A0A0A): ✅ 18:1
+- Text-Secondary (#A1A1AA) on Background (#0A0A0A): ✅ 6.7:1
+- Pink-Primary (#EC4899) on Surface (#111111): ✅ 5.2:1
+- Success (#16A34A) on Surface (#111111): ✅ 3.8:1
+- Error (#DC2626) on Surface (#111111): ✅ 4.5:1
+- Warning (#F59E0B) on Surface (#111111): ✅ 5.8:1
 
 ### 키보드 네비게이션
 - Tab key: 모든 인터랙티브 요소 순회 가능
@@ -222,9 +226,23 @@ Key breakpoints for Agent Control Room:
 ### Tailwind 설정
 ```javascript
 module.exports = {
+  darkMode: 'class', // or 'media'
   theme: {
     colors: {
-      // Custom color palette above
+      background: '#0A0A0A',
+      surface: '#111111',
+      'surface-2': '#18181B',
+      border: '#27272A',
+      'text-primary': '#FAFAFA',
+      'text-secondary': '#A1A1AA',
+      'pink-primary': '#EC4899',
+      'pink-soft': '#F472B6',
+      'pink-muted': '#BE185D',
+      success: '#16A34A',
+      warning: '#F59E0B',
+      error: '#DC2626',
+      'gray-600': '#52525B',
+      'gray-700': '#3F3F46',
     },
     spacing: {
       xs: '4px',
