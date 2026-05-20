@@ -156,14 +156,23 @@ Acceptance criteria met:
 
 ### T021 — Token / Rate Limit Handoff
 
-Status: TODO  
+Status: DONE  
 Recommended agent: Codex  
 Priority: P3
 
-Tasks:
-- Allow user to manually set agent status.
-- Generate handoff on status change.
-- Show next available agent recommendation.
+Implemented:
+- `/agent-status` lets the user manually set `available`, `limited`, `cooling_down`, `blocked`, or `manual_only`.
+- Status changes persist through `/api/agent-status` and `data/agent-statuses.json`.
+- Runtime fallback recommendation is returned after a manual status change.
+- Handoff prompts are generated and saved when a status requires agent transfer.
+- Copy-ready handoff preview is shown in the UI.
+
+Acceptance criteria met:
+- User can update agent status via `/agent-status`.
+- Status changes persist in `data/agent-statuses.json`.
+- Handoff prompt generated on manual status change for unavailable/manual transfer states.
+- UI shows recommended fallback agent and reason.
+- `npm run typecheck` and `npm run lint` pass.
 
 ## Phase 5 — Autonomous Loop
 
@@ -178,10 +187,10 @@ Goal:
 
 ## Immediate Next Task
 
-T021 — Token / Rate Limit Handoff
+T022 — Autonomous Execution Loop
 
 Next prompt target:
-- Codex
+- Claude Code
 
 Read first:
 - `docs/ARCHITECTURE.md`
@@ -191,23 +200,20 @@ Read first:
 ## Latest Session Report
 
 Summary:
-- T020 Multi-Agent Router Enhancement implemented.
-- Agent routing now handles "limited", "cooling_down", and "blocked" states.
-- Automatic fallback agent selection with handoff prompt generation.
-- UI enhanced to display routing rationale and handoff requirements.
+- T021 Token / Rate Limit Handoff implemented.
+- `/agent-status` now supports manual status updates, fallback recommendation, and copy-ready handoff preview.
+- `/api/agent-status` persists status changes and generates saved handoffs for transfer states.
 
 Tests run:
 - `npm run typecheck` ✓
 - `npm run lint` ✓
-- API test (blocked/limited states) ✓
 
 Completed:
-- T020 Multi-Agent Router Enhancement
-- RoutingResult type with statusReason, handoffRequired, handoffPrompt
-- OrchestrationResult type extended for handoff fields
-- DirectionOrchestrator UI component enhanced
+- T021 Token / Rate Limit Handoff
+- Manual status update UI
+- Runtime fallback recommendation
+- Status-change handoff generation
 
 Remaining:
-- T021 Token / Rate Limit Handoff
 - T022 Autonomous Execution Loop
 - Real Vibe Kanban issue creation bridge

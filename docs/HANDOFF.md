@@ -25,6 +25,7 @@ Implemented:
 - T018 Agent Execution Runner implemented with git branch creation, `child_process.spawn`, SSE log streaming, execution log storage, and `RunnerLogView`.
 - T019 Git Diff & Outcome Analyzer implemented with `lib/analyzer/git-diff-analyzer.ts` and `/api/analyzer` endpoint.
 - `/plan` task cards now wire `RunnerLogView` directly for Claude Code and Codex tasks.
+- T021 Token / Rate Limit Handoff implemented at `/agent-status` with manual status updates, fallback recommendation, and copy-ready handoff preview.
 
 Verified:
 - `npm run typecheck`
@@ -38,7 +39,14 @@ Changed files from latest T019 implementation:
 - `docs/AGENT_STATE.md`
 - `docs/HANDOFF.md`
 
-Changed files from latest Codex UI wiring:
+Changed files from latest T021 implementation:
+- `app/agent-status/page.tsx`
+- `app/api/agent-status/route.ts`
+- `docs/AGENT_STATE.md`
+- `docs/HANDOFF.md`
+- `docs/TASKS.md`
+
+Changed files from previous Codex UI wiring:
 - `app/plan/page.tsx`
 - `app/reports/page.tsx`
 - `components/SessionReportForm.tsx`
@@ -70,7 +78,7 @@ Remaining issues:
 - First MCP/API bridge to actually create Vibe Kanban issues is not implemented yet.
 - No `/api` route, MCP client, or local HTTP client currently calls Vibe Kanban issue creation.
 - `data/feature-plans.json` currently uses `project-agent-control-room` while `data/projects.json` uses `agent-control-room`; UI handles both ids, but the seed data should be reconciled later.
-- T021 Token / Rate Limit Handoff is next focus for Codex.
+- T022 Autonomous Execution Loop is next focus.
 - `npm install` reported 5 audit vulnerabilities.
 - Upstream Vibe Kanban says it is sunsetting; avoid deep fork work until the bridge proves useful.
 
@@ -195,13 +203,13 @@ Handoff must include:
 ## Current Handoff Recommendation
 The next handoff should be:
 
-From: Claude Code  
-To: Codex  
-Reason: T021 Token / Rate Limit Handoff is the next bounded UI/state task after T020 routing completion.
+From: Codex  
+To: Claude Code  
+Reason: T022 Autonomous Execution Loop needs architecture-level workflow design and human-in-the-loop guardrail decisions.
 
 Next prompt:
 ```txt
-Implement T021 (Token / Rate Limit Handoff) for Agent Control Room.
+Implement T022 (Autonomous Execution Loop) for Agent Control Room.
 
 Read first:
 - CLAUDE.md
@@ -211,26 +219,28 @@ Read first:
 - docs/HANDOFF.md
 
 Current state:
-- T020 is complete.
-- Agent routing handles limited/cooling_down/blocked states, selects fallback agents, and generates handoff prompts.
-- Agent statuses are stored in `data/agent-statuses.json` through `lib/storage/agent-status-store.ts`.
+- T021 is complete.
+- `/agent-status` supports manual status changes for Claude Code, Codex, and Antigravity.
+- Status changes persist through `data/agent-statuses.json`.
+- Transfer states generate saved handoff prompts and next-agent recommendations.
 
 Task:
-- Allow the user to manually set agent status.
-- Persist status changes in `data/agent-statuses.json`.
-- Generate a handoff prompt when status changes make another agent the better option.
-- Show the next available agent recommendation.
+- Design and implement the smallest human-approved cycle continuation flow.
+- After an execution/analyzer result, present the generated next prompt.
+- Ask the user whether to continue before starting another agent action.
+- Preserve current plan/task context when continuing.
 
 Do not:
 - Implement automatic token usage detection.
-- Implement autonomous execution.
+- Start another execution without explicit user approval.
+- Auto-merge or auto-commit.
 - Build Slack/GitHub notification integrations.
 
 Acceptance criteria:
-- User can update agent status via UI.
-- Status changes persist.
-- UI shows fallback or next available agent recommendation.
-- Handoff prompt is generated when the active/preferred agent becomes unavailable.
+- User sees a next prompt after a cycle result.
+- User can explicitly continue or stop.
+- Continue action keeps plan/task context intact.
+- No next execution starts without user approval.
 - `npm run typecheck` and `npm run lint` pass.
 
 Report back with:

@@ -7,16 +7,16 @@ Build Agent Control Room as a Human-in-the-loop AI Development Orchestrator — 
 Phase 4 — Multi-Agent Routing
 
 ## active_task
-Phases 1-4 (partial) now implemented. T016-T020 are complete. T020 (Multi-Agent Router Enhancement) handles "limited", "cooling_down", and "blocked" agent states with automatic fallback selection and handoff prompt generation. UI displays routing rationale and handoff requirements. Next focus is T021 (Token / Rate Limit Handoff).
+Phases 1-4 (partial) now implemented. T016-T021 are complete. T021 (Token / Rate Limit Handoff) lets the user manually update agent statuses, persists status changes, recommends the next available agent, and generates copy-ready handoffs when a status change requires transfer. Next focus is T022 (Autonomous Execution Loop).
 
 ## current_agent
-Claude Code
-
-## recommended_next_agent
 Codex
 
+## recommended_next_agent
+Claude Code
+
 ## reason
-T021 requires UI for manual agent status updates and handoff generation on status change. Codex is strong for bounded UI implementation and form handling.
+T022 requires loop design across execution results, next prompts, and user approval. Claude Code is better suited for architecture-heavy workflow design before implementation.
 
 ## agent_statuses
 | Agent | Status | Reason |
@@ -43,14 +43,14 @@ T021 requires UI for manual agent status updates and handoff generation on statu
 - Agent Control Room is the independent orchestration layer on top of any kanban base.
 
 ## next_task
-T021 — Token / Rate Limit Handoff: Allow user to manually set agent status, generate handoff on status change, show next available agent recommendation.
+T022 — Autonomous Execution Loop: After each cycle, generate the next prompt and ask the user whether to continue.
 
 ## next_prompt_target
-Codex
+Claude Code
 
 ## next_prompt
 ```txt
-Implement T021 (Token / Rate Limit Handoff) for Agent Control Room.
+Implement T022 (Autonomous Execution Loop) for Agent Control Room.
 
 Read first:
 - docs/ARCHITECTURE.md
@@ -58,24 +58,24 @@ Read first:
 - docs/TASKS.md
 
 Current state:
-- Phase 4 (Multi-Agent Routing) is now working.
-- T020 completed: Agent routing handles limited/cooling_down/blocked states, auto-selects fallback agents, generates handoff prompts.
-- UI displays routing rationale, fallback recommendations, and handoff prompts.
+- T021 is complete.
+- `/agent-status` supports manual agent status updates.
+- Status changes persist in `data/agent-statuses.json`.
+- Transfer states generate saved handoff prompts and show next-agent recommendations.
 
 Task:
-- Build UI to allow user to manually set agent status (available/limited/cooling_down/blocked/manual_only).
-- Integrate agent-status-store.ts for runtime status updates.
-- Generate handoff prompt when user changes agent status.
-- Show next available agent recommendation after status change.
-- Wire handoff preview into the UI.
+- Design the smallest human-in-the-loop autonomous cycle.
+- After a completed/partial/blocked execution result, generate a next prompt.
+- Ask the user whether to continue before any next execution.
+- Keep MVP guardrails: no auto-merge, no hidden execution, no Slack/GitHub automation.
 
 Acceptance criteria:
-- User can update agent status via UI at `/agent-status` or similar.
-- Status changes persist in data/agent-statuses.json.
-- Handoff prompt generated on manual status change.
-- UI shows recommended fallback agent and reason.
+- User can review the recommended next prompt after a cycle.
+- User can explicitly choose continue or stop.
+- Continue action preserves plan/task context.
+- No agent execution starts without user approval.
 - `npm run typecheck` and `npm run lint` pass.
 ```
 
 ## last_updated
-2026-05-20 (T020 completed)
+2026-05-20 (T021 completed)

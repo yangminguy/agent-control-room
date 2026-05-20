@@ -17,9 +17,11 @@ import {
   Eye,
   EyeOff,
   RefreshCw,
+  ChevronRight,
 } from "lucide-react";
 import { RunnerLogView } from "@/components/runner/RunnerLogView";
 import type { PlanTask, PlanTaskStatus, AgentType, CompletionJudgment } from "@/lib/types";
+import type { DiffAnalysisOutput } from "@/lib/analyzer/git-diff-analyzer";
 
 const STATUS_CONFIG: Record<
   PlanTaskStatus,
@@ -113,6 +115,10 @@ export function KanbanCard({
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedNext, setCopiedNext] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<DiffAnalysisOutput | null>(null);
+  const [branchName, setBranchName] = useState<string>("");
+  const [showLoopApproval, setShowLoopApproval] = useState(false);
 
   const cfg = STATUS_CONFIG[task.status];
 
@@ -248,12 +254,32 @@ export function KanbanCard({
                   prompt={task.generatedPrompt}
                   agent={runnerAgent}
                   projectPath={projectPath}
-                  onComplete={(status) =>
-                    onStatusChange(
-                      task.id,
-                      status === "done" ? "done" : "blocked",
-                    )
-                  }
+                  onComplete={(status, bn) => {
+                    const newStatus = status === "done" ? "done" : "blocked";
+                    onStatusChange(task.id, newStatus);
+                    
+                    if (status === "done" && bn) {
+                      setBranchName(bn);
+                      setIsAnalyzing(true);
+                      setShowLoopApproval(true);
+                      fetch("/api/analyzer", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ planId, taskId: task.id, branchName: bn }),
+                      })
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (data.analysis) {
+                            setAnalysisResult(data.analysis);
+                          }
+                          setIsAnalyzing(false);
+                        })
+                        .catch((err) => {
+                          console.error("Analyzer error:", err);
+                          setIsAnalyzing(false);
+                        });
+                    }
+                  }}
                 />
               </div>
             ) : (

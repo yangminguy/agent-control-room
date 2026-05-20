@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateStatusChangeHandoff } from "@/lib/orchestration/handoff-generator";
 import { getAgentStatuses, updateAgentStatus } from "@/lib/storage/agent-status-store";
-import type { AgentType, Handoff } from "@/lib/types";
+import type { AgentStatus, AgentStatusValue, AgentType, Handoff } from "@/lib/types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HANDOFFS_FILE = "handoffs.json";
@@ -16,12 +16,48 @@ const AgentStatusUpdateSchema = z.object({
   nextAvailableAt: z.string().optional(),
 });
 
-function getFallbackAgent(agent: AgentType): AgentType {
-  if (agent === "claude-code") {
-    return "codex";
+const AGENT_FALLBACK_ORDER: Record<AgentType, AgentType[]> = {
+  "claude-code": ["codex", "antigravity"],
+  codex: ["claude-code", "antigravity"],
+  antigravity: ["codex", "claude-code"],
+};
+
+const HANDOFF_STATUSES = new Set<AgentStatusValue>([
+  "limited",
+  "cooling_down",
+  "blocked",
+  "manual_only",
+]);
+
+function isAvailableForRecommendation(status: AgentStatusValue): boolean {
+  return status === "available" || status === "manual_only";
+}
+
+function getRecommendedFallbackAgent(
+  fromAgent: AgentType,
+  statuses: AgentStatus[],
+): AgentType | null {
+  for (const candidate of AGENT_FALLBACK_ORDER[fromAgent]) {
+    const currentStatus = statuses.find((status) => status.agent === candidate);
+
+    if (!currentStatus || isAvailableForRecommendation(currentStatus.status)) {
+      return candidate;
+    }
   }
 
-  return "claude-code";
+  return null;
+}
+
+function getRecommendationReason(
+  fromAgent: AgentType,
+  toAgent: AgentType | null,
+  status: AgentStatusValue,
+): string {
+  if (!toAgent) {
+    return `${fromAgent} 상태가 ${status}로 변경되었지만 즉시 이어받을 수 있는 에이전트가 없습니다.`;
+  }
+
+  return `${fromAgent} 상태가 ${status}로 변경되어 ${toAgent}가 다음 작업을 이어받는 것을 추천합니다.`;
 }
 
 async function readHandoffs(): Promise<Handoff[]> {
@@ -48,21 +84,34 @@ export async function POST(request: Request) {
     status: body.status,
     reason: body.reason,
     nextAvailableAt:
-      body.status === "cooling_down" ? body.nextAvailableAt : undefined,
+      body.status === "cooling_down" || body.status === "blocked"
+        ? body.nextAvailableAt
+        : undefined,
   });
 
-  if (body.status !== "cooling_down" && body.status !== "blocked") {
+  if (!HANDOFF_STATUSES.has(body.status)) {
     return NextResponse.json({ updated });
   }
 
-  const toAgent = getFallbackAgent(body.agent);
+  const statuses = await getAgentStatuses();
+  const recommendedAgent = getRecommendedFallbackAgent(body.agent, statuses);
+  const recommendationReason = getRecommendationReason(
+    body.agent,
+    recommendedAgent,
+    body.status,
+  );
+
+  if (!recommendedAgent) {
+    return NextResponse.json({ updated, recommendedAgent, recommendationReason });
+  }
+
   const handoffReason = body.reason
     ? `${body.status}: ${body.reason}`
     : body.status;
   const handoff: Handoff = {
     ...generateStatusChangeHandoff({
       fromAgent: body.agent,
-      toAgent,
+      toAgent: recommendedAgent,
       reason: handoffReason,
     }),
     id: `handoff-${Date.now()}`,
@@ -72,5 +121,10 @@ export async function POST(request: Request) {
   const handoffs = await readHandoffs();
   await writeHandoffs([handoff, ...handoffs]);
 
-  return NextResponse.json({ updated, handoff });
+  return NextResponse.json({
+    updated,
+    recommendedAgent,
+    recommendationReason,
+    handoff,
+  });
 }

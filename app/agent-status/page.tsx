@@ -1,21 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { AgentStatus, AgentStatusValue, AgentType } from "@/lib/types";
-import { ChevronDown } from "lucide-react";
-
-interface GeneratedHandoff {
-  projectId: string;
-  taskId: string;
-  fromAgent: AgentType;
-  toAgent: AgentType;
-  reason: string;
-  completedWork: string[];
-  remainingWork: string[];
-  changedFiles: string[];
-  forbiddenFiles: string[];
-  nextPrompt: string;
-}
+import { ArrowRight, CircleAlert } from "lucide-react";
+import { HandoffPreview } from "@/components/handoffs/HandoffPreview";
+import type { AgentStatus, AgentStatusValue, AgentType, Handoff } from "@/lib/types";
 
 const AGENT_DISPLAY_NAMES: Record<AgentType, string> = {
   "claude-code": "Claude Code",
@@ -29,6 +17,13 @@ const STATUS_COLORS: Record<AgentStatusValue, string> = {
   cooling_down: "bg-orange-100 text-orange-800",
   blocked: "bg-red-100 text-red-800",
   manual_only: "bg-gray-100 text-gray-800",
+};
+
+type AgentStatusResponse = {
+  updated: AgentStatus;
+  recommendedAgent?: AgentType | null;
+  recommendationReason?: string;
+  handoff?: Handoff;
 };
 
 export default function AgentStatusPage() {
@@ -54,14 +49,22 @@ export default function AgentStatusPage() {
     codex: "",
     antigravity: "",
   });
-  const [generatedHandoffs, setGeneratedHandoffs] = useState<
-    Record<AgentType, GeneratedHandoff | undefined>
-  >({
+  const [generatedHandoffs, setGeneratedHandoffs] = useState<Record<
+    AgentType,
+    Handoff | undefined
+  >>({
     "claude-code": undefined,
     codex: undefined,
     antigravity: undefined,
   });
-  const [expandedHandoff, setExpandedHandoff] = useState<AgentType | null>(null);
+  const [recommendations, setRecommendations] = useState<Record<
+    AgentType,
+    { agent: AgentType | null; reason: string } | undefined
+  >>({
+    "claude-code": undefined,
+    codex: undefined,
+    antigravity: undefined,
+  });
 
   // 초기 상태 로드
   useEffect(() => {
@@ -83,6 +86,17 @@ export default function AgentStatusPage() {
         });
 
         setSelectedStatuses(statusMap);
+        setReasons({
+          "claude-code":
+            data.statuses?.find((status: AgentStatus) => status.agent === "claude-code")
+              ?.reason || "",
+          codex:
+            data.statuses?.find((status: AgentStatus) => status.agent === "codex")
+              ?.reason || "",
+          antigravity:
+            data.statuses?.find((status: AgentStatus) => status.agent === "antigravity")
+              ?.reason || "",
+        });
       } catch (error) {
         console.error("Failed to fetch agent statuses:", error);
       } finally {
@@ -107,13 +121,24 @@ export default function AgentStatusPage() {
         }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as AgentStatusResponse;
 
       if (data.updated) {
         // 상태 목록 업데이트
         setStatuses((prev) =>
-          prev.map((s) => (s.agent === agent ? data.updated : s))
+          prev.some((s) => s.agent === agent)
+            ? prev.map((s) => (s.agent === agent ? data.updated : s))
+            : [...prev, data.updated]
         );
+        setRecommendations((prev) => ({
+          ...prev,
+          [agent]: data.recommendationReason
+            ? {
+                agent: data.recommendedAgent ?? null,
+                reason: data.recommendationReason,
+              }
+            : undefined,
+        }));
 
         // 핸드오프가 생성되었으면 표시
         if (data.handoff) {
@@ -121,7 +146,11 @@ export default function AgentStatusPage() {
             ...prev,
             [agent]: data.handoff,
           }));
-          setExpandedHandoff(agent);
+        } else {
+          setGeneratedHandoffs((prev) => ({
+            ...prev,
+            [agent]: undefined,
+          }));
         }
       }
     } catch (error) {
@@ -149,6 +178,7 @@ export default function AgentStatusPage() {
           const agentType = agent as AgentType;
           const currentStatus = statuses.find((s) => s.agent === agentType);
           const handoff = generatedHandoffs[agentType];
+          const recommendation = recommendations[agentType];
 
           return (
             <div key={agent} className="rounded-lg border border-gray-200 p-6">
@@ -169,6 +199,12 @@ export default function AgentStatusPage() {
                 {currentStatus?.reason && (
                   <p className="text-sm text-gray-600 mt-2">
                     {currentStatus.reason}
+                  </p>
+                )}
+                {currentStatus?.nextAvailableAt && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    복구 예상:{" "}
+                    {new Date(currentStatus.nextAvailableAt).toLocaleString()}
                   </p>
                 )}
               </div>
@@ -247,54 +283,58 @@ export default function AgentStatusPage() {
                 </button>
               </div>
 
-              {/* 핸드오프 정보 */}
-              {handoff && (
-                <div className="mt-4 border-t pt-4">
-                  <button
-                    onClick={() =>
-                      setExpandedHandoff(
-                        expandedHandoff === agentType ? null : agentType
-                      )
-                    }
-                    className="flex w-full items-center gap-2 rounded bg-blue-50 p-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
-                  >
-                    <ChevronDown
-                      size={16}
-                      className={`transition-transform ${
-                        expandedHandoff === agentType ? "rotate-180" : ""
-                      }`}
-                    />
-                    핸드오프 생성됨
-                  </button>
-
-                  {expandedHandoff === agentType && (
-                    <div className="mt-3 space-y-2 text-sm">
-                      <div>
-                        <p className="font-medium text-gray-700">
-                          다음 에이전트:
+              {recommendation && (
+                <div className="mt-4 rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
+                  <div className="flex items-start gap-2">
+                    <CircleAlert className="mt-0.5 h-4 w-4 flex-none" />
+                    <div className="space-y-1">
+                      <p>{recommendation.reason}</p>
+                      {recommendation.agent && (
+                        <p className="flex items-center gap-2 font-medium">
+                          <span>{AGENT_DISPLAY_NAMES[agentType]}</span>
+                          <ArrowRight className="h-4 w-4" />
+                          <span>
+                            {AGENT_DISPLAY_NAMES[recommendation.agent]}
+                          </span>
                         </p>
-                        <p className="text-blue-600">
-                          → {AGENT_DISPLAY_NAMES[handoff.toAgent]}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">사유:</p>
-                        <p className="text-gray-600">{handoff.reason}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">다음 작업:</p>
-                        <p className="rounded bg-gray-100 p-2 font-mono text-xs">
-                          {handoff.nextPrompt}
-                        </p>
-                      </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                </div>
+              )}
+
+              {handoff && (
+                <div className="mt-4 rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+                  Handoff prompt generated below.
                 </div>
               )}
             </div>
           );
         })}
       </div>
+
+      {Object.values(generatedHandoffs).some(Boolean) && (
+        <section className="space-y-4">
+          <div>
+            <h2 className="text-2xl font-semibold">Generated Handoffs</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Copy-ready prompts created from the latest manual status changes.
+            </p>
+          </div>
+          <div className="space-y-6">
+            {Object.entries(generatedHandoffs).map(([agent, handoff]) =>
+              handoff ? (
+                <div key={agent} className="space-y-2">
+                  <h3 className="font-medium">
+                    {AGENT_DISPLAY_NAMES[agent as AgentType]} status handoff
+                  </h3>
+                  <HandoffPreview handoff={handoff} />
+                </div>
+              ) : null
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

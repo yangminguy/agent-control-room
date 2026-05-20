@@ -9,7 +9,7 @@ interface RunnerLogViewProps {
   prompt: string;
   agent: AgentType;
   projectPath: string;
-  onComplete?: (status: "done" | "failed") => void;
+  onComplete?: (status: "done" | "failed", branchName?: string) => void;
 }
 
 interface LogEntry {
@@ -113,7 +113,7 @@ export function RunnerLogView({
                   const code = parseInt(match[1], 10);
                   setExitCode(code);
                   const status = code === 0 ? "done" : "failed";
-                  onComplete?.(status);
+                  onComplete?.(status, branchName);
                   setIsRunning(false);
                 }
               }
