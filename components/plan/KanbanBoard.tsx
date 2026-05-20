@@ -5,13 +5,13 @@ import type { FeaturePlan, PlanTask, PlanTaskStatus } from "@/lib/types";
 import { KanbanCard } from "./KanbanCard";
 
 const COLUMNS: { key: PlanTaskStatus; label: string; color: string }[] = [
-  { key: "planned", label: "Backlog", color: "bg-gray-100 text-gray-600" },
-  { key: "ready", label: "Ready", color: "bg-blue-100 text-blue-700" },
-  { key: "running", label: "Running", color: "bg-amber-100 text-amber-700" },
-  { key: "needs_review", label: "Review", color: "bg-purple-100 text-purple-700" },
-  { key: "done", label: "Done", color: "bg-emerald-100 text-emerald-700" },
-  { key: "partial", label: "Partial", color: "bg-orange-100 text-orange-700" },
-  { key: "blocked", label: "Blocked", color: "bg-red-100 text-red-700" },
+  { key: "planned", label: "Backlog", color: "bg-surface-2 text-text-secondary" },
+  { key: "ready", label: "Ready", color: "bg-surface-2 text-pink-primary" },
+  { key: "running", label: "Running", color: "bg-surface-2 text-amber-500" },
+  { key: "needs_review", label: "Review", color: "bg-surface-2 text-pink-primary" },
+  { key: "done", label: "Done", color: "bg-surface-2 text-green-600" },
+  { key: "partial", label: "Partial", color: "bg-surface-2 text-amber-500" },
+  { key: "blocked", label: "Blocked", color: "bg-surface-2 text-error" },
 ];
 
 interface KanbanBoardProps {

@@ -87,7 +87,7 @@ export function SessionReportForm({
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div>
-        <label className="text-sm font-medium text-slate-800" htmlFor="project">
+        <label className="text-sm font-medium text-text-primary" htmlFor="project">
           Project
         </label>
         <select
@@ -105,7 +105,7 @@ export function SessionReportForm({
       </div>
 
       <div>
-        <label className="text-sm font-medium text-slate-800" htmlFor="task">
+        <label className="text-sm font-medium text-text-primary" htmlFor="task">
           Task
         </label>
         <select
@@ -123,7 +123,7 @@ export function SessionReportForm({
       </div>
 
       <div>
-        <label className="text-sm font-medium text-slate-800" htmlFor="agent">
+        <label className="text-sm font-medium text-text-primary" htmlFor="agent">
           Agent
         </label>
         <select
@@ -155,7 +155,7 @@ export function SessionReportForm({
       {message ? <p className="text-sm text-slate-700">{message}</p> : null}
 
       <button
-        className="rounded-md bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:bg-slate-400"
+        className="rounded-md bg-pink-primary px-4 py-2.5 text-sm font-semibold text-background hover:bg-pink-soft disabled:bg-gray-600"
         disabled={isSaving || !summary.trim() || !projectId || !taskId}
         onClick={saveReport}
         type="button"
@@ -179,7 +179,7 @@ function TextArea({
 
   return (
     <div>
-      <label className="text-sm font-medium text-slate-800" htmlFor={id}>
+      <label className="text-sm font-medium text-text-primary" htmlFor={id}>
         {label}
       </label>
       <textarea

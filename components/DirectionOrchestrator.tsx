@@ -64,7 +64,7 @@ export function DirectionOrchestrator() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-5 py-6 lg:px-8">
       <header className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-        <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+        <p className="text-sm font-semibold uppercase tracking-wide text-pink-primary">
           Agent Control Room
         </p>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -151,7 +151,7 @@ export function DirectionOrchestrator() {
           ) : null}
 
           <button
-            className="rounded-md bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+            className="rounded-md bg-pink-primary px-4 py-2.5 text-sm font-semibold text-background hover:bg-pink-soft disabled:cursor-not-allowed disabled:bg-gray-600"
             disabled={isLoading || !projectName.trim() || !direction.trim()}
             onClick={handleGenerate}
             type="button"

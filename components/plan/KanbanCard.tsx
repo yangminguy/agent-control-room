@@ -35,8 +35,8 @@ const STATUS_CONFIG: Record<
   },
   ready: {
     label: "Ready",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
+    color: "text-pink-primary",
+    bg: "bg-surface-2",
     icon: <Clock className="w-3.5 h-3.5" />,
   },
   running: {
@@ -411,14 +411,14 @@ export function KanbanCard({
                   >
                     {JUDGMENT_CONFIG[analysisResult.completionJudgment].label}
                   </p>
-                  <pre className="max-h-36 overflow-auto whitespace-pre-wrap rounded border border-blue-100 bg-white p-3 text-xs leading-relaxed text-gray-700">
+                  <pre className="max-h-36 overflow-auto whitespace-pre-wrap rounded border border-border bg-surface-2 p-3 text-xs leading-relaxed text-text-secondary">
                     {analysisResult.nextPrompt}
                   </pre>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={handleLoopContinue}
                       disabled={isPreparingNext}
-                      className="inline-flex items-center gap-1 rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
+                      className="inline-flex items-center gap-1 rounded bg-pink-primary px-3 py-1.5 text-xs font-medium text-background hover:bg-pink-soft disabled:bg-gray-600"
                     >
                       {isPreparingNext ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -524,7 +524,7 @@ export function KanbanCard({
               )}
             </div>
             {task.nextPrompt ? (
-              <pre className="text-xs text-gray-700 bg-blue-50 border border-blue-100 rounded-lg p-3 whitespace-pre-wrap leading-relaxed overflow-auto max-h-32">
+              <pre className="text-xs text-text-secondary bg-surface-2 border border-border rounded-lg p-3 whitespace-pre-wrap leading-relaxed overflow-auto max-h-32">
                 {task.nextPrompt}
               </pre>
             ) : (
