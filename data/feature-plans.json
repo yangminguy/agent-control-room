@@ -1,0 +1,152 @@
+[
+  {
+    "id": "plan-phase2-structured-planning",
+    "projectId": "project-agent-control-room",
+    "title": "Phase 2: Structured Planning",
+    "userGoal": "실행 추적이 가능한 계획/태스크/칸반 구조를 만들고, 에이전트 실행 결과를 자동으로 캡처해 다음 프롬프트를 생성한다.",
+    "status": "running",
+    "tasks": [
+      {
+        "id": "pt-016",
+        "planId": "plan-phase2-structured-planning",
+        "title": "Plan & Kanban Data Model",
+        "description": "FeaturePlan, PlanTask, KanbanCard, SubAgentTrack 타입을 정의하고 시드 데이터를 생성한다.",
+        "status": "done",
+        "assignedAgent": "antigravity",
+        "priority": "P1",
+        "acceptanceCriteria": [
+          "모든 새 타입이 any 없이 lib/types.ts에서 export된다.",
+          "data/feature-plans.json이 최소 3개 태스크를 가진 plan 1개와 함께 존재한다.",
+          "KanbanCard 타입이 작업명, 담당 에이전트, 목표, 생성된 프롬프트, 실행 상태, 변경 파일, Diff 요약, 완료 판정, 다음 프롬프트 9개 필드를 포함한다.",
+          "npm run typecheck와 npm run lint가 통과한다."
+        ],
+        "subAgentTracks": [
+          {
+            "id": "sat-016-arch",
+            "role": "Architecture Reviewer",
+            "status": "done",
+            "summary": "TASK_MODEL.md 기반 타입 구조 검토 및 KanbanCard 필드 확장 확인 완료"
+          },
+          {
+            "id": "sat-016-type",
+            "role": "Type Definer",
+            "status": "done",
+            "summary": "PlanTaskStatus, SubAgentTrack, PlanTask, FeaturePlan, CompletionJudgment, KanbanCard, DiffSummary, ExecutionLog 8개 타입 lib/types.ts에 추가"
+          },
+          {
+            "id": "sat-016-seed",
+            "role": "Data Seeder",
+            "status": "done",
+            "summary": "data/feature-plans.json 시드 파일 생성 및 lib/storage/feature-plan-store.ts 구현"
+          }
+        ],
+        "generatedPrompt": "lib/types.ts에 PlanTaskStatus, SubAgentTrack, PlanTask, FeaturePlan, CompletionJudgment, KanbanCard, DiffSummary, ExecutionLog 타입을 추가하고, data/feature-plans.json 시드 파일과 lib/storage/feature-plan-store.ts 스토리지 헬퍼를 구현하라.",
+        "changedFiles": [
+          "lib/types.ts",
+          "data/feature-plans.json",
+          "lib/storage/feature-plan-store.ts"
+        ],
+        "diffSummary": "lib/types.ts에 8개 Phase 2 타입 추가 (+121줄). data/feature-plans.json 신규 생성 (plan 1개, task 3개). lib/storage/feature-plan-store.ts 신규 생성 (getFeaturePlans, getFeaturePlanById, addFeaturePlan, updatePlanTaskStatus 4개 함수).",
+        "completionJudgment": "completed",
+        "branchName": "acr/t016-plan-model-20260520",
+        "lastSessionReportId": null,
+        "createdAt": "2026-05-20T12:00:00.000Z",
+        "updatedAt": "2026-05-20T12:05:00.000Z"
+      },
+      {
+        "id": "pt-017",
+        "planId": "plan-phase2-structured-planning",
+        "title": "HTML Implementation Plan View",
+        "description": "app/plan/page.tsx를 생성해 FeaturePlan과 PlanTask를 칸반 보드 형태로 시각화한다. 각 태스크는 상태 뱃지, 담당 에이전트, 서브에이전트 트랙을 표시하고 수동 완료 표시 버튼을 제공한다.",
+        "status": "done",
+        "assignedAgent": "antigravity",
+        "priority": "P1",
+        "acceptanceCriteria": [
+          "plan view가 모든 태스크와 상태를 보여준다.",
+          "태스크 완료 시 시각적으로 업데이트된다.",
+          "비개발자도 읽을 수 있는 UI다."
+        ],
+        "subAgentTracks": [
+          {
+            "id": "sat-017-fe",
+            "role": "Frontend Implementer",
+            "status": "done",
+            "summary": "app/plan/page.tsx, components/plan/KanbanBoard.tsx, components/plan/KanbanCard.tsx 구현 완료"
+          },
+          {
+            "id": "sat-017-qa",
+            "role": "QA Reviewer",
+            "status": "done",
+            "summary": "typecheck + lint 통과, /api/plans/[planId]/tasks/[taskId] PATCH API 확인 완료"
+          }
+        ],
+        "generatedPrompt": null,
+        "changedFiles": [
+          "app/plan/page.tsx",
+          "components/plan/KanbanBoard.tsx",
+          "components/plan/KanbanCard.tsx",
+          "app/api/plans/[planId]/tasks/[taskId]/route.ts"
+        ],
+        "diffSummary": "Kanban Board UI 구현 완료. FeaturePlan을 칸반 보드로 시각화, 7개 상태 컬럼(Planned/Ready/Running/Review/Done/Partial/Blocked), 상태 변경 버튼, 프롬프트 복사, Sub-Agent Tracks 표시.",
+        "completionJudgment": "completed",
+        "branchName": "acr/t017-plan-view-20260520",
+        "lastSessionReportId": null,
+        "createdAt": "2026-05-20T12:00:00.000Z",
+        "updatedAt": "2026-05-20T12:19:00.000Z"
+      },
+      {
+        "id": "pt-018",
+        "planId": "plan-phase2-structured-planning",
+        "title": "Agent Execution Runner",
+        "description": "칸반 카드를 생성하고, git 브랜치를 만들고, 에이전트를 실행하고, 로그를 캡처하고, 태스크 상태를 업데이트하는 실행 어댑터를 구현한다.",
+        "status": "done",
+        "assignedAgent": "claude-code",
+        "priority": "P2",
+        "acceptanceCriteria": [
+          "사용자가 생성된 프롬프트가 있는 태스크에서 Execute를 클릭할 수 있다.",
+          "새 git 브랜치가 자동으로 생성된다.",
+          "로그가 UI에 실시간 스트리밍된다.",
+          "태스크 상태가 완료 시 Done 또는 Failed로 업데이트된다."
+        ],
+        "subAgentTracks": [
+          {
+            "id": "sat-018-spike",
+            "role": "Architecture Reviewer",
+            "status": "done",
+            "summary": "Claude Code 2.1.145 CLI 검증 완료 (-p/--print 플래그 확인). Codex 미설치로 MVP 제외."
+          },
+          {
+            "id": "sat-018-be",
+            "role": "Backend Implementer",
+            "status": "done",
+            "summary": "lib/runner/git-utils.ts, lib/runner/spawn-runner.ts, app/api/runner/route.ts, lib/storage/execution-log-store.ts 구현 완료"
+          },
+          {
+            "id": "sat-018-fe",
+            "role": "Frontend Implementer",
+            "status": "done",
+            "summary": "components/runner/RunnerLogView.tsx 구현 완료 (터미널 스타일 로그, 실시간 SSE 스트리밍)"
+          }
+        ],
+        "generatedPrompt": null,
+        "changedFiles": [
+          "lib/runner/git-utils.ts",
+          "lib/runner/spawn-runner.ts",
+          "app/api/runner/route.ts",
+          "components/runner/RunnerLogView.tsx",
+          "lib/storage/execution-log-store.ts",
+          "data/execution-logs.json",
+          "docs/T018_AGENT_EXECUTION_RUNNER_SPIKE.md"
+        ],
+        "diffSummary": "Agent Execution Runner 전체 구현 완료. Claude Code CLI spawn, SSE 로그 스트리밍, git 브랜치 자동 생성, 실행 로그 저장, RunnerLogView UI 포함.",
+        "completionJudgment": "completed",
+        "branchName": "acr/t018-runner-20260520",
+        "lastSessionReportId": null,
+        "createdAt": "2026-05-20T12:00:00.000Z",
+        "updatedAt": "2026-05-20T12:18:00.000Z"
+      }
+    ],
+    "createdAt": "2026-05-20T12:00:00.000Z",
+    "updatedAt": "2026-05-20T12:19:00.000Z"
+  }
+]

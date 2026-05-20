@@ -1,0 +1,21 @@
+[
+  {
+    "id": "agent-control-room",
+    "name": "Agent Control Room",
+    "path": "/Users/wonminyang/Desktop/양원민 개발자/agent_control_room_docs",
+    "description": "Personal prompt and handoff orchestrator for AI coding tools.",
+    "defaultAgent": "codex",
+    "docs": [
+      {
+        "id": "agent-control-room-prd",
+        "projectId": "agent-control-room",
+        "path": "docs/PRD.md",
+        "title": "Product Requirements",
+        "summary": "Defines the prompt-first MVP for translating product direction into technical tasks, agent recommendations, prompts, handoffs, and session reports.",
+        "updatedAt": "2026-05-20T00:00:00.000Z"
+      }
+    ],
+    "createdAt": "2026-05-20T00:00:00.000Z",
+    "updatedAt": "2026-05-20T00:00:00.000Z"
+  }
+]

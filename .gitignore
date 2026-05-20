@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.env
+.env.local
+.env.*.local
+dist/
+build/
+.DS_Store
+*.log
+.claude/
+data/execution-logs.json
+data/agent-statuses.json
