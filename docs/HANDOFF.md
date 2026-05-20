@@ -203,13 +203,13 @@ Handoff must include:
 ## Current Handoff Recommendation
 The next handoff should be:
 
-From: Codex  
-To: Claude Code  
-Reason: T022 Autonomous Execution Loop needs architecture-level workflow design and human-in-the-loop guardrail decisions.
+From: Claude Code / Codex  
+To: Codex or Design  
+Reason: T022 is complete; the next useful work is MVP refinement, loop UX polish, error recovery, and the real Vibe Kanban issue creation bridge.
 
 Next prompt:
 ```txt
-Implement T022 (Autonomous Execution Loop) for Agent Control Room.
+MVP Refinement & Integration for Agent Control Room.
 
 Read first:
 - CLAUDE.md
@@ -219,16 +219,16 @@ Read first:
 - docs/HANDOFF.md
 
 Current state:
-- T021 is complete.
-- `/agent-status` supports manual status changes for Claude Code, Codex, and Antigravity.
-- Status changes persist through `data/agent-statuses.json`.
-- Transfer states generate saved handoff prompts and next-agent recommendations.
+- T022 is complete.
+- Core execution flow is now Task → Run → Analyze → Continue/Stop → Next Task.
+- `/api/loop-continue` prepares the next target task without starting execution.
+- The user remains in control before every next action.
 
 Task:
-- Design and implement the smallest human-approved cycle continuation flow.
-- After an execution/analyzer result, present the generated next prompt.
-- Ask the user whether to continue before starting another agent action.
-- Preserve current plan/task context when continuing.
+- Improve Loop UX feedback and refresh behavior.
+- Add graceful error states for analyzer/runner/loop failures.
+- Implement real Vibe Kanban issue creation if the local integration surface is available.
+- Keep changes scoped and avoid hidden automation.
 
 Do not:
 - Implement automatic token usage detection.
@@ -237,10 +237,10 @@ Do not:
 - Build Slack/GitHub notification integrations.
 
 Acceptance criteria:
-- User sees a next prompt after a cycle result.
-- User can explicitly continue or stop.
-- Continue action keeps plan/task context intact.
-- No next execution starts without user approval.
+- User sees clear feedback after Continue or Stop.
+- Analyzer and loop errors are visible and recoverable.
+- Kanban state reflects prepared next work without a full mental reset.
+- Real Vibe Kanban issue creation is isolated behind the existing bridge.
 - `npm run typecheck` and `npm run lint` pass.
 
 Report back with:

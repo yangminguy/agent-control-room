@@ -102,6 +102,7 @@ interface KanbanCardProps {
   planId: string;
   projectPath: string;
   onStatusChange: (taskId: string, status: PlanTaskStatus) => void;
+  onTaskUpdate?: (task: PlanTask) => void;
 }
 
 export function KanbanCard({
@@ -109,6 +110,7 @@ export function KanbanCard({
   planId,
   projectPath,
   onStatusChange,
+  onTaskUpdate,
 }: KanbanCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -119,6 +121,8 @@ export function KanbanCard({
   const [analysisResult, setAnalysisResult] = useState<DiffAnalysisOutput | null>(null);
   const [branchName, setBranchName] = useState<string>("");
   const [showLoopApproval, setShowLoopApproval] = useState(false);
+  const [loopMessage, setLoopMessage] = useState<string | null>(null);
+  const [isPreparingNext, setIsPreparingNext] = useState(false);
 
   const cfg = STATUS_CONFIG[task.status];
 
@@ -144,6 +148,45 @@ export function KanbanCard({
     } else {
       setCopiedNext(true);
       setTimeout(() => setCopiedNext(false), 2000);
+    }
+  };
+
+  const handleLoopContinue = async () => {
+    const nextPrompt = analysisResult?.nextPrompt || task.nextPrompt;
+    if (!nextPrompt) return;
+
+    setIsPreparingNext(true);
+    setLoopMessage(null);
+
+    try {
+      const response = await fetch("/api/loop-continue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId,
+          taskId: task.id,
+          nextPrompt,
+        }),
+      });
+      const data = await response.json() as {
+        targetTask?: PlanTask | null;
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to prepare next task.");
+      }
+
+      if (data.targetTask) {
+        onTaskUpdate?.(data.targetTask);
+        setLoopMessage(`${data.targetTask.title} 작업이 Ready 상태로 준비되었습니다.`);
+      } else {
+        setLoopMessage("이어갈 다음 작업이 없습니다. 현재 계획을 검토하세요.");
+      }
+    } catch (error) {
+      setLoopMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsPreparingNext(false);
     }
   };
 
@@ -265,12 +308,15 @@ export function KanbanCard({
                       fetch("/api/analyzer", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ planId, taskId: task.id, branchName: bn }),
+                        body: JSON.stringify({ planId, taskId: task.id, cwd: projectPath }),
                       })
                         .then((res) => res.json())
                         .then((data) => {
                           if (data.analysis) {
                             setAnalysisResult(data.analysis);
+                            if (data.updatedTask) {
+                              onTaskUpdate?.(data.updatedTask);
+                            }
                           }
                           setIsAnalyzing(false);
                         })
@@ -336,6 +382,75 @@ export function KanbanCard({
               <p className="text-xs text-gray-300">아직 생성되지 않음</p>
             )}
           </div>
+
+          {/* 루프 승인 */}
+          {showLoopApproval && (
+            <div className="p-4 bg-slate-50">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                  Loop Approval
+                </span>
+                {branchName && (
+                  <span className="text-xs text-gray-400 font-mono">
+                    {branchName}
+                  </span>
+                )}
+              </div>
+
+              {isAnalyzing ? (
+                <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  실행 결과를 분석하는 중입니다.
+                </div>
+              ) : analysisResult ? (
+                <div className="mt-3 space-y-3">
+                  <p
+                    className={`text-sm font-semibold ${
+                      JUDGMENT_CONFIG[analysisResult.completionJudgment].color
+                    }`}
+                  >
+                    {JUDGMENT_CONFIG[analysisResult.completionJudgment].label}
+                  </p>
+                  <pre className="max-h-36 overflow-auto whitespace-pre-wrap rounded border border-blue-100 bg-white p-3 text-xs leading-relaxed text-gray-700">
+                    {analysisResult.nextPrompt}
+                  </pre>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={handleLoopContinue}
+                      disabled={isPreparingNext}
+                      className="inline-flex items-center gap-1 rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
+                    >
+                      {isPreparingNext ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      )}
+                      Continue
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowLoopApproval(false);
+                        setLoopMessage("현재 결과를 보존하고 루프를 중단했습니다.");
+                      }}
+                      className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      Stop
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-3 text-xs text-red-500">
+                  분석 결과를 가져오지 못했습니다. Diff Analyzer를 다시 확인하세요.
+                </p>
+              )}
+
+              {loopMessage && (
+                <p className="mt-3 rounded border border-gray-200 bg-white p-2 text-xs text-gray-600">
+                  {loopMessage}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* 변경 파일 */}
           <div className="p-4">

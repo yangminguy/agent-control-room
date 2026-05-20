@@ -172,8 +172,13 @@ export type PlanTaskStatus =
 export type SubAgentTrack = {
   id: string;
   role: string; // e.g. "Architecture Reviewer", "Backend Implementer", "Type Definer"
+  agentId?: string; // T025: 내부 에이전트 ID (44개 내부 에이전트 지원)
+  externalAgent?: AgentType; // T025: 외부 에이전트 (fallback)
   status: PlanTaskStatus;
   summary?: string; // 이 트랙이 완료한 내용 요약
+  executionOrder?: number; // T025: multi-agent composition에서의 실행 순서
+  estimatedTokens?: number; // T025: 예상 토큰 수
+  estimatedMinutes?: number; // T025: 예상 소요 시간
 };
 
 /** 실행 단위: FeaturePlan 내 하나의 작업 */

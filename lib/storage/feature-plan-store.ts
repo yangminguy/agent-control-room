@@ -148,3 +148,71 @@ export async function updateKanbanCardResult(
   await writeJson(FEATURE_PLANS_FILE, plans);
   return updatedPlan;
 }
+
+export async function prepareLoopContinuation(
+  planId: string,
+  currentTaskId: string,
+  nextPrompt: string,
+): Promise<{
+  plan: FeaturePlan;
+  targetTask: PlanTask | null;
+}> {
+  const plans = await getFeaturePlans();
+  const planIndex = plans.findIndex((p) => p.id === planId);
+
+  if (planIndex === -1) {
+    throw new Error(`FeaturePlan not found: ${planId}`);
+  }
+
+  const plan = plans[planIndex];
+  const currentTaskIndex = plan.tasks.findIndex((task) => task.id === currentTaskId);
+
+  if (currentTaskIndex === -1) {
+    throw new Error(`PlanTask not found: ${currentTaskId}`);
+  }
+
+  const currentTask = plan.tasks[currentTaskIndex];
+  const targetTaskIndex =
+    currentTask.completionJudgment === "completed"
+      ? plan.tasks.findIndex(
+          (task, index) => index > currentTaskIndex && task.status !== "done",
+        )
+      : currentTaskIndex;
+
+  if (targetTaskIndex === -1) {
+    const updatedPlan = {
+      ...plan,
+      updatedAt: new Date().toISOString(),
+    };
+    plans[planIndex] = updatedPlan;
+    await writeJson(FEATURE_PLANS_FILE, plans);
+    return { plan: updatedPlan, targetTask: null };
+  }
+
+  const now = new Date().toISOString();
+  const updatedTasks = plan.tasks.map((task, index) =>
+    index === targetTaskIndex
+      ? {
+          ...task,
+          status: "ready" as PlanTaskStatus,
+          generatedPrompt: nextPrompt,
+          updatedAt: now,
+        }
+      : task,
+  );
+
+  const updatedPlan: FeaturePlan = {
+    ...plan,
+    tasks: updatedTasks,
+    status: "running",
+    updatedAt: now,
+  };
+
+  plans[planIndex] = updatedPlan;
+  await writeJson(FEATURE_PLANS_FILE, plans);
+
+  return {
+    plan: updatedPlan,
+    targetTask: updatedTasks[targetTaskIndex],
+  };
+}

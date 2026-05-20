@@ -38,6 +38,7 @@ export function RunnerLogView({
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [exitCode, setExitCode] = useState<number | null>(null);
+  const [actualBranchName, setActualBranchName] = useState<string | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const branchName = generateBranchPreview(taskId);
@@ -56,6 +57,7 @@ export function RunnerLogView({
     setIsRunning(true);
     setLogs([]);
     setExitCode(null);
+    setActualBranchName(null);
 
     try {
       const response = await fetch("/api/runner", {
@@ -91,6 +93,7 @@ export function RunnerLogView({
 
       const decoder = new TextDecoder();
       let buffer = "";
+      let completedBranchName: string | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -107,13 +110,18 @@ export function RunnerLogView({
               const entry = JSON.parse(jsonStr) as LogEntry;
               setLogs((prev) => [...prev, entry]);
 
+              if (entry.log.startsWith("[INFO] Branch created: ")) {
+                completedBranchName = entry.log.replace("[INFO] Branch created: ", "");
+                setActualBranchName(completedBranchName);
+              }
+
               if (entry.log.startsWith("[DONE]") || entry.log.startsWith("[ERROR]")) {
                 const match = entry.log.match(/Exit code: (\d+)/);
                 if (match) {
                   const code = parseInt(match[1], 10);
                   setExitCode(code);
                   const status = code === 0 ? "done" : "failed";
-                  onComplete?.(status, branchName);
+                  onComplete?.(status, completedBranchName || branchName);
                   setIsRunning(false);
                 }
               }
@@ -154,7 +162,10 @@ export function RunnerLogView({
 
         {!isRunning && (
           <div className="text-sm text-gray-600">
-            Branch: <code className="rounded bg-gray-100 px-2 py-1">{branchName}</code>
+            Branch:{" "}
+            <code className="rounded bg-gray-100 px-2 py-1">
+              {actualBranchName || branchName}
+            </code>
           </div>
         )}
 

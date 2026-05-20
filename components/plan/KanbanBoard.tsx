@@ -30,6 +30,12 @@ export function KanbanBoard({ plan, projectPath }: KanbanBoardProps) {
     );
   };
 
+  const handleTaskUpdate = (updatedTask: PlanTask) => {
+    setTasks((prev) =>
+      prev.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
+    );
+  };
+
   const tasksByStatus = (status: PlanTaskStatus) =>
     tasks.filter((t) => t.status === status);
 
@@ -79,6 +85,7 @@ export function KanbanBoard({ plan, projectPath }: KanbanBoardProps) {
                   planId={plan.id}
                   projectPath={projectPath}
                   onStatusChange={handleStatusChange}
+                  onTaskUpdate={handleTaskUpdate}
                 />
               ))}
             </div>

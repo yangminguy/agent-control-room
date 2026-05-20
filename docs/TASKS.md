@@ -198,10 +198,10 @@ Acceptance criteria met:
 
 ## Immediate Next Task
 
-T022 — Autonomous Execution Loop
+MVP Refinement — Loop UX, Vibe Kanban issue creation, and error recovery
 
 Next prompt target:
-- Claude Code
+- Codex or Design
 
 Read first:
 - `docs/ARCHITECTURE.md`
@@ -211,20 +211,23 @@ Read first:
 ## Latest Session Report
 
 Summary:
-- T021 Token / Rate Limit Handoff implemented.
-- `/agent-status` now supports manual status updates, fallback recommendation, and copy-ready handoff preview.
-- `/api/agent-status` persists status changes and generates saved handoffs for transfer states.
+- T022 Autonomous Execution Loop completed and QA-fixed.
+- Runner completion now triggers analyzer with the correct project path.
+- Loop Approval UI shows judgment, next prompt, Continue, and Stop controls.
+- `/api/loop-continue` prepares the next target task without auto-executing it.
 
 Tests run:
 - `npm run typecheck` ✓
 - `npm run lint` ✓
+- `npm run build` ✓
+- `/api/loop-continue` smoke test ✓
 
 Completed:
-- T021 Token / Rate Limit Handoff
-- Manual status update UI
-- Runtime fallback recommendation
-- Status-change handoff generation
+- T022 Autonomous Execution Loop
+- Analyzer-to-loop UI wiring
+- Human-approved Continue/Stop flow
+- Next task prompt preparation
 
 Remaining:
-- T022 Autonomous Execution Loop
 - Real Vibe Kanban issue creation bridge
+- Loop UX polish and error recovery
