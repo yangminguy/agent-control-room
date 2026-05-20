@@ -24,11 +24,19 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
     return;
   }
 
-  const [cmd, ...args] = buildCommand(agent, prompt);
+  let cmd: string;
+  let args: string[];
+  try {
+    [cmd, ...args] = buildCommand(agent, prompt);
+  } catch (error) {
+    onLog(`[ERROR] ${error instanceof Error ? error.message : String(error)}`);
+    onComplete(1);
+    return;
+  }
 
   const child = spawn(cmd, args, {
     cwd,
-    shell: true,
+    shell: false,
   });
 
   child.stdout?.on("data", (data) => {

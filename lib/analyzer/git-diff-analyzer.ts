@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import type { CompletionJudgment } from "@/lib/types";
+import type { CompletionJudgment, DiffAnalysisOutput } from "@/lib/types";
 
 /**
  * T019 — Git Diff Analyzer
@@ -10,15 +10,6 @@ export interface DiffAnalysisInput {
   cwd: string;
   branchName?: string | null;
   acceptanceCriteria: string[];
-}
-
-export interface DiffAnalysisOutput {
-  changedFiles: string[];
-  addedLines: number;
-  removedLines: number;
-  diffSummary: string;
-  completionJudgment: CompletionJudgment;
-  nextPrompt: string;
 }
 
 /**
@@ -250,5 +241,8 @@ export async function analyzeDiff(
     diffSummary,
     completionJudgment,
     nextPrompt,
+    completedTaskIds: [],
+    partialTaskIds: [],
+    blockedTaskIds: [],
   };
 }

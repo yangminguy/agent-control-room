@@ -288,17 +288,19 @@ export type KanbanCard = {
 };
 
 /** T019용: git diff 분석 결과 */
-export type DiffSummary = {
+export type DiffAnalysisOutput = {
   changedFiles: string[];
   addedLines: number;
   removedLines: number;
-  summary: string;              // LLM 생성 plain-language 요약
-  completedTaskIds: string[];   // done 판정된 planTask ids
-  partialTaskIds: string[];     // partial 판정된 planTask ids
-  blockedTaskIds: string[];     // blocked 판정된 planTask ids
+  diffSummary: string;                    // Plain-language diff 요약
+  completionJudgment: CompletionJudgment; // 완료 판정
+  nextPrompt: string;                     // 다음 프롬프트
+  completedTaskIds: string[];             // done 판정된 planTask ids
+  partialTaskIds: string[];               // partial 판정된 planTask ids
+  blockedTaskIds: string[];               // blocked/needs_review 판정된 planTask ids
 };
 
-export type DiffAnalysisOutput = DiffSummary;
+export type DiffSummary = DiffAnalysisOutput;
 
 /** T018용: 에이전트 실행 로그 */
 export type ExecutionLog = {

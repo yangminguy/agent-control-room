@@ -10,3 +10,4 @@ build/
 .claude/
 data/execution-logs.json
 data/agent-statuses.json
+.vercel

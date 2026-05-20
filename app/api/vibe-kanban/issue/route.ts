@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import {
-  MockVibeKanbanClient,
   getVibeKanbanClient,
+  isMockVibeKanbanClient,
   toVibeKanbanIssueDraft,
 } from "@/lib/integrations/vibe-kanban";
 
@@ -35,18 +35,31 @@ export async function POST(request: Request) {
     });
 
     const client = getVibeKanbanClient();
-    let result = await client.createIssue(draft);
+    const isMock = isMockVibeKanbanClient(client);
+    const result = await client.createIssue(draft);
 
-    if (!result.success && !(client instanceof MockVibeKanbanClient)) {
-      console.warn(
-        "[VibeKanban API] Real client failed, falling back to mock. Reason:",
-        result.message
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          ...result,
+          mode: "real",
+          draft,
+        },
+        { status: 502 },
       );
-      const fallback = new MockVibeKanbanClient();
-      result = await fallback.createIssue(draft);
     }
 
-    return NextResponse.json(result, { status: result.success ? 200 : 500 });
+    return NextResponse.json(
+      {
+        ...result,
+        mode: isMock ? "mock" : "real",
+        draft,
+        message: isMock
+          ? "Vibe Kanban URL is not configured; created a local mock draft only."
+          : result.message,
+      },
+      { status: isMock ? 202 : 200 },
+    );
   } catch (error: any) {
     console.error("[VibeKanban API] Error:", error);
     return NextResponse.json(

@@ -95,6 +95,12 @@ export class HttpVibeKanbanClient implements VibeKanbanClient {
   }
 }
 
+export function isMockVibeKanbanClient(
+  client: VibeKanbanClient,
+): client is MockVibeKanbanClient {
+  return client instanceof MockVibeKanbanClient;
+}
+
 export class MockVibeKanbanClient implements VibeKanbanClient {
   async createIssue(
     draft: VibeKanbanIssueDraft

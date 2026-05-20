@@ -20,8 +20,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { RunnerLogView } from "@/components/runner/RunnerLogView";
-import type { PlanTask, PlanTaskStatus, AgentType, CompletionJudgment } from "@/lib/types";
-import type { DiffAnalysisOutput } from "@/lib/analyzer/git-diff-analyzer";
+import type { PlanTask, PlanTaskStatus, AgentType, CompletionJudgment, DiffAnalysisOutput } from "@/lib/types";
 
 const STATUS_CONFIG: Record<
   PlanTaskStatus,
@@ -191,11 +190,14 @@ export function KanbanCard({
   };
 
   const nextActions = NEXT_STATUSES[task.status];
-  const runnerAgent =
-    task.assignedAgent === "claude-code" || task.assignedAgent === "codex"
-      ? task.assignedAgent
-      : null;
+  const runnerAgent = task.assignedAgent === "claude-code" ? task.assignedAgent : null;
   const canExecute = Boolean(projectPath && task.generatedPrompt && runnerAgent);
+  const executionUnavailableMessage =
+    task.assignedAgent === "codex"
+      ? "Codex CLI 실행은 아직 지원하지 않습니다. 생성된 프롬프트를 복사해 수동으로 실행하세요."
+      : task.assignedAgent === "antigravity"
+        ? "Antigravity는 현재 수동 실행 대상입니다."
+        : "프로젝트 경로 또는 생성된 프롬프트가 필요합니다.";
 
   return (
     <div
@@ -330,9 +332,7 @@ export function KanbanCard({
               </div>
             ) : (
               <p className="mt-1 text-xs text-gray-300">
-                {runnerAgent
-                  ? "프로젝트 경로 또는 생성된 프롬프트가 필요합니다."
-                  : "이 에이전트는 현재 수동 실행 대상입니다."}
+                {executionUnavailableMessage}
               </p>
             )}
           </div>

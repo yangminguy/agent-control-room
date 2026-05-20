@@ -24,9 +24,9 @@ const OrchestrationSchema = z.object({
   recommendedAgent: z.enum(["claude-code", "codex", "antigravity"]),
   fallbackAgent: z.enum(["claude-code", "codex", "antigravity"]).nullable(),
   agentReason: z.string(),
-  statusReason: z.string().optional(),
-  handoffRequired: z.boolean().optional(),
-  handoffPrompt: z.string().optional(),
+  statusReason: z.string().nullable(),
+  handoffRequired: z.boolean(),
+  handoffPrompt: z.string().nullable(),
   copyReadyPrompt: z.string(),
   acceptanceCriteria: z.array(z.string()).min(1),
   assumptions: z.array(z.string()),
@@ -43,6 +43,9 @@ const responseSchema = {
     "recommendedAgent",
     "fallbackAgent",
     "agentReason",
+    "statusReason",
+    "handoffRequired",
+    "handoffPrompt",
     "copyReadyPrompt",
     "acceptanceCriteria",
     "assumptions",
@@ -113,9 +116,13 @@ const responseSchema = {
       ],
     },
     agentReason: { type: "string" },
-    statusReason: { type: "string" },
+    statusReason: {
+      anyOf: [{ type: "string" }, { type: "null" }],
+    },
     handoffRequired: { type: "boolean" },
-    handoffPrompt: { type: "string" },
+    handoffPrompt: {
+      anyOf: [{ type: "string" }, { type: "null" }],
+    },
     copyReadyPrompt: { type: "string" },
     acceptanceCriteria: {
       type: "array",
@@ -170,8 +177,13 @@ export async function orchestrateDirection(
       },
     });
 
-    const parsed = JSON.parse(response.output_text);
-    return { ...OrchestrationSchema.parse(parsed), source: "openai" };
+    const parsed = OrchestrationSchema.parse(JSON.parse(response.output_text));
+    return {
+      ...parsed,
+      statusReason: parsed.statusReason ?? undefined,
+      handoffPrompt: parsed.handoffPrompt ?? undefined,
+      source: "openai",
+    };
   } catch (error) {
     console.error("OpenAI orchestration failed", error);
     return { ...createFallbackOrchestration(input), source: "fallback" };

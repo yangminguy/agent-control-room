@@ -3,6 +3,8 @@ import { spawnAgent } from "@/lib/runner/spawn-runner";
 import { addExecutionLog, updateExecutionLog } from "@/lib/storage/execution-log-store";
 import { getFeaturePlanById, updatePlanTaskStatus } from "@/lib/storage/feature-plan-store";
 
+const SUPPORTED_RUNNER_AGENTS = new Set(["claude-code"]);
+
 export async function POST(request: Request) {
   let responseStarted = false;
   const textEncoder = new TextEncoder();
@@ -22,6 +24,13 @@ export async function POST(request: Request) {
     };
 
     const { planId, taskId, prompt, cwd, agent } = body;
+
+    if (!SUPPORTED_RUNNER_AGENTS.has(agent)) {
+      return new Response(
+        textEncoder.encode(`data: ${JSON.stringify({ log: `[ERROR] ${agent} CLI execution is not supported yet. Use the copy-ready prompt for manual execution.`, type: "system" })}\n\n`),
+        { status: 400, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
 
     // planTask 조회
     const plan = await getFeaturePlanById(planId);
@@ -49,7 +58,12 @@ export async function POST(request: Request) {
           // 미커밋된 변경사항 확인
           const hasUncommitted = await checkUncommittedChanges(cwd);
           if (hasUncommitted) {
-            controller.enqueue(encode("[WARNING] Uncommitted changes detected in working directory", "system"));
+            controller.enqueue(encode(
+              "[ERROR] Uncommitted changes detected. Commit, stash, or discard existing changes before running an agent so the analyzer can inspect only this execution.",
+              "system",
+            ));
+            controller.close();
+            return;
           }
 
           // 브랜치명 생성 및 생성

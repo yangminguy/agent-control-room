@@ -25,7 +25,11 @@ export function SendToVibeKanbanButton({ project, task }: { project: Project; ta
 
       const data = await response.json();
       if (data.success) {
-        alert(`성공적으로 Vibe Kanban에 이슈를 생성했습니다!\nIssue ID: ${data.issueId}`);
+        if (data.mode === "mock") {
+          alert(`Vibe Kanban draft를 mock으로 생성했습니다.\nIssue ID: ${data.issueId}\n\n실제 이슈 생성은 VIBE_KANBAN_URL 설정 후 가능합니다.`);
+        } else {
+          alert(`성공적으로 Vibe Kanban에 이슈를 생성했습니다!\nIssue ID: ${data.issueId}`);
+        }
       } else {
         alert(`이슈 생성 실패: ${data.message}`);
       }

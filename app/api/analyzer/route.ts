@@ -41,16 +41,31 @@ export async function POST(request: Request) {
 
     // Map completion judgment to task status
     const newTaskStatus = mapJudgmentToTaskStatus(analysisResult.completionJudgment);
+    const taskIdsByJudgment = {
+      completedTaskIds:
+        analysisResult.completionJudgment === "completed" ? [taskId] : [],
+      partialTaskIds:
+        analysisResult.completionJudgment === "partial" ? [taskId] : [],
+      blockedTaskIds:
+        analysisResult.completionJudgment === "not_completed" ||
+        analysisResult.completionJudgment === "pending"
+          ? [taskId]
+          : [],
+    };
+    const enrichedAnalysis = {
+      ...analysisResult,
+      ...taskIdsByJudgment,
+    };
 
     // Update KanbanCard fields in feature plan
     const updatedPlan = await updateKanbanCardResult(
       planId,
       taskId,
       {
-        changedFiles: analysisResult.changedFiles,
-        diffSummary: analysisResult.diffSummary,
-        completionJudgment: analysisResult.completionJudgment,
-        nextPrompt: analysisResult.nextPrompt,
+        changedFiles: enrichedAnalysis.changedFiles,
+        diffSummary: enrichedAnalysis.diffSummary,
+        completionJudgment: enrichedAnalysis.completionJudgment,
+        nextPrompt: enrichedAnalysis.nextPrompt,
         status: newTaskStatus,
       }
     );
@@ -60,7 +75,7 @@ export async function POST(request: Request) {
 
     return Response.json({
       success: true,
-      analysis: analysisResult,
+      analysis: enrichedAnalysis,
       taskStatus: newTaskStatus,
       executionLogId: executionLog?.id,
       updatedTask: updatedPlan.tasks.find((t) => t.id === taskId),

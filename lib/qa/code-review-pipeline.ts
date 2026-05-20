@@ -49,7 +49,7 @@ export async function runAutomatedCodeReview(
   const recommendedActions: string[] = [];
 
   // 1. Check for security issues
-  if (diffOutput.changedFiles.includes("auth") || diffOutput.changedFiles.some((f) => f.includes("password"))) {
+  if (diffOutput.changedFiles.some((f) => f.includes("auth") || f.includes("password"))) {
     // Security review trigger
     issues.push({
       severity: "critical",
@@ -172,7 +172,9 @@ export async function runAutomatedCodeReview(
 
   // 12. Handoff Quality Check
   const hasComprehensiveChanges =
-    diffOutput.summary.length > 20 && diffOutput.completedTaskIds.length > 0;
+    diffOutput.diffSummary.length > 20 &&
+    diffOutput.completionJudgment === "completed" &&
+    diffOutput.completedTaskIds.length > 0;
   if (hasComprehensiveChanges) {
     passedChecks.push("✓ Handoff-ready: Clear task completion and summary");
   } else {
