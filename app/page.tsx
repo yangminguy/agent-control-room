@@ -42,12 +42,12 @@ export default async function Home() {
       </section>
 
       {/* Section 1: Recent Session Report */}
-      {recentSessionReport && (
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-green-600" />
-            Recent Session Report
-          </h2>
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 text-green-600" />
+          Recent Session Report
+        </h2>
+        {recentSessionReport ? (
           <div className="bg-surface border border-border rounded-lg p-4 space-y-3">
             <div className="flex items-start justify-between">
               <div>
@@ -75,8 +75,18 @@ export default async function Home() {
               View all reports →
             </Link>
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="bg-surface border border-border rounded-lg p-6 text-center">
+            <p className="text-text-secondary">No session reports yet</p>
+            <Link
+              href="/reports"
+              className="text-sm text-pink-primary hover:text-pink-soft transition-colors mt-2 inline-block"
+            >
+              Create your first session report →
+            </Link>
+          </div>
+        )}
+      </section>
 
       {/* Section 2: Blocked & Needs Review Tasks */}
       {(blockedTasks.length > 0 || needsReviewTasks.length > 0) && (
@@ -130,24 +140,34 @@ export default async function Home() {
       </section>
 
       {/* Section 4: Active Projects */}
-      {projects.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-text-primary">Active Projects</h2>
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold text-text-primary">Active Projects</h2>
+        {projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {projects.slice(0, 2).map((project) => (
               <ProjectStatusCard key={project.id} project={project} tasks={tasks} />
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="bg-surface border border-border rounded-lg p-6 text-center">
+            <p className="text-text-secondary">No projects yet</p>
+            <Link
+              href="/projects"
+              className="text-sm text-pink-primary hover:text-pink-soft transition-colors mt-2 inline-block"
+            >
+              Register your first project →
+            </Link>
+          </div>
+        )}
+      </section>
 
       {/* Section 5: Next Handoff Candidates */}
-      {pendingHandoffs.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-            <Eye className="w-5 h-5 text-pink-primary" />
-            Next Handoff Candidates ({pendingHandoffs.length})
-          </h2>
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+          <Eye className="w-5 h-5 text-pink-primary" />
+          Next Handoff Candidates {pendingHandoffs.length > 0 && `(${pendingHandoffs.length})`}
+        </h2>
+        {pendingHandoffs.length > 0 ? (
           <div className="space-y-2">
             {pendingHandoffs.map((handoff) => (
               <div key={handoff.id} className="bg-surface border border-border rounded-lg p-3">
@@ -158,8 +178,18 @@ export default async function Home() {
               </div>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="bg-surface border border-border rounded-lg p-6 text-center">
+            <p className="text-text-secondary">No pending handoffs</p>
+            <Link
+              href="/handoffs"
+              className="text-sm text-pink-primary hover:text-pink-soft transition-colors mt-2 inline-block"
+            >
+              View handoff library →
+            </Link>
+          </div>
+        )}
+      </section>
 
       {/* Direction Orchestrator */}
       <div className="border-t border-border pt-10">

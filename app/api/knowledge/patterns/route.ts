@@ -1,4 +1,4 @@
-import { synthesizeExecutionPatterns, adjustAgentScoreByPattern } from "@/lib/knowledge/pattern-synthesis";
+import { synthesizeExecutionPatterns } from "@/lib/knowledge/pattern-synthesis";
 
 export async function POST(req: Request) {
   try {

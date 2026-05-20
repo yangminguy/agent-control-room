@@ -2,27 +2,77 @@
   "agents": [
     {
       "agent_id": "accessibility-tester",
-      "aliases": ["a11y", "accessibility", "wcag"],
-      "specializations": ["accessibility-testing", "wcag-compliance", "a11y-audits"],
-      "input_types": ["ui-components", "frontend-code", "design-specs"],
-      "output_types": ["accessibility-report", "wcag-violations", "remediation-guide"],
-      "best_for": ["ui-audits", "wcag-aa-testing", "accessibility-fixes", "inclusive-design"],
-      "avoid_when": ["backend-heavy", "database-design", "algorithm-optimization"],
+      "aliases": [
+        "a11y",
+        "accessibility",
+        "wcag"
+      ],
+      "specializations": [
+        "accessibility-testing",
+        "wcag-compliance",
+        "a11y-audits"
+      ],
+      "input_types": [
+        "ui-components",
+        "frontend-code",
+        "design-specs"
+      ],
+      "output_types": [
+        "accessibility-report",
+        "wcag-violations",
+        "remediation-guide"
+      ],
+      "best_for": [
+        "ui-audits",
+        "wcag-aa-testing",
+        "accessibility-fixes",
+        "inclusive-design"
+      ],
+      "avoid_when": [
+        "backend-heavy",
+        "database-design",
+        "algorithm-optimization"
+      ],
       "estimated_tokens": 12000,
       "estimated_time_minutes": 45,
       "team_context": "works-with-ui-designer-ux-researcher",
-      "dependencies": ["ui-designer", "frontend-developer"],
+      "dependencies": [
+        "ui-designer",
+        "frontend-developer"
+      ],
       "success_rate": 0.92,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "agent-installer",
-      "aliases": ["installer", "agent-setup"],
-      "specializations": ["agent-discovery", "agent-installation", "repository-integration"],
-      "input_types": ["repo-path", "agent-name", "install-request"],
-      "output_types": ["installation-status", "agent-manifest", "integration-guide"],
-      "best_for": ["agent-setup", "tool-discovery", "skill-installation"],
-      "avoid_when": ["code-implementation", "architecture-design"],
+      "aliases": [
+        "installer",
+        "agent-setup"
+      ],
+      "specializations": [
+        "agent-discovery",
+        "agent-installation",
+        "repository-integration"
+      ],
+      "input_types": [
+        "repo-path",
+        "agent-name",
+        "install-request"
+      ],
+      "output_types": [
+        "installation-status",
+        "agent-manifest",
+        "integration-guide"
+      ],
+      "best_for": [
+        "agent-setup",
+        "tool-discovery",
+        "skill-installation"
+      ],
+      "avoid_when": [
+        "code-implementation",
+        "architecture-design"
+      ],
       "estimated_tokens": 5000,
       "estimated_time_minutes": 20,
       "team_context": "infrastructure",
@@ -32,12 +82,38 @@
     },
     {
       "agent_id": "agent-organizer",
-      "aliases": ["organizer", "orchestrator", "coordinator"],
-      "specializations": ["agent-orchestration", "team-coordination", "workflow-design", "task-distribution"],
-      "input_types": ["complex-project", "multi-agent-plan", "team-structure"],
-      "output_types": ["execution-plan", "task-breakdown", "dependency-graph", "team-assignments"],
-      "best_for": ["multi-agent-coordination", "large-project-planning", "team-assembly", "workflow-orchestration"],
-      "avoid_when": ["single-task-implementation", "trivial-work"],
+      "aliases": [
+        "organizer",
+        "orchestrator",
+        "coordinator"
+      ],
+      "specializations": [
+        "agent-orchestration",
+        "team-coordination",
+        "workflow-design",
+        "task-distribution"
+      ],
+      "input_types": [
+        "complex-project",
+        "multi-agent-plan",
+        "team-structure"
+      ],
+      "output_types": [
+        "execution-plan",
+        "task-breakdown",
+        "dependency-graph",
+        "team-assignments"
+      ],
+      "best_for": [
+        "multi-agent-coordination",
+        "large-project-planning",
+        "team-assembly",
+        "workflow-orchestration"
+      ],
+      "avoid_when": [
+        "single-task-implementation",
+        "trivial-work"
+      ],
       "estimated_tokens": 20000,
       "estimated_time_minutes": 90,
       "team_context": "lead-coordinator",
@@ -47,192 +123,514 @@
     },
     {
       "agent_id": "ai-engineer",
-      "aliases": ["ml-engineer", "ai-architect"],
-      "specializations": ["ai-system-design", "ml-pipelines", "prompt-engineering", "model-optimization", "agent-capability-mapping"],
-      "input_types": ["ai-system-requirements", "agent-specs", "capability-assessment"],
-      "output_types": ["system-architecture", "capability-matrix", "implementation-guide"],
-      "best_for": ["ai-system-architecture", "agent-profiling", "llm-system-design", "capability-assessment"],
-      "avoid_when": ["frontend-design", "basic-crud"],
+      "aliases": [
+        "ml-engineer",
+        "ai-architect"
+      ],
+      "specializations": [
+        "ai-system-design",
+        "ml-pipelines",
+        "prompt-engineering",
+        "model-optimization",
+        "agent-capability-mapping"
+      ],
+      "input_types": [
+        "ai-system-requirements",
+        "agent-specs",
+        "capability-assessment"
+      ],
+      "output_types": [
+        "system-architecture",
+        "capability-matrix",
+        "implementation-guide"
+      ],
+      "best_for": [
+        "ai-system-architecture",
+        "agent-profiling",
+        "llm-system-design",
+        "capability-assessment"
+      ],
+      "avoid_when": [
+        "frontend-design",
+        "basic-crud"
+      ],
       "estimated_tokens": 25000,
       "estimated_time_minutes": 120,
       "team_context": "intelligence-lead",
-      "dependencies": ["llm-architect", "prompt-engineer"],
+      "dependencies": [
+        "llm-architect",
+        "prompt-engineer"
+      ],
       "success_rate": 0.85,
       "last_used": "2026-05-18"
     },
     {
       "agent_id": "backend-developer",
-      "aliases": ["server-dev", "api-engineer"],
-      "specializations": ["backend-development", "api-design", "database-integration", "server-architecture"],
-      "input_types": ["api-spec", "database-schema", "backend-requirements"],
-      "output_types": ["api-implementation", "server-code", "integration-guide"],
-      "best_for": ["api-development", "server-implementation", "database-integration", "backend-architecture"],
-      "avoid_when": ["frontend-design", "ui-implementation"],
+      "aliases": [
+        "server-dev",
+        "api-engineer"
+      ],
+      "specializations": [
+        "backend-development",
+        "api-design",
+        "database-integration",
+        "server-architecture"
+      ],
+      "input_types": [
+        "api-spec",
+        "database-schema",
+        "backend-requirements"
+      ],
+      "output_types": [
+        "api-implementation",
+        "server-code",
+        "integration-guide"
+      ],
+      "best_for": [
+        "api-development",
+        "server-implementation",
+        "database-integration",
+        "backend-architecture"
+      ],
+      "avoid_when": [
+        "frontend-design",
+        "ui-implementation"
+      ],
       "estimated_tokens": 30000,
       "estimated_time_minutes": 150,
       "team_context": "infrastructure",
-      "dependencies": ["database-optimizer", "postgres-pro"],
-      "success_rate": 0.90,
+      "dependencies": [
+        "database-optimizer",
+        "postgres-pro"
+      ],
+      "success_rate": 0.9,
       "last_used": "2026-05-19"
     },
     {
       "agent_id": "business-analyst",
-      "aliases": ["ba", "business-strategist"],
-      "specializations": ["business-analysis", "requirements-gathering", "stakeholder-management"],
-      "input_types": ["business-problem", "stakeholder-feedback", "market-research"],
-      "output_types": ["business-requirements", "use-cases", "acceptance-criteria"],
-      "best_for": ["requirements-gathering", "user-research", "business-strategy"],
-      "avoid_when": ["code-implementation", "technical-design"],
+      "aliases": [
+        "ba",
+        "business-strategist"
+      ],
+      "specializations": [
+        "business-analysis",
+        "requirements-gathering",
+        "stakeholder-management"
+      ],
+      "input_types": [
+        "business-problem",
+        "stakeholder-feedback",
+        "market-research"
+      ],
+      "output_types": [
+        "business-requirements",
+        "use-cases",
+        "acceptance-criteria"
+      ],
+      "best_for": [
+        "requirements-gathering",
+        "user-research",
+        "business-strategy"
+      ],
+      "avoid_when": [
+        "code-implementation",
+        "technical-design"
+      ],
       "estimated_tokens": 15000,
       "estimated_time_minutes": 60,
       "team_context": "planning",
-      "dependencies": ["ux-researcher", "product-manager"],
+      "dependencies": [
+        "ux-researcher",
+        "product-manager"
+      ],
       "success_rate": 0.87,
       "last_used": "2026-05-15"
     },
     {
       "agent_id": "code-reviewer",
-      "aliases": ["reviewer", "code-qa"],
-      "specializations": ["code-review", "security-analysis", "performance-review", "best-practices"],
-      "input_types": ["code-diff", "pull-request", "implementation"],
-      "output_types": ["code-review-report", "security-findings", "improvement-suggestions"],
-      "best_for": ["code-review", "security-audits", "performance-optimization", "quality-assurance"],
-      "avoid_when": ["initial-design", "architecture-planning"],
+      "aliases": [
+        "reviewer",
+        "code-qa"
+      ],
+      "specializations": [
+        "code-review",
+        "security-analysis",
+        "performance-review",
+        "best-practices"
+      ],
+      "input_types": [
+        "code-diff",
+        "pull-request",
+        "implementation"
+      ],
+      "output_types": [
+        "code-review-report",
+        "security-findings",
+        "improvement-suggestions"
+      ],
+      "best_for": [
+        "code-review",
+        "security-audits",
+        "performance-optimization",
+        "quality-assurance"
+      ],
+      "avoid_when": [
+        "initial-design",
+        "architecture-planning"
+      ],
       "estimated_tokens": 20000,
       "estimated_time_minutes": 90,
       "team_context": "qa-lead",
-      "dependencies": ["security-reviewer"],
+      "dependencies": [
+        "security-reviewer"
+      ],
       "success_rate": 0.93,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "codebase-orchestrator",
-      "aliases": ["codebase-manager", "architecture-reviewer"],
-      "specializations": ["codebase-analysis", "refactoring-planning", "architecture-review"],
-      "input_types": ["codebase-path", "architecture-question", "refactor-request"],
-      "output_types": ["architecture-report", "refactor-plan", "improvement-roadmap"],
-      "best_for": ["codebase-analysis", "large-refactoring", "architecture-decisions"],
-      "avoid_when": ["trivial-fixes", "single-file-edits"],
+      "aliases": [
+        "codebase-manager",
+        "architecture-reviewer"
+      ],
+      "specializations": [
+        "codebase-analysis",
+        "refactoring-planning",
+        "architecture-review"
+      ],
+      "input_types": [
+        "codebase-path",
+        "architecture-question",
+        "refactor-request"
+      ],
+      "output_types": [
+        "architecture-report",
+        "refactor-plan",
+        "improvement-roadmap"
+      ],
+      "best_for": [
+        "codebase-analysis",
+        "large-refactoring",
+        "architecture-decisions"
+      ],
+      "avoid_when": [
+        "trivial-fixes",
+        "single-file-edits"
+      ],
       "estimated_tokens": 25000,
       "estimated_time_minutes": 120,
       "team_context": "architecture",
-      "dependencies": ["refactoring-specialist"],
+      "dependencies": [
+        "refactoring-specialist"
+      ],
       "success_rate": 0.86,
       "last_used": "2026-05-17"
     },
     {
       "agent_id": "competitive-analyst",
-      "aliases": ["market-analyst", "competitor-research"],
-      "specializations": ["competitive-analysis", "market-research", "benchmark-analysis"],
-      "input_types": ["product-type", "market-segment", "competitor-list"],
-      "output_types": ["competitive-analysis", "market-report", "strategy-recommendations"],
-      "best_for": ["market-research", "competitive-positioning", "strategy-development"],
-      "avoid_when": ["implementation-work", "code-writing"],
+      "aliases": [
+        "market-analyst",
+        "competitor-research"
+      ],
+      "specializations": [
+        "competitive-analysis",
+        "market-research",
+        "benchmark-analysis"
+      ],
+      "input_types": [
+        "product-type",
+        "market-segment",
+        "competitor-list"
+      ],
+      "output_types": [
+        "competitive-analysis",
+        "market-report",
+        "strategy-recommendations"
+      ],
+      "best_for": [
+        "market-research",
+        "competitive-positioning",
+        "strategy-development"
+      ],
+      "avoid_when": [
+        "implementation-work",
+        "code-writing"
+      ],
       "estimated_tokens": 12000,
       "estimated_time_minutes": 60,
       "team_context": "strategy",
-      "dependencies": ["business-analyst"],
-      "success_rate": 0.80,
+      "dependencies": [
+        "business-analyst"
+      ],
+      "success_rate": 0.8,
       "last_used": "2026-05-10"
     },
     {
       "agent_id": "content-marketer",
-      "aliases": ["marketer", "content-strategist"],
-      "specializations": ["content-strategy", "seo-optimization", "marketing-campaigns"],
-      "input_types": ["marketing-goal", "target-audience", "content-brief"],
-      "output_types": ["marketing-strategy", "content-plan", "campaign-roadmap"],
-      "best_for": ["content-creation", "seo-strategy", "marketing-planning"],
-      "avoid_when": ["technical-implementation", "code-review"],
+      "aliases": [
+        "marketer",
+        "content-strategist"
+      ],
+      "specializations": [
+        "content-strategy",
+        "seo-optimization",
+        "marketing-campaigns"
+      ],
+      "input_types": [
+        "marketing-goal",
+        "target-audience",
+        "content-brief"
+      ],
+      "output_types": [
+        "marketing-strategy",
+        "content-plan",
+        "campaign-roadmap"
+      ],
+      "best_for": [
+        "content-creation",
+        "seo-strategy",
+        "marketing-planning"
+      ],
+      "avoid_when": [
+        "technical-implementation",
+        "code-review"
+      ],
       "estimated_tokens": 10000,
       "estimated_time_minutes": 45,
       "team_context": "marketing",
-      "dependencies": ["seo-specialist"],
+      "dependencies": [
+        "seo-specialist"
+      ],
       "success_rate": 0.82,
       "last_used": "2026-04-30"
     },
     {
       "agent_id": "context-manager",
-      "aliases": ["context-keeper", "memory-manager"],
-      "specializations": ["context-preservation", "session-management", "memory-tracking"],
-      "input_types": ["conversation-state", "session-data", "context-query"],
-      "output_types": ["context-summary", "session-state", "continuation-guide"],
-      "best_for": ["multi-session-continuity", "context-preservation", "memory-management"],
-      "avoid_when": ["implementation-work"],
+      "aliases": [
+        "context-keeper",
+        "memory-manager"
+      ],
+      "specializations": [
+        "context-preservation",
+        "session-management",
+        "memory-tracking"
+      ],
+      "input_types": [
+        "conversation-state",
+        "session-data",
+        "context-query"
+      ],
+      "output_types": [
+        "context-summary",
+        "session-state",
+        "continuation-guide"
+      ],
+      "best_for": [
+        "multi-session-continuity",
+        "context-preservation",
+        "memory-management"
+      ],
+      "avoid_when": [
+        "implementation-work"
+      ],
       "estimated_tokens": 8000,
       "estimated_time_minutes": 30,
       "team_context": "intelligence",
-      "dependencies": ["knowledge-synthesizer"],
-      "success_rate": 0.90,
+      "dependencies": [
+        "knowledge-synthesizer"
+      ],
+      "success_rate": 0.9,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "data-analyst",
-      "aliases": ["analyst", "data-scientist"],
-      "specializations": ["data-analysis", "metrics-tracking", "performance-metrics", "trend-analysis"],
-      "input_types": ["dataset", "metric-request", "analysis-question"],
-      "output_types": ["analysis-report", "metric-dashboard", "insights"],
-      "best_for": ["data-analysis", "metrics-generation", "trend-identification"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "analyst",
+        "data-scientist"
+      ],
+      "specializations": [
+        "data-analysis",
+        "metrics-tracking",
+        "performance-metrics",
+        "trend-analysis"
+      ],
+      "input_types": [
+        "dataset",
+        "metric-request",
+        "analysis-question"
+      ],
+      "output_types": [
+        "analysis-report",
+        "metric-dashboard",
+        "insights"
+      ],
+      "best_for": [
+        "data-analysis",
+        "metrics-generation",
+        "trend-identification"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 15000,
       "estimated_time_minutes": 75,
       "team_context": "analytics",
-      "dependencies": ["research-analyst", "knowledge-synthesizer"],
+      "dependencies": [
+        "research-analyst",
+        "knowledge-synthesizer"
+      ],
       "success_rate": 0.88,
       "last_used": "2026-05-19"
     },
     {
       "agent_id": "data-engineer",
-      "aliases": ["etl-engineer", "data-pipeline"],
-      "specializations": ["data-pipeline-design", "etl-processes", "data-modeling", "database-schema"],
-      "input_types": ["data-requirements", "schema-spec", "pipeline-request"],
-      "output_types": ["pipeline-implementation", "schema-design", "data-model"],
-      "best_for": ["data-pipeline-development", "etl-implementation", "data-modeling"],
-      "avoid_when": ["frontend-work", "ui-design"],
+      "aliases": [
+        "etl-engineer",
+        "data-pipeline"
+      ],
+      "specializations": [
+        "data-pipeline-design",
+        "etl-processes",
+        "data-modeling",
+        "database-schema"
+      ],
+      "input_types": [
+        "data-requirements",
+        "schema-spec",
+        "pipeline-request"
+      ],
+      "output_types": [
+        "pipeline-implementation",
+        "schema-design",
+        "data-model"
+      ],
+      "best_for": [
+        "data-pipeline-development",
+        "etl-implementation",
+        "data-modeling"
+      ],
+      "avoid_when": [
+        "frontend-work",
+        "ui-design"
+      ],
       "estimated_tokens": 20000,
       "estimated_time_minutes": 100,
       "team_context": "infrastructure",
-      "dependencies": ["database-optimizer", "postgres-pro"],
+      "dependencies": [
+        "database-optimizer",
+        "postgres-pro"
+      ],
       "success_rate": 0.89,
       "last_used": "2026-05-18"
     },
     {
       "agent_id": "database-optimizer",
-      "aliases": ["db-perf", "query-optimizer"],
-      "specializations": ["database-optimization", "query-performance", "indexing-strategy"],
-      "input_types": ["query-analysis", "performance-issue", "schema-review"],
-      "output_types": ["optimization-plan", "query-improvement", "performance-report"],
-      "best_for": ["database-optimization", "query-performance-tuning", "indexing"],
-      "avoid_when": ["frontend-design", "ui-implementation"],
+      "aliases": [
+        "db-perf",
+        "query-optimizer"
+      ],
+      "specializations": [
+        "database-optimization",
+        "query-performance",
+        "indexing-strategy"
+      ],
+      "input_types": [
+        "query-analysis",
+        "performance-issue",
+        "schema-review"
+      ],
+      "output_types": [
+        "optimization-plan",
+        "query-improvement",
+        "performance-report"
+      ],
+      "best_for": [
+        "database-optimization",
+        "query-performance-tuning",
+        "indexing"
+      ],
+      "avoid_when": [
+        "frontend-design",
+        "ui-implementation"
+      ],
       "estimated_tokens": 12000,
       "estimated_time_minutes": 60,
       "team_context": "infrastructure",
-      "dependencies": ["postgres-pro"],
+      "dependencies": [
+        "postgres-pro"
+      ],
       "success_rate": 0.91,
       "last_used": "2026-05-17"
     },
     {
       "agent_id": "debugger",
-      "aliases": ["debug-specialist", "troubleshooter"],
-      "specializations": ["debugging", "error-analysis", "root-cause-analysis", "issue-diagnosis"],
-      "input_types": ["error-log", "failing-test", "reproduction-steps"],
-      "output_types": ["root-cause-analysis", "fix-suggestion", "debug-guide"],
-      "best_for": ["debugging", "error-diagnosis", "root-cause-analysis"],
-      "avoid_when": ["feature-design", "architecture"],
+      "aliases": [
+        "debug-specialist",
+        "troubleshooter"
+      ],
+      "specializations": [
+        "debugging",
+        "error-analysis",
+        "root-cause-analysis",
+        "issue-diagnosis"
+      ],
+      "input_types": [
+        "error-log",
+        "failing-test",
+        "reproduction-steps"
+      ],
+      "output_types": [
+        "root-cause-analysis",
+        "fix-suggestion",
+        "debug-guide"
+      ],
+      "best_for": [
+        "debugging",
+        "error-diagnosis",
+        "root-cause-analysis"
+      ],
+      "avoid_when": [
+        "feature-design",
+        "architecture"
+      ],
       "estimated_tokens": 10000,
       "estimated_time_minutes": 45,
       "team_context": "qa",
-      "dependencies": ["error-detective"],
+      "dependencies": [
+        "error-detective"
+      ],
       "success_rate": 0.92,
       "last_used": "2026-05-16"
     },
     {
       "agent_id": "dependency-manager",
-      "aliases": ["deps-manager", "package-manager"],
-      "specializations": ["dependency-management", "security-patching", "version-resolution"],
-      "input_types": ["dependency-issue", "package-list", "security-audit"],
-      "output_types": ["dependency-report", "upgrade-plan", "security-fixes"],
-      "best_for": ["dependency-audits", "security-patching", "version-management"],
-      "avoid_when": ["feature-implementation"],
+      "aliases": [
+        "deps-manager",
+        "package-manager"
+      ],
+      "specializations": [
+        "dependency-management",
+        "security-patching",
+        "version-resolution"
+      ],
+      "input_types": [
+        "dependency-issue",
+        "package-list",
+        "security-audit"
+      ],
+      "output_types": [
+        "dependency-report",
+        "upgrade-plan",
+        "security-fixes"
+      ],
+      "best_for": [
+        "dependency-audits",
+        "security-patching",
+        "version-management"
+      ],
+      "avoid_when": [
+        "feature-implementation"
+      ],
       "estimated_tokens": 8000,
       "estimated_time_minutes": 40,
       "team_context": "infrastructure",
@@ -242,87 +640,229 @@
     },
     {
       "agent_id": "design-bridge",
-      "aliases": ["design-translator", "design-implementer"],
-      "specializations": ["design-to-code", "design-system-implementation", "component-library"],
-      "input_types": ["design-spec", "figma-link", "component-design"],
-      "output_types": ["component-code", "design-implementation", "style-guide"],
-      "best_for": ["design-to-code-translation", "component-implementation", "design-system-building"],
-      "avoid_when": ["pure-design", "pure-engineering"],
+      "aliases": [
+        "design-translator",
+        "design-implementer"
+      ],
+      "specializations": [
+        "design-to-code",
+        "design-system-implementation",
+        "component-library"
+      ],
+      "input_types": [
+        "design-spec",
+        "figma-link",
+        "component-design"
+      ],
+      "output_types": [
+        "component-code",
+        "design-implementation",
+        "style-guide"
+      ],
+      "best_for": [
+        "design-to-code-translation",
+        "component-implementation",
+        "design-system-building"
+      ],
+      "avoid_when": [
+        "pure-design",
+        "pure-engineering"
+      ],
       "estimated_tokens": 18000,
       "estimated_time_minutes": 90,
       "team_context": "ui-design",
-      "dependencies": ["ui-designer", "frontend-developer"],
+      "dependencies": [
+        "ui-designer",
+        "frontend-developer"
+      ],
       "success_rate": 0.87,
       "last_used": "2026-05-18"
     },
     {
       "agent_id": "documentation-engineer",
-      "aliases": ["doc-engineer", "technical-documenter"],
-      "specializations": ["documentation-generation", "api-documentation", "technical-writing"],
-      "input_types": ["code", "api-spec", "architecture"],
-      "output_types": ["documentation", "api-docs", "guides"],
-      "best_for": ["auto-documentation", "api-docs", "technical-guides"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "doc-engineer",
+        "technical-documenter"
+      ],
+      "specializations": [
+        "documentation-generation",
+        "api-documentation",
+        "technical-writing"
+      ],
+      "input_types": [
+        "code",
+        "api-spec",
+        "architecture"
+      ],
+      "output_types": [
+        "documentation",
+        "api-docs",
+        "guides"
+      ],
+      "best_for": [
+        "auto-documentation",
+        "api-docs",
+        "technical-guides"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 12000,
       "estimated_time_minutes": 60,
       "team_context": "documentation",
-      "dependencies": ["technical-writer"],
+      "dependencies": [
+        "technical-writer"
+      ],
       "success_rate": 0.85,
       "last_used": "2026-05-17"
     },
     {
       "agent_id": "error-detective",
-      "aliases": ["error-analyzer", "issue-detective"],
-      "specializations": ["error-analysis", "log-analysis", "failure-investigation"],
-      "input_types": ["error-log", "stack-trace", "failure-report"],
-      "output_types": ["root-cause-analysis", "error-report", "prevention-guide"],
-      "best_for": ["error-analysis", "log-investigation", "failure-root-cause"],
-      "avoid_when": ["feature-design"],
+      "aliases": [
+        "error-analyzer",
+        "issue-detective"
+      ],
+      "specializations": [
+        "error-analysis",
+        "log-analysis",
+        "failure-investigation"
+      ],
+      "input_types": [
+        "error-log",
+        "stack-trace",
+        "failure-report"
+      ],
+      "output_types": [
+        "root-cause-analysis",
+        "error-report",
+        "prevention-guide"
+      ],
+      "best_for": [
+        "error-analysis",
+        "log-investigation",
+        "failure-root-cause"
+      ],
+      "avoid_when": [
+        "feature-design"
+      ],
       "estimated_tokens": 10000,
       "estimated_time_minutes": 45,
       "team_context": "qa",
-      "dependencies": ["debugger"],
+      "dependencies": [
+        "debugger"
+      ],
       "success_rate": 0.89,
       "last_used": "2026-05-14"
     },
     {
       "agent_id": "frontend-developer",
-      "aliases": ["frontend-engineer", "web-dev"],
-      "specializations": ["frontend-development", "react", "ui-implementation", "responsive-design"],
-      "input_types": ["design-spec", "component-requirement", "feature-request"],
-      "output_types": ["react-component", "frontend-code", "style-implementation"],
-      "best_for": ["frontend-development", "react-implementation", "ui-coding"],
-      "avoid_when": ["backend-development", "database-design"],
+      "aliases": [
+        "frontend-engineer",
+        "web-dev"
+      ],
+      "specializations": [
+        "frontend-development",
+        "react",
+        "ui-implementation",
+        "responsive-design"
+      ],
+      "input_types": [
+        "design-spec",
+        "component-requirement",
+        "feature-request"
+      ],
+      "output_types": [
+        "react-component",
+        "frontend-code",
+        "style-implementation"
+      ],
+      "best_for": [
+        "frontend-development",
+        "react-implementation",
+        "ui-coding"
+      ],
+      "avoid_when": [
+        "backend-development",
+        "database-design"
+      ],
       "estimated_tokens": 25000,
       "estimated_time_minutes": 120,
       "team_context": "ui-design",
-      "dependencies": ["ui-designer", "design-bridge"],
+      "dependencies": [
+        "ui-designer",
+        "design-bridge"
+      ],
       "success_rate": 0.91,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "fullstack-developer",
-      "aliases": ["full-stack", "fullstack"],
-      "specializations": ["fullstack-development", "api-to-ui", "end-to-end-features"],
-      "input_types": ["feature-spec", "api-spec", "ui-requirement"],
-      "output_types": ["full-feature", "api-client", "integration"],
-      "best_for": ["full-feature-development", "end-to-end-features", "api-integration"],
-      "avoid_when": ["specialized-domains"],
+      "aliases": [
+        "full-stack",
+        "fullstack"
+      ],
+      "specializations": [
+        "fullstack-development",
+        "api-to-ui",
+        "end-to-end-features"
+      ],
+      "input_types": [
+        "feature-spec",
+        "api-spec",
+        "ui-requirement"
+      ],
+      "output_types": [
+        "full-feature",
+        "api-client",
+        "integration"
+      ],
+      "best_for": [
+        "full-feature-development",
+        "end-to-end-features",
+        "api-integration"
+      ],
+      "avoid_when": [
+        "specialized-domains"
+      ],
       "estimated_tokens": 35000,
       "estimated_time_minutes": 180,
       "team_context": "development",
-      "dependencies": ["backend-developer", "frontend-developer"],
+      "dependencies": [
+        "backend-developer",
+        "frontend-developer"
+      ],
       "success_rate": 0.86,
       "last_used": "2026-05-19"
     },
     {
       "agent_id": "git-workflow-manager",
-      "aliases": ["git-manager", "branching-strategy"],
-      "specializations": ["git-workflows", "branching-strategy", "merge-management"],
-      "input_types": ["workflow-requirement", "team-size", "release-strategy"],
-      "output_types": ["workflow-guide", "branching-strategy", "process-documentation"],
-      "best_for": ["git-workflow-design", "ci-cd-strategy", "merge-management"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "git-manager",
+        "branching-strategy"
+      ],
+      "specializations": [
+        "git-workflows",
+        "branching-strategy",
+        "merge-management"
+      ],
+      "input_types": [
+        "workflow-requirement",
+        "team-size",
+        "release-strategy"
+      ],
+      "output_types": [
+        "workflow-guide",
+        "branching-strategy",
+        "process-documentation"
+      ],
+      "best_for": [
+        "git-workflow-design",
+        "ci-cd-strategy",
+        "merge-management"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 8000,
       "estimated_time_minutes": 40,
       "team_context": "operations",
@@ -332,349 +872,976 @@
     },
     {
       "agent_id": "knowledge-synthesizer",
-      "aliases": ["synthesis-expert", "learner"],
-      "specializations": ["pattern-synthesis", "learning-extraction", "insight-generation", "knowledge-integration"],
-      "input_types": ["execution-logs", "session-reports", "historical-data"],
-      "output_types": ["pattern-report", "insights", "recommendations"],
-      "best_for": ["pattern-detection", "learning-synthesis", "continuous-improvement"],
-      "avoid_when": ["implementation-work"],
+      "aliases": [
+        "synthesis-expert",
+        "learner"
+      ],
+      "specializations": [
+        "pattern-synthesis",
+        "learning-extraction",
+        "insight-generation",
+        "knowledge-integration"
+      ],
+      "input_types": [
+        "execution-logs",
+        "session-reports",
+        "historical-data"
+      ],
+      "output_types": [
+        "pattern-report",
+        "insights",
+        "recommendations"
+      ],
+      "best_for": [
+        "pattern-detection",
+        "learning-synthesis",
+        "continuous-improvement"
+      ],
+      "avoid_when": [
+        "implementation-work"
+      ],
       "estimated_tokens": 15000,
       "estimated_time_minutes": 75,
       "team_context": "analytics",
-      "dependencies": ["data-analyst", "research-analyst"],
+      "dependencies": [
+        "data-analyst",
+        "research-analyst"
+      ],
       "success_rate": 0.84,
       "last_used": "2026-05-18"
     },
     {
       "agent_id": "llm-architect",
-      "aliases": ["llm-designer", "ai-architect"],
-      "specializations": ["llm-system-design", "prompt-architecture", "agent-design", "multi-agent-systems"],
-      "input_types": ["system-requirement", "agent-spec", "capability-request"],
-      "output_types": ["system-design", "architecture-doc", "agent-blueprint"],
-      "best_for": ["llm-system-architecture", "agent-design", "prompt-optimization"],
-      "avoid_when": ["frontend-design", "database-design"],
+      "aliases": [
+        "llm-designer",
+        "ai-architect"
+      ],
+      "specializations": [
+        "llm-system-design",
+        "prompt-architecture",
+        "agent-design",
+        "multi-agent-systems"
+      ],
+      "input_types": [
+        "system-requirement",
+        "agent-spec",
+        "capability-request"
+      ],
+      "output_types": [
+        "system-design",
+        "architecture-doc",
+        "agent-blueprint"
+      ],
+      "best_for": [
+        "llm-system-architecture",
+        "agent-design",
+        "prompt-optimization"
+      ],
+      "avoid_when": [
+        "frontend-design",
+        "database-design"
+      ],
       "estimated_tokens": 20000,
       "estimated_time_minutes": 100,
       "team_context": "intelligence",
-      "dependencies": ["ai-engineer", "prompt-engineer"],
+      "dependencies": [
+        "ai-engineer",
+        "prompt-engineer"
+      ],
       "success_rate": 0.87,
       "last_used": "2026-05-19"
     },
     {
       "agent_id": "nextjs-developer",
-      "aliases": ["next-dev", "app-router"],
-      "specializations": ["nextjs-development", "server-components", "api-routes", "full-stack-nextjs"],
-      "input_types": ["nextjs-feature", "api-requirement", "page-spec"],
-      "output_types": ["nextjs-implementation", "server-components", "api-routes"],
-      "best_for": ["nextjs-development", "full-stack-nextjs", "api-implementation"],
-      "avoid_when": ["other-frameworks"],
+      "aliases": [
+        "next-dev",
+        "app-router"
+      ],
+      "specializations": [
+        "nextjs-development",
+        "server-components",
+        "api-routes",
+        "full-stack-nextjs"
+      ],
+      "input_types": [
+        "nextjs-feature",
+        "api-requirement",
+        "page-spec"
+      ],
+      "output_types": [
+        "nextjs-implementation",
+        "server-components",
+        "api-routes"
+      ],
+      "best_for": [
+        "nextjs-development",
+        "full-stack-nextjs",
+        "api-implementation"
+      ],
+      "avoid_when": [
+        "other-frameworks"
+      ],
       "estimated_tokens": 25000,
       "estimated_time_minutes": 120,
       "team_context": "development",
-      "dependencies": ["typescript-pro", "backend-developer"],
-      "success_rate": 0.90,
+      "dependencies": [
+        "typescript-pro",
+        "backend-developer"
+      ],
+      "success_rate": 0.9,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "performance-engineer",
-      "aliases": ["perf-specialist", "optimization-expert"],
-      "specializations": ["performance-optimization", "profiling", "bottleneck-analysis"],
-      "input_types": ["performance-issue", "profile-data", "slow-function"],
-      "output_types": ["optimization-plan", "performance-report", "improvement-guide"],
-      "best_for": ["performance-optimization", "profiling", "bottleneck-elimination"],
-      "avoid_when": ["initial-design"],
+      "aliases": [
+        "perf-specialist",
+        "optimization-expert"
+      ],
+      "specializations": [
+        "performance-optimization",
+        "profiling",
+        "bottleneck-analysis"
+      ],
+      "input_types": [
+        "performance-issue",
+        "profile-data",
+        "slow-function"
+      ],
+      "output_types": [
+        "optimization-plan",
+        "performance-report",
+        "improvement-guide"
+      ],
+      "best_for": [
+        "performance-optimization",
+        "profiling",
+        "bottleneck-elimination"
+      ],
+      "avoid_when": [
+        "initial-design"
+      ],
       "estimated_tokens": 12000,
       "estimated_time_minutes": 60,
       "team_context": "infrastructure",
-      "dependencies": ["debugger"],
+      "dependencies": [
+        "debugger"
+      ],
       "success_rate": 0.89,
       "last_used": "2026-05-16"
     },
     {
       "agent_id": "postgres-pro",
-      "aliases": ["postgres-expert", "db-expert"],
-      "specializations": ["postgresql-design", "advanced-sql", "replication", "optimization"],
-      "input_types": ["schema-design", "performance-issue", "database-requirement"],
-      "output_types": ["schema-design", "optimization-plan", "query-improvement"],
-      "best_for": ["postgresql-architecture", "complex-queries", "database-optimization"],
-      "avoid_when": ["frontend-development"],
+      "aliases": [
+        "postgres-expert",
+        "db-expert"
+      ],
+      "specializations": [
+        "postgresql-design",
+        "advanced-sql",
+        "replication",
+        "optimization"
+      ],
+      "input_types": [
+        "schema-design",
+        "performance-issue",
+        "database-requirement"
+      ],
+      "output_types": [
+        "schema-design",
+        "optimization-plan",
+        "query-improvement"
+      ],
+      "best_for": [
+        "postgresql-architecture",
+        "complex-queries",
+        "database-optimization"
+      ],
+      "avoid_when": [
+        "frontend-development"
+      ],
       "estimated_tokens": 18000,
       "estimated_time_minutes": 90,
       "team_context": "infrastructure-lead",
-      "dependencies": ["database-optimizer", "data-engineer"],
+      "dependencies": [
+        "database-optimizer",
+        "data-engineer"
+      ],
       "success_rate": 0.93,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "product-manager",
-      "aliases": ["pm", "product-lead"],
-      "specializations": ["product-strategy", "feature-prioritization", "roadmap-planning"],
-      "input_types": ["market-data", "user-feedback", "business-goal"],
-      "output_types": ["product-strategy", "feature-roadmap", "prioritization"],
-      "best_for": ["product-strategy", "roadmap-planning", "feature-prioritization"],
-      "avoid_when": ["implementation-work"],
+      "aliases": [
+        "pm",
+        "product-lead"
+      ],
+      "specializations": [
+        "product-strategy",
+        "feature-prioritization",
+        "roadmap-planning"
+      ],
+      "input_types": [
+        "market-data",
+        "user-feedback",
+        "business-goal"
+      ],
+      "output_types": [
+        "product-strategy",
+        "feature-roadmap",
+        "prioritization"
+      ],
+      "best_for": [
+        "product-strategy",
+        "roadmap-planning",
+        "feature-prioritization"
+      ],
+      "avoid_when": [
+        "implementation-work"
+      ],
       "estimated_tokens": 12000,
       "estimated_time_minutes": 60,
       "team_context": "strategy",
-      "dependencies": ["business-analyst", "ux-researcher"],
+      "dependencies": [
+        "business-analyst",
+        "ux-researcher"
+      ],
       "success_rate": 0.83,
       "last_used": "2026-05-18"
     },
     {
       "agent_id": "project-agent-recommender",
-      "aliases": ["agent-recommender", "agent-matcher"],
-      "specializations": ["agent-recommendation", "agent-matching", "skill-assessment"],
-      "input_types": ["task-description", "requirement", "project-type"],
-      "output_types": ["agent-recommendation", "skill-assessment", "team-suggestion"],
-      "best_for": ["agent-recommendation", "agent-matching", "team-assembly"],
-      "avoid_when": ["implementation-work"],
+      "aliases": [
+        "agent-recommender",
+        "agent-matcher"
+      ],
+      "specializations": [
+        "agent-recommendation",
+        "agent-matching",
+        "skill-assessment"
+      ],
+      "input_types": [
+        "task-description",
+        "requirement",
+        "project-type"
+      ],
+      "output_types": [
+        "agent-recommendation",
+        "skill-assessment",
+        "team-suggestion"
+      ],
+      "best_for": [
+        "agent-recommendation",
+        "agent-matching",
+        "team-assembly"
+      ],
+      "avoid_when": [
+        "implementation-work"
+      ],
       "estimated_tokens": 8000,
       "estimated_time_minutes": 40,
       "team_context": "coordination",
-      "dependencies": ["agent-organizer"],
+      "dependencies": [
+        "agent-organizer"
+      ],
       "success_rate": 0.86,
       "last_used": "2026-05-17"
     },
     {
       "agent_id": "project-manager",
-      "aliases": ["pm-ops", "project-lead"],
-      "specializations": ["project-management", "timeline-tracking", "risk-management"],
-      "input_types": ["project-plan", "task-list", "timeline"],
-      "output_types": ["project-status", "risk-assessment", "schedule-update"],
-      "best_for": ["project-management", "timeline-tracking", "team-coordination"],
-      "avoid_when": ["implementation-work"],
+      "aliases": [
+        "pm-ops",
+        "project-lead"
+      ],
+      "specializations": [
+        "project-management",
+        "timeline-tracking",
+        "risk-management"
+      ],
+      "input_types": [
+        "project-plan",
+        "task-list",
+        "timeline"
+      ],
+      "output_types": [
+        "project-status",
+        "risk-assessment",
+        "schedule-update"
+      ],
+      "best_for": [
+        "project-management",
+        "timeline-tracking",
+        "team-coordination"
+      ],
+      "avoid_when": [
+        "implementation-work"
+      ],
       "estimated_tokens": 10000,
       "estimated_time_minutes": 50,
       "team_context": "operations-lead",
-      "dependencies": ["task-distributor"],
+      "dependencies": [
+        "task-distributor"
+      ],
       "success_rate": 0.85,
       "last_used": "2026-05-19"
     },
     {
       "agent_id": "prompt-engineer",
-      "aliases": ["prompt-specialist", "prompt-optimizer"],
-      "specializations": ["prompt-engineering", "prompt-optimization", "few-shot-learning"],
-      "input_types": ["prompt-idea", "task-spec", "llm-request"],
-      "output_types": ["optimized-prompt", "prompt-variants", "prompt-guide"],
-      "best_for": ["prompt-optimization", "prompt-generation", "context-injection"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "prompt-specialist",
+        "prompt-optimizer"
+      ],
+      "specializations": [
+        "prompt-engineering",
+        "prompt-optimization",
+        "few-shot-learning"
+      ],
+      "input_types": [
+        "prompt-idea",
+        "task-spec",
+        "llm-request"
+      ],
+      "output_types": [
+        "optimized-prompt",
+        "prompt-variants",
+        "prompt-guide"
+      ],
+      "best_for": [
+        "prompt-optimization",
+        "prompt-generation",
+        "context-injection"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 10000,
       "estimated_time_minutes": 45,
       "team_context": "intelligence",
-      "dependencies": ["llm-architect"],
+      "dependencies": [
+        "llm-architect"
+      ],
       "success_rate": 0.88,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "qa-expert",
-      "aliases": ["qa-lead", "test-expert"],
-      "specializations": ["qa-strategy", "test-generation", "quality-assurance"],
-      "input_types": ["code", "acceptance-criteria", "feature-spec"],
-      "output_types": ["test-cases", "qa-report", "test-plan"],
-      "best_for": ["test-generation", "qa-strategy", "quality-assurance"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "qa-lead",
+        "test-expert"
+      ],
+      "specializations": [
+        "qa-strategy",
+        "test-generation",
+        "quality-assurance"
+      ],
+      "input_types": [
+        "code",
+        "acceptance-criteria",
+        "feature-spec"
+      ],
+      "output_types": [
+        "test-cases",
+        "qa-report",
+        "test-plan"
+      ],
+      "best_for": [
+        "test-generation",
+        "qa-strategy",
+        "quality-assurance"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 15000,
       "estimated_time_minutes": 75,
       "team_context": "qa-team",
-      "dependencies": ["typescript-pro", "debugger"],
+      "dependencies": [
+        "typescript-pro",
+        "debugger"
+      ],
       "success_rate": 0.91,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "react-specialist",
-      "aliases": ["react-expert", "react-dev"],
-      "specializations": ["react-development", "state-management", "hooks", "performance"],
-      "input_types": ["react-component-spec", "state-requirement", "performance-issue"],
-      "output_types": ["react-implementation", "state-solution", "hook-implementation"],
-      "best_for": ["react-development", "state-management", "react-optimization"],
-      "avoid_when": ["backend-development"],
+      "aliases": [
+        "react-expert",
+        "react-dev"
+      ],
+      "specializations": [
+        "react-development",
+        "state-management",
+        "hooks",
+        "performance"
+      ],
+      "input_types": [
+        "react-component-spec",
+        "state-requirement",
+        "performance-issue"
+      ],
+      "output_types": [
+        "react-implementation",
+        "state-solution",
+        "hook-implementation"
+      ],
+      "best_for": [
+        "react-development",
+        "state-management",
+        "react-optimization"
+      ],
+      "avoid_when": [
+        "backend-development"
+      ],
       "estimated_tokens": 20000,
       "estimated_time_minutes": 100,
       "team_context": "development",
-      "dependencies": ["frontend-developer", "typescript-pro"],
-      "success_rate": 0.90,
+      "dependencies": [
+        "frontend-developer",
+        "typescript-pro"
+      ],
+      "success_rate": 0.9,
       "last_used": "2026-05-19"
     },
     {
       "agent_id": "readme-generator",
-      "aliases": ["doc-generator", "readme-writer"],
-      "specializations": ["readme-generation", "project-documentation", "quick-start-guides"],
-      "input_types": ["codebase-path", "feature-list", "installation-steps"],
-      "output_types": ["readme", "installation-guide", "project-overview"],
-      "best_for": ["readme-generation", "project-documentation", "onboarding-docs"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "doc-generator",
+        "readme-writer"
+      ],
+      "specializations": [
+        "readme-generation",
+        "project-documentation",
+        "quick-start-guides"
+      ],
+      "input_types": [
+        "codebase-path",
+        "feature-list",
+        "installation-steps"
+      ],
+      "output_types": [
+        "readme",
+        "installation-guide",
+        "project-overview"
+      ],
+      "best_for": [
+        "readme-generation",
+        "project-documentation",
+        "onboarding-docs"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 8000,
       "estimated_time_minutes": 40,
       "team_context": "documentation",
-      "dependencies": ["technical-writer"],
+      "dependencies": [
+        "technical-writer"
+      ],
       "success_rate": 0.89,
       "last_used": "2026-05-15"
     },
     {
       "agent_id": "refactoring-specialist",
-      "aliases": ["refactor-expert", "code-cleanser"],
-      "specializations": ["refactoring", "code-cleanup", "technical-debt-reduction"],
-      "input_types": ["code-section", "refactoring-request", "quality-issue"],
-      "output_types": ["refactored-code", "improvement-guide", "before-after-comparison"],
-      "best_for": ["refactoring", "technical-debt-cleanup", "code-quality-improvement"],
-      "avoid_when": ["new-feature-development"],
+      "aliases": [
+        "refactor-expert",
+        "code-cleanser"
+      ],
+      "specializations": [
+        "refactoring",
+        "code-cleanup",
+        "technical-debt-reduction"
+      ],
+      "input_types": [
+        "code-section",
+        "refactoring-request",
+        "quality-issue"
+      ],
+      "output_types": [
+        "refactored-code",
+        "improvement-guide",
+        "before-after-comparison"
+      ],
+      "best_for": [
+        "refactoring",
+        "technical-debt-cleanup",
+        "code-quality-improvement"
+      ],
+      "avoid_when": [
+        "new-feature-development"
+      ],
       "estimated_tokens": 18000,
       "estimated_time_minutes": 90,
       "team_context": "development",
-      "dependencies": ["code-reviewer", "typescript-pro"],
+      "dependencies": [
+        "code-reviewer",
+        "typescript-pro"
+      ],
       "success_rate": 0.88,
       "last_used": "2026-05-16"
     },
     {
       "agent_id": "research-analyst",
-      "aliases": ["researcher", "trend-analyst"],
-      "specializations": ["research-analysis", "trend-identification", "insight-generation"],
-      "input_types": ["research-question", "data-set", "trend-topic"],
-      "output_types": ["research-report", "trend-analysis", "insights"],
-      "best_for": ["research-analysis", "trend-identification", "deep-analysis"],
-      "avoid_when": ["implementation-work"],
+      "aliases": [
+        "researcher",
+        "trend-analyst"
+      ],
+      "specializations": [
+        "research-analysis",
+        "trend-identification",
+        "insight-generation"
+      ],
+      "input_types": [
+        "research-question",
+        "data-set",
+        "trend-topic"
+      ],
+      "output_types": [
+        "research-report",
+        "trend-analysis",
+        "insights"
+      ],
+      "best_for": [
+        "research-analysis",
+        "trend-identification",
+        "deep-analysis"
+      ],
+      "avoid_when": [
+        "implementation-work"
+      ],
       "estimated_tokens": 12000,
       "estimated_time_minutes": 60,
       "team_context": "analytics",
-      "dependencies": ["data-analyst"],
+      "dependencies": [
+        "data-analyst"
+      ],
       "success_rate": 0.82,
       "last_used": "2026-05-14"
     },
     {
       "agent_id": "seo-specialist",
-      "aliases": ["seo-expert", "search-optimizer"],
-      "specializations": ["seo-optimization", "keyword-strategy", "technical-seo"],
-      "input_types": ["content", "keyword-target", "seo-issue"],
-      "output_types": ["seo-recommendations", "optimization-plan", "keyword-strategy"],
-      "best_for": ["seo-optimization", "keyword-research", "search-ranking-improvement"],
-      "avoid_when": ["backend-architecture"],
+      "aliases": [
+        "seo-expert",
+        "search-optimizer"
+      ],
+      "specializations": [
+        "seo-optimization",
+        "keyword-strategy",
+        "technical-seo"
+      ],
+      "input_types": [
+        "content",
+        "keyword-target",
+        "seo-issue"
+      ],
+      "output_types": [
+        "seo-recommendations",
+        "optimization-plan",
+        "keyword-strategy"
+      ],
+      "best_for": [
+        "seo-optimization",
+        "keyword-research",
+        "search-ranking-improvement"
+      ],
+      "avoid_when": [
+        "backend-architecture"
+      ],
       "estimated_tokens": 10000,
       "estimated_time_minutes": 45,
       "team_context": "marketing",
-      "dependencies": ["content-marketer"],
-      "success_rate": 0.80,
+      "dependencies": [
+        "content-marketer"
+      ],
+      "success_rate": 0.8,
       "last_used": "2026-05-10"
     },
     {
       "agent_id": "task-distributor",
-      "aliases": ["distributor", "queue-manager"],
-      "specializations": ["task-distribution", "queue-management", "load-balancing"],
-      "input_types": ["task-list", "agent-availability", "priority"],
-      "output_types": ["task-assignments", "execution-order", "load-plan"],
-      "best_for": ["task-distribution", "parallel-execution", "load-balancing"],
-      "avoid_when": ["implementation-work"],
+      "aliases": [
+        "distributor",
+        "queue-manager"
+      ],
+      "specializations": [
+        "task-distribution",
+        "queue-management",
+        "load-balancing"
+      ],
+      "input_types": [
+        "task-list",
+        "agent-availability",
+        "priority"
+      ],
+      "output_types": [
+        "task-assignments",
+        "execution-order",
+        "load-plan"
+      ],
+      "best_for": [
+        "task-distribution",
+        "parallel-execution",
+        "load-balancing"
+      ],
+      "avoid_when": [
+        "implementation-work"
+      ],
       "estimated_tokens": 10000,
       "estimated_time_minutes": 50,
       "team_context": "operations",
-      "dependencies": ["project-manager"],
+      "dependencies": [
+        "project-manager"
+      ],
       "success_rate": 0.89,
       "last_used": "2026-05-18"
     },
     {
       "agent_id": "technical-writer",
-      "aliases": ["writer", "documentation-specialist"],
-      "specializations": ["technical-writing", "documentation", "user-guides"],
-      "input_types": ["code-documentation", "feature-desc", "api-spec"],
-      "output_types": ["written-guide", "documentation", "user-manual"],
-      "best_for": ["technical-writing", "user-guide-creation", "documentation-writing"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "writer",
+        "documentation-specialist"
+      ],
+      "specializations": [
+        "technical-writing",
+        "documentation",
+        "user-guides"
+      ],
+      "input_types": [
+        "code-documentation",
+        "feature-desc",
+        "api-spec"
+      ],
+      "output_types": [
+        "written-guide",
+        "documentation",
+        "user-manual"
+      ],
+      "best_for": [
+        "technical-writing",
+        "user-guide-creation",
+        "documentation-writing"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 10000,
       "estimated_time_minutes": 45,
       "team_context": "documentation",
-      "dependencies": ["documentation-engineer"],
+      "dependencies": [
+        "documentation-engineer"
+      ],
       "success_rate": 0.87,
       "last_used": "2026-05-17"
     },
     {
       "agent_id": "typescript-pro",
-      "aliases": ["ts-expert", "type-specialist"],
-      "specializations": ["typescript", "type-system", "advanced-types"],
-      "input_types": ["typescript-issue", "type-requirement", "code-section"],
-      "output_types": ["typescript-solution", "type-implementation", "type-guide"],
-      "best_for": ["typescript-implementation", "complex-types", "type-safety"],
-      "avoid_when": ["design-work"],
+      "aliases": [
+        "ts-expert",
+        "type-specialist"
+      ],
+      "specializations": [
+        "typescript",
+        "type-system",
+        "advanced-types"
+      ],
+      "input_types": [
+        "typescript-issue",
+        "type-requirement",
+        "code-section"
+      ],
+      "output_types": [
+        "typescript-solution",
+        "type-implementation",
+        "type-guide"
+      ],
+      "best_for": [
+        "typescript-implementation",
+        "complex-types",
+        "type-safety"
+      ],
+      "avoid_when": [
+        "design-work"
+      ],
       "estimated_tokens": 15000,
       "estimated_time_minutes": 75,
       "team_context": "development",
-      "dependencies": ["frontend-developer", "backend-developer"],
+      "dependencies": [
+        "frontend-developer",
+        "backend-developer"
+      ],
       "success_rate": 0.92,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "ui-designer",
-      "aliases": ["designer", "ux-designer"],
-      "specializations": ["ui-design", "design-systems", "interaction-design", "visual-design"],
-      "input_types": ["design-request", "user-flow", "component-spec"],
-      "output_types": ["design-spec", "component-design", "design-system"],
-      "best_for": ["ui-design", "design-system-creation", "interaction-design"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "designer",
+        "ux-designer"
+      ],
+      "specializations": [
+        "ui-design",
+        "design-systems",
+        "interaction-design",
+        "visual-design"
+      ],
+      "input_types": [
+        "design-request",
+        "user-flow",
+        "component-spec"
+      ],
+      "output_types": [
+        "design-spec",
+        "component-design",
+        "design-system"
+      ],
+      "best_for": [
+        "ui-design",
+        "design-system-creation",
+        "interaction-design"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 18000,
       "estimated_time_minutes": 90,
       "team_context": "ui-design-lead",
-      "dependencies": ["ux-researcher", "accessibility-tester"],
+      "dependencies": [
+        "ux-researcher",
+        "accessibility-tester"
+      ],
       "success_rate": 0.89,
       "last_used": "2026-05-20"
     },
     {
       "agent_id": "ui-ux-tester",
-      "aliases": ["ux-tester", "usability-tester"],
-      "specializations": ["ui-testing", "usability-testing", "user-interaction-testing"],
-      "input_types": ["ui-component", "user-flow", "interaction-spec"],
-      "output_types": ["usability-report", "ui-test-results", "improvement-suggestions"],
-      "best_for": ["usability-testing", "ui-functionality-testing", "interaction-validation"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "ux-tester",
+        "usability-tester"
+      ],
+      "specializations": [
+        "ui-testing",
+        "usability-testing",
+        "user-interaction-testing"
+      ],
+      "input_types": [
+        "ui-component",
+        "user-flow",
+        "interaction-spec"
+      ],
+      "output_types": [
+        "usability-report",
+        "ui-test-results",
+        "improvement-suggestions"
+      ],
+      "best_for": [
+        "usability-testing",
+        "ui-functionality-testing",
+        "interaction-validation"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 12000,
       "estimated_time_minutes": 60,
       "team_context": "qa",
-      "dependencies": ["ui-designer", "accessibility-tester"],
+      "dependencies": [
+        "ui-designer",
+        "accessibility-tester"
+      ],
       "success_rate": 0.87,
       "last_used": "2026-05-18"
     },
     {
       "agent_id": "ux-researcher",
-      "aliases": ["ux-specialist", "user-researcher"],
-      "specializations": ["user-research", "ux-strategy", "user-journey-mapping"],
-      "input_types": ["user-problem", "product-area", "research-question"],
-      "output_types": ["user-research-report", "journey-map", "persona-development"],
-      "best_for": ["user-research", "ux-strategy", "user-journey-mapping"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "ux-specialist",
+        "user-researcher"
+      ],
+      "specializations": [
+        "user-research",
+        "ux-strategy",
+        "user-journey-mapping"
+      ],
+      "input_types": [
+        "user-problem",
+        "product-area",
+        "research-question"
+      ],
+      "output_types": [
+        "user-research-report",
+        "journey-map",
+        "persona-development"
+      ],
+      "best_for": [
+        "user-research",
+        "ux-strategy",
+        "user-journey-mapping"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 15000,
       "estimated_time_minutes": 75,
       "team_context": "ui-design",
-      "dependencies": ["business-analyst"],
+      "dependencies": [
+        "business-analyst"
+      ],
       "success_rate": 0.86,
       "last_used": "2026-05-19"
     },
     {
       "agent_id": "workflow-orchestrator",
-      "aliases": ["orchestrator", "workflow-designer"],
-      "specializations": ["workflow-design", "process-automation", "conditional-logic"],
-      "input_types": ["workflow-requirement", "process-flow", "automation-request"],
-      "output_types": ["workflow-design", "automation-guide", "process-documentation"],
-      "best_for": ["workflow-design", "process-automation", "conditional-logic"],
-      "avoid_when": ["code-implementation"],
+      "aliases": [
+        "orchestrator",
+        "workflow-designer"
+      ],
+      "specializations": [
+        "workflow-design",
+        "process-automation",
+        "conditional-logic"
+      ],
+      "input_types": [
+        "workflow-requirement",
+        "process-flow",
+        "automation-request"
+      ],
+      "output_types": [
+        "workflow-design",
+        "automation-guide",
+        "process-documentation"
+      ],
+      "best_for": [
+        "workflow-design",
+        "process-automation",
+        "conditional-logic"
+      ],
+      "avoid_when": [
+        "code-implementation"
+      ],
       "estimated_tokens": 15000,
       "estimated_time_minutes": 75,
       "team_context": "operations-lead",
-      "dependencies": ["project-manager", "task-distributor"],
+      "dependencies": [
+        "project-manager",
+        "task-distributor"
+      ],
       "success_rate": 0.84,
       "last_used": "2026-05-19"
+    },
+    {
+      "agent_id": "security-specialist",
+      "aliases": [
+        "security-expert",
+        "security-engineer"
+      ],
+      "specializations": [
+        "security-analysis",
+        "vulnerability-assessment",
+        "security-architecture",
+        "penetration-testing"
+      ],
+      "input_types": [
+        "code-review",
+        "architecture-spec",
+        "security-requirements"
+      ],
+      "output_types": [
+        "security-assessment",
+        "vulnerability-report",
+        "security-recommendations"
+      ],
+      "best_for": [
+        "security-audits",
+        "vulnerability-assessment",
+        "security-implementation",
+        "compliance-review"
+      ],
+      "avoid_when": [
+        "ui-design",
+        "frontend-styling"
+      ],
+      "estimated_tokens": 22000,
+      "estimated_time_minutes": 100,
+      "team_context": "security-lead",
+      "dependencies": [
+        "code-reviewer",
+        "backend-developer"
+      ],
+      "success_rate": 0.91,
+      "last_used": "2026-05-20"
     }
   ],
   "metadata": {
-    "total_agents": 44,
+    "total_agents": 45,
     "generated_date": "2026-05-20",
     "version": "1.0",
     "categories": {
-      "ui-design": ["ui-designer", "ux-researcher", "design-bridge", "accessibility-tester", "ui-ux-tester", "frontend-developer"],
-      "code": ["code-reviewer", "backend-developer", "nextjs-developer", "react-specialist", "fullstack-developer", "typescript-pro", "refactoring-specialist"],
-      "architecture": ["agent-organizer", "codebase-orchestrator", "ai-engineer", "llm-architect"],
-      "analytics": ["data-analyst", "research-analyst", "knowledge-synthesizer"],
-      "operations": ["project-manager", "task-distributor", "git-workflow-manager", "workflow-orchestrator"],
-      "qa": ["qa-expert", "debugger", "error-detective", "ui-ux-tester", "accessibility-tester"],
-      "infrastructure": ["postgres-pro", "data-engineer", "backend-developer", "database-optimizer", "performance-engineer"],
-      "documentation": ["documentation-engineer", "technical-writer", "readme-generator"],
-      "other": ["agent-installer", "context-manager", "prompt-engineer", "dependency-manager", "competitive-analyst", "content-marketer", "business-analyst", "product-manager", "project-agent-recommender", "seo-specialist"]
+      "ui-design": [
+        "ui-designer",
+        "ux-researcher",
+        "design-bridge",
+        "accessibility-tester",
+        "ui-ux-tester",
+        "frontend-developer"
+      ],
+      "code": [
+        "code-reviewer",
+        "backend-developer",
+        "nextjs-developer",
+        "react-specialist",
+        "fullstack-developer",
+        "typescript-pro",
+        "refactoring-specialist"
+      ],
+      "architecture": [
+        "agent-organizer",
+        "codebase-orchestrator",
+        "ai-engineer",
+        "llm-architect"
+      ],
+      "analytics": [
+        "data-analyst",
+        "research-analyst",
+        "knowledge-synthesizer"
+      ],
+      "operations": [
+        "project-manager",
+        "task-distributor",
+        "git-workflow-manager",
+        "workflow-orchestrator"
+      ],
+      "qa": [
+        "qa-expert",
+        "debugger",
+        "error-detective",
+        "ui-ux-tester",
+        "accessibility-tester"
+      ],
+      "infrastructure": [
+        "postgres-pro",
+        "data-engineer",
+        "backend-developer",
+        "database-optimizer",
+        "performance-engineer"
+      ],
+      "documentation": [
+        "documentation-engineer",
+        "technical-writer",
+        "readme-generator"
+      ],
+      "other": [
+        "agent-installer",
+        "context-manager",
+        "prompt-engineer",
+        "dependency-manager",
+        "competitive-analyst",
+        "content-marketer",
+        "business-analyst",
+        "product-manager",
+        "project-agent-recommender",
+        "seo-specialist"
+      ],
+      "security": [
+        "security-specialist",
+        "code-reviewer"
+      ]
     }
   }
 }

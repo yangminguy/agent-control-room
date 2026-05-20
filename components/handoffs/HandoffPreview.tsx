@@ -16,10 +16,10 @@ export function HandoffPreview({ handoff }: { handoff: Handoff }) {
   };
 
   return (
-    <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
-      <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
+    <div className="bg-surface-2 border rounded-lg shadow-sm overflow-hidden">
+      <div className="p-4 bg-surface border-b flex items-center justify-between">
         <div className="flex items-center gap-3 font-medium">
-          <span className="capitalize px-2 py-1 bg-gray-200 rounded text-sm">
+          <span className="capitalize px-2 py-1 bg-surface-2 rounded text-sm">
             {handoff.fromAgent.replace("-", " ")}
           </span>
           <ArrowRight className="w-4 h-4 text-gray-400" />
@@ -29,7 +29,7 @@ export function HandoffPreview({ handoff }: { handoff: Handoff }) {
         </div>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-2 text-sm bg-white border px-3 py-1.5 rounded-md hover:bg-gray-50 transition shadow-sm"
+          className="flex items-center gap-2 text-sm bg-surface-2 border px-3 py-1.5 rounded-md hover:bg-surface transition shadow-sm"
         >
           {copied ? (
             <>

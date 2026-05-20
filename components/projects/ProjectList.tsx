@@ -5,8 +5,8 @@ import type { Project } from "@/lib/types";
 export function ProjectList({ projects }: { projects: Project[] }) {
   if (projects.length === 0) {
     return (
-      <div className="text-center p-8 border rounded-lg bg-gray-50">
-        <p className="text-gray-500">No projects found. Add one above.</p>
+      <div className="text-center p-8 border rounded-lg bg-surface">
+        <p className="text-text-tertiary">No projects found. Add one above.</p>
       </div>
     );
   }
@@ -19,7 +19,7 @@ export function ProjectList({ projects }: { projects: Project[] }) {
           href={`/projects/${project.id}`}
           className="block group"
         >
-          <div className="p-6 border rounded-lg hover:border-500 hover:shadow-md transition bg-white h-full flex flex-col">
+          <div className="p-6 border rounded-lg hover:border-500 hover:shadow-md transition bg-surface-2 h-full flex flex-col">
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2 text-lg font-semibold">
                 <Folder className="w-5 h-5 text-pink-primary" />

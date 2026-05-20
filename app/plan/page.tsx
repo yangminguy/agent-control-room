@@ -34,7 +34,7 @@ function PlanSummaryBar({
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
   return (
-    <div className="rounded-xl border bg-white p-4 flex flex-wrap gap-6 items-center">
+    <div className="rounded-xl border bg-surface-2 p-4 flex flex-wrap gap-6 items-center">
       {/* 진행률 바 */}
       <div className="flex-1 min-w-40">
         <div className="flex justify-between text-xs text-gray-500 mb-1">

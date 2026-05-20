@@ -40,8 +40,8 @@ export default function AdvisorPage() {
     <div className="container mx-auto p-8 max-w-4xl">
       <header className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Technical Advisor</h1>
-          <p className="text-slate-600 mt-2">
+          <h1 className="text-3xl font-bold text-text-primary">Technical Advisor</h1>
+          <p className="text-text-secondary mt-2">
             Ask technical questions and get structured advice before taking action.
           </p>
         </div>

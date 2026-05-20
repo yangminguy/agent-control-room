@@ -58,7 +58,7 @@ export function SessionReportForm({
         summary,
         testsRun: splitLines(testsRun),
         remainingIssues: splitLines(remainingIssues),
-        recommendedNextTask,
+        nextTask: recommendedNextTask,
       }),
     });
 
@@ -85,7 +85,7 @@ export function SessionReportForm({
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-3xl flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="mx-auto flex w-full max-w-3xl flex-col gap-4 rounded-lg border border-border bg-surface-2 p-5 shadow-sm">
       <div>
         <label className="text-sm font-medium text-text-primary" htmlFor="project">
           Project
@@ -152,7 +152,7 @@ export function SessionReportForm({
         onChange={setRecommendedNextTask}
       />
 
-      {message ? <p className="text-sm text-slate-700">{message}</p> : null}
+      {message ? <p className="text-sm text-text-primary">{message}</p> : null}
 
       <button
         className="rounded-md bg-pink-primary px-4 py-2.5 text-sm font-semibold text-background hover:bg-pink-soft disabled:bg-gray-600"

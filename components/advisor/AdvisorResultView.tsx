@@ -21,19 +21,19 @@ export default function AdvisorResultView({
   };
 
   return (
-    <div className="space-y-6 max-w-3xl bg-white p-6 rounded-lg shadow-sm border border-slate-200 mt-6">
-      <h2 className="text-xl font-bold text-slate-800 border-b pb-2">Advisor Analysis</h2>
+    <div className="space-y-6 max-w-3xl bg-surface-2 p-6 rounded-lg shadow-sm border border-border mt-6">
+      <h2 className="text-xl font-bold text-text-primary border-b pb-2">Advisor Analysis</h2>
       
       <section>
-        <h3 className="text-lg font-semibold text-slate-700 mb-2">Problem Summary</h3>
-        <p className="text-slate-600 bg-slate-50 p-4 rounded-md border border-slate-100">
+        <h3 className="text-lg font-semibold text-text-primary mb-2">Problem Summary</h3>
+        <p className="text-text-secondary bg-surface p-4 rounded-md border border-border">
           {result.problemSummary}
         </p>
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold text-slate-700 mb-2">Likely Causes</h3>
-        <ul className="list-disc pl-5 space-y-1 text-slate-600">
+        <h3 className="text-lg font-semibold text-text-primary mb-2">Likely Causes</h3>
+        <ul className="list-disc pl-5 space-y-1 text-text-secondary">
           {result.likelyCauses.map((cause, idx) => (
             <li key={idx}>{cause}</li>
           ))}
@@ -41,8 +41,8 @@ export default function AdvisorResultView({
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold text-slate-700 mb-2">Options</h3>
-        <ul className="list-disc pl-5 space-y-1 text-slate-600">
+        <h3 className="text-lg font-semibold text-text-primary mb-2">Options</h3>
+        <ul className="list-disc pl-5 space-y-1 text-text-secondary">
           {result.options.map((opt, idx) => (
             <li key={idx}>{opt}</li>
           ))}
@@ -71,10 +71,10 @@ export default function AdvisorResultView({
 
       <section>
         <div className="flex justify-between items-center mb-2 mt-8">
-          <h3 className="text-lg font-semibold text-slate-700">Next Prompt</h3>
+          <h3 className="text-lg font-semibold text-text-primary">Next Prompt</h3>
           <button
             onClick={handleCopy}
-            className="text-sm px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors"
+            className="text-sm px-3 py-1 bg-surface-2 hover:bg-surface text-text-primary rounded transition-colors"
           >
             {copied ? "Copied!" : "Copy Prompt"}
           </button>

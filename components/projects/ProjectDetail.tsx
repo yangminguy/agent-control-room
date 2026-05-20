@@ -8,7 +8,7 @@ export function ProjectDetail({ project, tasks }: { project: Project; tasks: Tas
   return (
     <div className="space-y-8">
       {/* Overview Card */}
-      <div className="bg-white border rounded-lg p-6 shadow-sm">
+      <div className="bg-surface-2 border rounded-lg p-6 shadow-sm">
         <h2 className="text-xl font-semibold mb-4">Overview</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -38,7 +38,7 @@ export function ProjectDetail({ project, tasks }: { project: Project; tasks: Tas
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Core Documents */}
-        <div className="bg-white border rounded-lg p-6 shadow-sm">
+        <div className="bg-surface-2 border rounded-lg p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Core Documents</h2>
             <span className="bg-surface-2 text-pink-primary text-xs px-2 py-1 rounded-full font-medium">
@@ -67,7 +67,7 @@ export function ProjectDetail({ project, tasks }: { project: Project; tasks: Tas
         </div>
 
         {/* Recent Tasks */}
-        <div className="bg-white border rounded-lg p-6 shadow-sm">
+        <div className="bg-surface-2 border rounded-lg p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Tasks</h2>
             <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">

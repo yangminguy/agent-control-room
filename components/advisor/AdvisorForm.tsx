@@ -20,16 +20,16 @@ export default function AdvisorForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl bg-surface-2 p-6 rounded-lg shadow-sm border border-border">
       <div>
-        <h2 className="text-lg font-semibold mb-4 text-slate-800">Advisor Mode</h2>
-        <p className="text-sm text-slate-600 mb-4">
+        <h2 className="text-lg font-semibold mb-4 text-text-primary">Advisor Mode</h2>
+        <p className="text-sm text-text-secondary mb-4">
           Ask a technical question or describe a problem you are facing. The system will analyze the issue and provide recommendations.
         </p>
       </div>
 
       <div>
-        <label htmlFor="question" className="block text-sm font-medium text-slate-700 mb-1">
+        <label htmlFor="question" className="block text-sm font-medium text-text-primary mb-1">
           Your Question
         </label>
         <textarea
@@ -38,13 +38,13 @@ export default function AdvisorForm({
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="e.g., Why is my Supabase query failing with RLS error?"
-          className="w-full p-3 border border-slate-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-500"
+          className="w-full p-3 border border-border rounded-md shadow-sm focus:ring-pink-500 focus:border-500"
           required
         />
       </div>
 
       <div>
-        <label htmlFor="projectContext" className="block text-sm font-medium text-slate-700 mb-1">
+        <label htmlFor="projectContext" className="block text-sm font-medium text-text-primary mb-1">
           Project Context (Optional)
         </label>
         <textarea
@@ -53,7 +53,7 @@ export default function AdvisorForm({
           value={projectContext}
           onChange={(e) => setProjectContext(e.target.value)}
           placeholder="Paste relevant AGENT_STATE.md, logs, or code snippets here..."
-          className="w-full p-3 font-mono text-sm border border-slate-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-500 bg-slate-50"
+          className="w-full p-3 font-mono text-sm border border-border rounded-md shadow-sm focus:ring-pink-500 focus:border-500 bg-surface"
         />
       </div>
 

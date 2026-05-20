@@ -43,7 +43,7 @@ export function SendToVibeKanbanButton({ project, task }: { project: Project; ta
       className={`mt-2 flex items-center gap-1 text-xs px-3 py-1.5 rounded border transition-colors ${
         isSending
           ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-          : "bg-white text-purple-600 border-purple-200 hover:bg-purple-50"
+          : "bg-surface-2 text-purple-600 border-purple-200 hover:bg-purple-50"
       }`}
     >
       <Send className="w-3 h-3" />

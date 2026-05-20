@@ -8,7 +8,9 @@ import {
 } from "@/lib/orchestration/task-queue";
 import type { PlanTask } from "@/lib/types";
 
-// Global queue instance (in production, use persistent storage)
+// Global queue instance (in-memory, MVP scope)
+// NOTE: Queue state is lost on server restart. For production, replace with persistent storage (Redis, database).
+// Current behavior is acceptable for MVP but should be addressed before scaling.
 let globalQueue = createExecutionQueue(3, {
   "claude-code": 1,
   codex: 2,

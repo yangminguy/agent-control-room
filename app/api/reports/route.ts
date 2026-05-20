@@ -10,7 +10,7 @@ const ReportSchema = z.object({
   summary: z.string().min(1),
   testsRun: z.array(z.string()),
   remainingIssues: z.array(z.string()),
-  recommendedNextTask: z.string(),
+  nextTask: z.string(),
   // Extended Session Report fields (optional for backward compatibility)
   executionTimeMinutes: z.number().default(0),
   tokensUsed: z.number().default(0),
@@ -25,7 +25,6 @@ const ReportSchema = z.object({
   manualNotes: z.string().default(""),
   completionJudgment: z.enum(["completed", "partial", "not_completed"]).default("completed"),
   completionReason: z.string().default(""),
-  nextTask: z.string().default(""),
   nextPrompt: z.string().default(""),
   recommendedAgent: z.enum(["claude-code", "codex", "antigravity", "manual"]).default("manual"),
   prdAlignmentScore: z.number().default(0),

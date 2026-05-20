@@ -14,7 +14,7 @@ export function ProjectStatusCard({
   const completedTasks = projectTasks.filter(t => t.status === "completed");
 
   return (
-    <div className="bg-white border rounded-lg p-5 shadow-sm hover:shadow-md transition flex flex-col h-full">
+    <div className="bg-surface-2 border rounded-lg p-5 shadow-sm hover:shadow-md transition flex flex-col h-full">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 font-semibold text-lg">
           <Folder className="w-5 h-5 text-pink-primary" />

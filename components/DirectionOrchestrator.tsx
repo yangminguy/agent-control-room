@@ -63,22 +63,22 @@ export function DirectionOrchestrator() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-5 py-6 lg:px-8">
-      <header className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+      <header className="flex flex-col gap-2 border-b border-border pb-5">
         <p className="text-sm font-semibold uppercase tracking-wide text-pink-primary">
           Agent Control Room
         </p>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-normal text-slate-950">
+            <h1 className="text-3xl font-semibold tracking-normal text-text-primary">
               Direction to Prompt
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-text-secondary">
               기획 방향을 기술 작업으로 번역하고, 추천 에이전트와 복사용 실행
               프롬프트를 생성합니다.
             </p>
           </div>
           <a
-            className="w-fit rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            className="w-fit rounded-md border border-border bg-surface-2 px-3 py-2 text-sm font-medium text-text-primary hover:bg-surface"
             href="/reports"
           >
             Session reports
@@ -87,9 +87,9 @@ export function DirectionOrchestrator() {
       </header>
 
       <section className="grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface-2 p-4 shadow-sm">
           <div>
-            <label className="text-sm font-medium text-slate-800" htmlFor="project-name">
+            <label className="text-sm font-medium text-text-primary" htmlFor="project-name">
               Project
             </label>
             <input
@@ -101,7 +101,7 @@ export function DirectionOrchestrator() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-800" htmlFor="agent-status">
+            <label className="text-sm font-medium text-text-primary" htmlFor="agent-status">
               Preferred agent status
             </label>
             <select
@@ -121,7 +121,7 @@ export function DirectionOrchestrator() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-800" htmlFor="context">
+            <label className="text-sm font-medium text-text-primary" htmlFor="context">
               Project context
             </label>
             <textarea
@@ -133,7 +133,7 @@ export function DirectionOrchestrator() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-800" htmlFor="direction">
+            <label className="text-sm font-medium text-text-primary" htmlFor="direction">
               Product direction
             </label>
             <textarea
@@ -162,19 +162,19 @@ export function DirectionOrchestrator() {
 
         <div className="flex min-h-[720px] flex-col gap-4">
           {!result ? (
-            <div className="flex h-full min-h-96 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm leading-6 text-slate-500">
+            <div className="flex h-full min-h-96 items-center justify-center rounded-lg border border-dashed border-border bg-surface-2 p-8 text-center text-sm leading-6 text-text-tertiary">
               입력을 확인한 뒤 Generate prompt를 누르면 기술 번역, 작업 분해,
               추천 에이전트, 복사용 프롬프트가 여기에 표시됩니다.
             </div>
           ) : (
             <>
-              <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+              <section className="rounded-lg border border-border bg-surface-2 p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">
                       Recommended agent
                     </p>
-                    <h2 className="mt-1 text-2xl font-semibold text-slate-950">
+                    <h2 className="mt-1 text-2xl font-semibold text-text-primary">
                       {agentLabel(result.recommendedAgent)}
                     </h2>
                   </div>
@@ -189,12 +189,12 @@ export function DirectionOrchestrator() {
                     )}
                   </div>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-slate-700">{result.agentReason}</p>
+                <p className="mt-3 text-sm leading-6 text-text-primary">{result.agentReason}</p>
                 {result.statusReason && (
                   <p className="mt-2 text-sm text-amber-700 font-medium">{result.statusReason}</p>
                 )}
                 {result.fallbackAgent ? (
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-text-secondary">
                     ← Fallback from {agentLabel(result.fallbackAgent as AgentType)}
                   </p>
                 ) : null}
@@ -202,7 +202,7 @@ export function DirectionOrchestrator() {
 
               <section className="grid gap-4 xl:grid-cols-2">
                 <ResultCard title="Technical translation">
-                  <p className="font-medium text-slate-900">
+                  <p className="font-medium text-text-primary">
                     {result.technicalTranslation.productIntent}
                   </p>
                   <p className="mt-2 leading-6">
@@ -212,9 +212,9 @@ export function DirectionOrchestrator() {
                 <ResultCard title="Tasks">
                   <div className="space-y-3">
                     {result.tasks.map((task) => (
-                      <div key={task.title} className="border-b border-slate-100 pb-3 last:border-0">
-                        <p className="font-medium text-slate-900">{task.title}</p>
-                        <p className="mt-1 text-xs text-slate-500">
+                      <div key={task.title} className="border-b border-border pb-3 last:border-0">
+                        <p className="font-medium text-text-primary">{task.title}</p>
+                        <p className="mt-1 text-xs text-text-tertiary">
                           {task.priority} · {agentLabel(task.recommendedAgent)}
                         </p>
                         <p className="mt-2 leading-6">{task.technicalSummary}</p>
@@ -248,8 +248,8 @@ export function DirectionOrchestrator() {
                 </section>
               ) : null}
 
-              <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <label className="text-sm font-semibold text-slate-900" htmlFor="prompt-preview">
+              <section className="rounded-lg border border-border bg-surface-2 p-4 shadow-sm">
+                <label className="text-sm font-semibold text-text-primary" htmlFor="prompt-preview">
                   Editable copy-ready prompt
                 </label>
                 <textarea
@@ -275,8 +275,8 @@ function ResultCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
-      <h3 className="mb-3 text-sm font-semibold text-slate-950">{title}</h3>
+    <section className="rounded-lg border border-border bg-surface-2 p-4 text-sm text-text-primary shadow-sm">
+      <h3 className="mb-3 text-sm font-semibold text-text-primary">{title}</h3>
       {children}
     </section>
   );
@@ -284,8 +284,8 @@ function ResultCard({
 
 function ListCard({ title, items }: { title: string; items: string[] }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
-      <h3 className="mb-3 text-sm font-semibold text-slate-950">{title}</h3>
+    <section className="rounded-lg border border-border bg-surface-2 p-4 text-sm text-text-primary shadow-sm">
+      <h3 className="mb-3 text-sm font-semibold text-text-primary">{title}</h3>
       <ul className="space-y-2">
         {(items.length ? items : ["None"]).map((item) => (
           <li className="leading-6" key={item}>

@@ -20,7 +20,7 @@ export function ProjectForm() {
   }
 
   return (
-    <div className="border rounded-lg p-6 bg-white shadow-sm mb-8">
+    <div className="border rounded-lg p-6 bg-surface-2 shadow-sm mb-8">
       <h3 className="text-lg font-semibold mb-4">Register New Project</h3>
       <form 
         action={async (formData) => {
