@@ -1,5 +1,8 @@
 export type AgentType = "claude-code" | "codex" | "antigravity";
 
+// T028: Internal agent type for UI/composition
+export type InternalAgentId = string; // e.g. "ui-designer", "backend-developer", etc.
+
 export type AgentStatusValue =
   | "available"
   | "limited"

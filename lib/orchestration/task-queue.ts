@@ -174,7 +174,7 @@ export function executeConditionalAction(
       ...originalTask,
       id: `escalate-${originalTask.id}`,
       title: `[ESCALATED] ${originalTask.title}`,
-      assignedAgent: "claude-code", // Always escalate to Claude Code
+      assignedAgent: "claude-code" as const, // Always escalate to Claude Code
       priority: "P0",
       status: "planned",
     };
