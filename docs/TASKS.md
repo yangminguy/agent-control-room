@@ -178,12 +178,23 @@ Acceptance criteria met:
 
 ### T022 — Autonomous Execution Loop
 
-Status: TODO  
+Status: DONE  
 Recommended agent: Claude Code  
 Priority: P3
 
-Goal:
-- After each cycle, generate the next prompt and ask the user whether to continue.
+Implemented:
+- KanbanCard: Auto-run analyzer after execution completion
+- Loop Approval UI: Display judgment badge, nextPrompt preview, Continue/Stop buttons
+- RunnerLogView: Pass branchName to onComplete callback
+- `/api/loop-continue` endpoint: Prepare next task with updated generatedPrompt
+- State management: isAnalyzing, analysisResult, branchName, showLoopApproval
+
+Acceptance criteria met:
+- After execution completes → Analyzer auto-called → Judgment displayed
+- Continue button → Next task ready with updated prompt
+- Stop button → Current result preserved
+- Human-in-the-loop loop design (no auto-execution)
+- `npm run typecheck` and `npm run lint` pass
 
 ## Immediate Next Task
 
