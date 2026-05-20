@@ -73,7 +73,7 @@ export class HttpVibeKanbanClient implements VibeKanbanClient {
   async createIssue(
     draft: VibeKanbanIssueDraft
   ): Promise<{ success: boolean; issueId?: string; message?: string }> {
-    const baseUrl = process.env.VIBE_KANBAN_URL || "http://localhost:3003";
+    const baseUrl = process.env.VIBE_KANBAN_URL || "http://localhost:3001";
     try {
       const response = await fetch(`${baseUrl}/api/issues`, {
         method: "POST",
@@ -106,4 +106,12 @@ export class MockVibeKanbanClient implements VibeKanbanClient {
       message: "Mock issue created successfully",
     });
   }
+}
+
+export function getVibeKanbanClient(): VibeKanbanClient {
+  const url = process.env.VIBE_KANBAN_URL;
+  if (url) {
+    return new HttpVibeKanbanClient();
+  }
+  return new MockVibeKanbanClient();
 }
