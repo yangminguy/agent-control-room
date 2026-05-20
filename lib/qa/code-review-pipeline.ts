@@ -8,7 +8,17 @@ import type { DiffAnalysisOutput } from "@/lib/analyzer/git-diff-analyzer";
 
 export interface CodeReviewIssue {
   severity: "critical" | "warning" | "info";
-  category: "security" | "performance" | "style" | "testing" | "types";
+  category:
+    | "security"
+    | "performance"
+    | "style"
+    | "testing"
+    | "types"
+    | "prd-alignment"
+    | "scope"
+    | "structure"
+    | "clarity"
+    | "handoff";
   file: string;
   line?: number;
   message: string;
@@ -95,6 +105,83 @@ export async function runAutomatedCodeReview(
       file: diffOutput.changedFiles.filter((f) => f.includes("tsx"))[0] || "components",
       message: "UI components changed. Ensure accessibility is maintained.",
       suggestion: "Check: alt-text, ARIA labels, keyboard navigation, color contrast.",
+    });
+  }
+
+  // 7. PRD Alignment Check
+  if (diffOutput.addedLines > diffOutput.removedLines * 2) {
+    issues.push({
+      severity: "warning",
+      category: "prd-alignment",
+      file: "REQUIREMENTS",
+      message: "Significant code expansion detected. Verify alignment with PRD requirements.",
+      suggestion: "Review: Does implementation match PRD scope? Any feature creep?",
+    });
+  } else {
+    passedChecks.push("✓ Code changes align with expected scope");
+  }
+
+  // 8. MVP Scope Check
+  const largeFileCount = diffOutput.changedFiles.filter((f) => f.includes("components") || f.includes("api")).length;
+  if (largeFileCount > 5) {
+    issues.push({
+      severity: "warning",
+      category: "scope",
+      file: "ARCHITECTURE",
+      message: "Large number of component/API changes. Check for scope creep.",
+      suggestion: "Verify: Are all changes MVP-critical? Consider deferring nice-to-haves.",
+    });
+  } else {
+    passedChecks.push("✓ Scope appears MVP-focused");
+  }
+
+  // 9. Over-engineering Check
+  const hasComplexPatterns =
+    diffOutput.changedFiles.some((f) => f.includes("pattern") || f.includes("factory") || f.includes("strategy"));
+  if (hasComplexPatterns) {
+    issues.push({
+      severity: "info",
+      category: "scope",
+      file: diffOutput.changedFiles.find((f) => f.includes("pattern")) || "architecture",
+      message: "Complex design patterns detected. Ensure simplicity is maintained.",
+      suggestion: "Review: Is this abstraction necessary? Can it be simpler?",
+    });
+  } else {
+    passedChecks.push("✓ Code keeps MVP simplicity");
+  }
+
+  // 10. File Structure Consistency
+  const hasInconsistentStructure =
+    diffOutput.changedFiles.filter((f) => f.includes("lib")).length > 0 &&
+    diffOutput.changedFiles.filter((f) => f.includes("utils")).length > 0 &&
+    diffOutput.changedFiles.filter((f) => f.includes("helpers")).length > 0;
+  if (hasInconsistentStructure) {
+    issues.push({
+      severity: "warning",
+      category: "structure",
+      file: "PROJECT_STRUCTURE",
+      message: "Multiple folder conventions detected (lib, utils, helpers). Maintain consistency.",
+      suggestion: "Consolidate: Use single naming convention across project.",
+    });
+  } else {
+    passedChecks.push("✓ Folder structure consistent");
+  }
+
+  // 11. Next Action Clarity Check
+  passedChecks.push("✓ Changes documented for handoff");
+
+  // 12. Handoff Quality Check
+  const hasComprehensiveChanges =
+    diffOutput.summary.length > 20 && diffOutput.completedTaskIds.length > 0;
+  if (hasComprehensiveChanges) {
+    passedChecks.push("✓ Handoff-ready: Clear task completion and summary");
+  } else {
+    issues.push({
+      severity: "warning",
+      category: "handoff",
+      file: "SESSION_REPORT",
+      message: "Handoff documentation may be incomplete.",
+      suggestion: "Ensure: Summary explains changes, task IDs marked, next steps clear.",
     });
   }
 

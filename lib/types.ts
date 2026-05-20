@@ -78,16 +78,47 @@ export type Handoff = {
 };
 
 export type SessionReport = {
+  // Identifiers
   id: string;
   projectId: string;
   taskId: string;
   agent: AgentType;
-  changedFiles: string[];
+
+  // Execution Details
   summary: string;
+  executionTimeMinutes: number;
+  tokensUsed: number;
+  errors: string[];
+
+  // Code Quality Metrics
+  changedFiles: string[];
   testsRun: string[];
+  codeReviewScore: number; // 0-100
+  accessibilityScore: number; // 0-100
+  performanceMetrics?: {
+    bundleSize?: number; // KB
+    loadTime?: number; // ms
+    coreWebVitals?: Record<string, number>;
+  };
+
+  // Session Notes
+  manualNotes: string; // User manual notes/observations
   remainingIssues: string[];
-  recommendedNextTask: string;
+
+  // Completion & Next Steps
+  completionJudgment: CompletionJudgment;
+  completionReason: string;
+  nextTask: string; // Next task to perform
+  nextPrompt: string; // Structured prompt for next agent
+  recommendedAgent: AgentType | "manual"; // Which agent should take next task
+
+  // Validation
+  prdAlignmentScore: number; // 0-100: How well does output match PRD
+  risks: string[]; // Potential issues or technical debt introduced
+
+  // Metadata
   createdAt: string;
+  updatedAt: string;
 };
 
 export type GeneratedTask = {
@@ -266,6 +297,8 @@ export type DiffSummary = {
   partialTaskIds: string[];     // partial 판정된 planTask ids
   blockedTaskIds: string[];     // blocked 판정된 planTask ids
 };
+
+export type DiffAnalysisOutput = DiffSummary;
 
 /** T018용: 에이전트 실행 로그 */
 export type ExecutionLog = {
