@@ -77,7 +77,7 @@ export default async function ReportsPage() {
             <p className="mt-2 leading-6 text-slate-700">{report.summary}</p>
             <p className="mt-3 text-sm font-medium text-slate-900">Recommended next task</p>
             <p className="mt-1 leading-6 text-slate-700">
-              {report.recommendedNextTask || "Not provided"}
+              {report.nextTask || "Not provided"}
             </p>
           </article>
         ))}

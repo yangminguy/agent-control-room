@@ -38,13 +38,15 @@ export function getSessionReports(): Promise<SessionReport[]> {
 }
 
 export async function addSessionReport(
-  report: Omit<SessionReport, "id" | "createdAt">,
+  report: Omit<SessionReport, "id" | "createdAt" | "updatedAt">,
 ): Promise<SessionReport> {
   const reports = await getSessionReports();
+  const now = new Date().toISOString();
   const nextReport: SessionReport = {
     ...report,
     id: `report-${Date.now()}`,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
   };
   await writeJson("session-reports.json", [nextReport, ...reports]);
   return nextReport;

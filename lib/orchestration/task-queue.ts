@@ -4,7 +4,7 @@
  * Manage multiple tasks with resource limits and conditional rules.
  */
 
-import type { PlanTask } from "@/lib/types";
+import type { PlanTask, AgentType } from "@/lib/types";
 
 export type TaskPriority = "P0" | "P1" | "P2" | "P3";
 
@@ -157,7 +157,7 @@ export function executeConditionalAction(
       title: `[DEBUG] ${originalTask.title}`,
       description: `Debug task for: ${originalTask.title}\n\nPrevious error: ${triggeredRule.params?.error || "unknown"}`,
       status: "planned",
-      assignedAgent: triggeredRule.targetAgent || "claude-code",
+      assignedAgent: ((triggeredRule.targetAgent || "claude-code") as AgentType),
       priority: "P0",
     };
   }

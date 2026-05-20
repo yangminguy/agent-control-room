@@ -1,5 +1,5 @@
 import { runAutomatedCodeReview, formatCodeReviewForDisplay } from "@/lib/qa/code-review-pipeline";
-import type { DiffAnalysisOutput } from "@/lib/analyzer/git-diff-analyzer";
+import type { DiffAnalysisOutput } from "@/lib/types";
 
 export async function POST(req: Request) {
   try {

@@ -4,7 +4,7 @@
  * After execution completes, automatically run code review on changed files.
  */
 
-import type { DiffAnalysisOutput } from "@/lib/analyzer/git-diff-analyzer";
+import type { DiffAnalysisOutput } from "@/lib/types";
 
 export interface CodeReviewIssue {
   severity: "critical" | "warning" | "info";
