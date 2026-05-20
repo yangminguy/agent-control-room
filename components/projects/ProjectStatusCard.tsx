@@ -17,7 +17,7 @@ export function ProjectStatusCard({
     <div className="bg-white border rounded-lg p-5 shadow-sm hover:shadow-md transition flex flex-col h-full">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 font-semibold text-lg">
-          <Folder className="w-5 h-5 text-blue-500" />
+          <Folder className="w-5 h-5 text-pink-primary" />
           {project.name}
         </div>
       </div>
@@ -30,7 +30,7 @@ export function ProjectStatusCard({
 
       <div className="mt-auto space-y-3">
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="bg-blue-50 text-blue-800 rounded p-2 text-center">
+          <div className="bg-surface-2 text-pink-primary rounded p-2 text-center">
             <div className="font-semibold">{activeTasks.length}</div>
             <div className="text-xs">Active Tasks</div>
           </div>
@@ -42,7 +42,7 @@ export function ProjectStatusCard({
 
         <Link 
           href={`/projects/${project.id}`}
-          className="flex items-center justify-center gap-2 w-full text-sm font-medium text-blue-600 hover:text-blue-700 py-2 border rounded hover:bg-blue-50 transition"
+          className="flex items-center justify-center gap-2 w-full text-sm font-medium text-pink-primary hover:text-pink-primary py-2 border rounded hover:bg-surface-2 transition"
         >
           View Project
           <ArrowRight className="w-4 h-4" />

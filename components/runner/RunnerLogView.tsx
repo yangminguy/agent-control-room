@@ -155,7 +155,7 @@ export function RunnerLogView({
         <button
           onClick={handleExecute}
           disabled={isRunning || isComplete}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="rounded bg-pink-primary px-4 py-2 text-white hover:bg-pink-soft disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {isRunning ? "실행 중..." : "Execute"}
         </button>

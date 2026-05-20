@@ -50,10 +50,10 @@ export default function AdvisorResultView({
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold text-blue-800 mb-2 flex items-center">
+        <h3 className="text-lg font-semibold text-pink-primary mb-2 flex items-center">
           <span className="mr-2">💡</span> Recommendation
         </h3>
-        <div className="bg-blue-50 p-4 rounded-md border border-blue-100 text-blue-900">
+        <div className="bg-surface-2 p-4 rounded-md border border-100 text-pink-primary">
           {result.recommendation}
         </div>
       </section>

@@ -23,7 +23,7 @@ export function HandoffPreview({ handoff }: { handoff: Handoff }) {
             {handoff.fromAgent.replace("-", " ")}
           </span>
           <ArrowRight className="w-4 h-4 text-gray-400" />
-          <span className="capitalize px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+          <span className="capitalize px-2 py-1 bg-surface-2 text-pink-primary rounded text-sm">
             {handoff.toAgent.replace("-", " ")}
           </span>
         </div>

@@ -62,7 +62,7 @@ function PlanSummaryBar({
           </span>
         )}
         {ready > 0 && (
-          <span className="flex items-center gap-1 text-blue-600">
+          <span className="flex items-center gap-1 text-pink-primary">
             <Clock className="w-3.5 h-3.5" />
             Ready {ready}
           </span>
@@ -97,7 +97,7 @@ export default async function PlanPage() {
             <span className="text-xs text-gray-600">Plan</span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <LayoutDashboard className="w-7 h-7 text-blue-500" />
+            <LayoutDashboard className="w-7 h-7 text-pink-primary" />
             Implementation Plan
           </h1>
           <p className="text-gray-500 mt-1 text-sm">

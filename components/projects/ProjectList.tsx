@@ -19,13 +19,13 @@ export function ProjectList({ projects }: { projects: Project[] }) {
           href={`/projects/${project.id}`}
           className="block group"
         >
-          <div className="p-6 border rounded-lg hover:border-blue-500 hover:shadow-md transition bg-white h-full flex flex-col">
+          <div className="p-6 border rounded-lg hover:border-500 hover:shadow-md transition bg-white h-full flex flex-col">
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2 text-lg font-semibold">
-                <Folder className="w-5 h-5 text-blue-500" />
+                <Folder className="w-5 h-5 text-pink-primary" />
                 {project.name}
               </div>
-              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-pink-primary transition-colors" />
             </div>
             {project.description && (
               <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-2">

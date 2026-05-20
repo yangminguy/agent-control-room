@@ -38,7 +38,7 @@ export default function AdvisorForm({
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="e.g., Why is my Supabase query failing with RLS error?"
-          className="w-full p-3 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          className="w-full p-3 border border-slate-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-500"
           required
         />
       </div>
@@ -53,14 +53,14 @@ export default function AdvisorForm({
           value={projectContext}
           onChange={(e) => setProjectContext(e.target.value)}
           placeholder="Paste relevant AGENT_STATE.md, logs, or code snippets here..."
-          className="w-full p-3 font-mono text-sm border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-slate-50"
+          className="w-full p-3 font-mono text-sm border border-slate-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-500 bg-slate-50"
         />
       </div>
 
       <button
         type="submit"
         disabled={isSubmitting || !question.trim()}
-        className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full py-2 px-4 bg-pink-primary hover:bg-pink-soft text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {isSubmitting ? "Analyzing..." : "Get Technical Advice"}
       </button>

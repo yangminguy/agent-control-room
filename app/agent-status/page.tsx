@@ -275,7 +275,7 @@ export default function AgentStatusPage() {
                 <button
                   onClick={() => handleUpdateStatus(agentType)}
                   disabled={updatingAgent === agentType}
-                  className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+                  className="w-full rounded bg-pink-primary px-4 py-2 text-white hover:bg-pink-soft disabled:bg-gray-400"
                 >
                   {updatingAgent === agentType
                     ? "업데이트 중..."
@@ -284,7 +284,7 @@ export default function AgentStatusPage() {
               </div>
 
               {recommendation && (
-                <div className="mt-4 rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
+                <div className="mt-4 rounded border border-100 bg-surface-2 p-3 text-sm text-pink-primary">
                   <div className="flex items-start gap-2">
                     <CircleAlert className="mt-0.5 h-4 w-4 flex-none" />
                     <div className="space-y-1">

@@ -44,7 +44,7 @@ export default async function ReportsPage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-5 py-6 lg:px-8">
       <header className="flex flex-col gap-3 border-b border-slate-200 pb-5">
-        <Link className="text-sm font-medium text-blue-700" href="/">
+        <Link className="text-sm font-medium text-pink-primary" href="/">
           Back to Direction to Prompt
         </Link>
         <div>

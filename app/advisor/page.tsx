@@ -45,7 +45,7 @@ export default function AdvisorPage() {
             Ask technical questions and get structured advice before taking action.
           </p>
         </div>
-        <Link href="/" className="text-blue-600 hover:underline">
+        <Link href="/" className="text-pink-primary hover:underline">
           Back to Dashboard
         </Link>
       </header>

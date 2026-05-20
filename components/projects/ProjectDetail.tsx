@@ -41,7 +41,7 @@ export function ProjectDetail({ project, tasks }: { project: Project; tasks: Tas
         <div className="bg-white border rounded-lg p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Core Documents</h2>
-            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+            <span className="bg-surface-2 text-pink-primary text-xs px-2 py-1 rounded-full font-medium">
               {project.docs.length} Docs
             </span>
           </div>
@@ -53,7 +53,7 @@ export function ProjectDetail({ project, tasks }: { project: Project; tasks: Tas
               {project.docs.map(doc => (
                 <div key={doc.id} className="p-3 border rounded-md hover:bg-gray-50 transition">
                   <div className="flex items-center gap-2 font-medium mb-1">
-                    <FileText className="w-4 h-4 text-blue-500" />
+                    <FileText className="w-4 h-4 text-pink-primary" />
                     {doc.title}
                   </div>
                   <p className="text-xs text-gray-500 font-mono truncate">{doc.path}</p>
@@ -91,7 +91,7 @@ export function ProjectDetail({ project, tasks }: { project: Project; tasks: Tas
                   </div>
                   <span className={`text-xs px-2 py-1 rounded border capitalize
                     ${task.status === "completed" ? "bg-green-50 text-green-700 border-green-200" : 
-                      task.status === "in_progress" ? "bg-blue-50 text-blue-700 border-blue-200" : 
+                      task.status === "in_progress" ? "bg-surface-2 text-pink-primary border-200" : 
                       "bg-gray-50 text-gray-700 border-gray-200"}`}
                   >
                     {task.status.replace("_", " ")}
