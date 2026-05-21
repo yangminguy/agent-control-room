@@ -2,6 +2,34 @@ import { checkUncommittedChanges, createBranch, generateBranchName, validateCwdS
 import { spawnAgent } from "@/lib/runner/spawn-runner";
 import { addExecutionLog, updateExecutionLog } from "@/lib/storage/execution-log-store";
 import { getFeaturePlanById, updatePlanTaskStatus } from "@/lib/storage/feature-plan-store";
+import { validateAndConsumeApprovalToken } from "@/lib/orchestration/approval-token-store";
+
+/**
+ * /api/runner — Internal Local Runner Endpoint
+ *
+ * IMPORTANT: This is NOT a paid external AI API endpoint.
+ * This is an internal endpoint that runs LOCAL terminal commands.
+ *
+ * What it does:
+ * 1. Validates server-issued approval token (5-min TTL, one-time use, context-bound)
+ * 2. Validates project path safety (no path traversal, within project scope)
+ * 3. Confirms uncomitted changes are stashed
+ * 4. Creates isolated git branch
+ * 5. Spawns LOCAL tool process (e.g. spawn("claude", ["-p", prompt], { cwd }))
+ * 6. Captures stdout/stderr logs as SSE stream
+ * 7. Returns logs and exit code to UI
+ *
+ * What it does NOT do:
+ * - Call external OpenAI API
+ * - Call external Anthropic API
+ * - Deploy or push to git
+ * - Auto-merge or create PRs
+ * - Run DB migrations
+ * - Call external paid AI APIs
+ *
+ * The user must already be authenticated into the local tool.
+ * No external credentials are used in this flow.
+ */
 
 const SUPPORTED_RUNNER_AGENTS = new Set(["claude-code"]);
 
@@ -21,9 +49,33 @@ export async function POST(request: Request) {
       prompt: string;
       cwd: string;
       agent: "claude-code" | "codex";
+      approvalToken?: string;
     };
 
-    const { planId, taskId, prompt, cwd, agent } = body;
+    const { planId, taskId, prompt, cwd, agent, approvalToken } = body;
+
+    // Validate server-issued approval token
+    if (!approvalToken) {
+      return new Response(
+        textEncoder.encode(`data: ${JSON.stringify({ log: "[ERROR] Execution requires approval token. Missing token.", type: "system" })}\n\n`),
+        { status: 403, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
+
+    // Validate token against execution context
+    const tokenContext = validateAndConsumeApprovalToken(approvalToken, {
+      planId,
+      taskId,
+      agent: agent as "claude-code" | "codex" | "antigravity",
+      cwd,
+    });
+
+    if (!tokenContext) {
+      return new Response(
+        textEncoder.encode(`data: ${JSON.stringify({ log: "[ERROR] Invalid, expired, or mismatched approval token. Request a new token from the workbench.", type: "system" })}\n\n`),
+        { status: 403, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
 
     // Security: Validate cwd against path traversal
     const projectRoot = process.cwd();

@@ -1,63 +1,90 @@
 # ARCHITECTURE.md — Agent Control Room
 
 ## 1. Architecture Goal
-Agent Control Room is a **Human-in-the-loop AI Development Orchestrator**. 
-It is not merely a CLI execution wrapper. It is an operational control room where a PM or non-developer inputs a product goal, and the system translates it into a functional plan, delegates tasks to appropriate AI coding agents (Claude Code, Codex, Antigravity), tracks execution, analyzes git diffs, and orchestrates the transition to the next step.
+Agent Control Room is an **AI Development Control Tower for non-developer PMs**.
+It is not merely a CLI execution wrapper or prompt generator. It is an operational control tower where a PM or non-developer inputs an idea or product direction, and the system translates it into requirements, generates a visual roadmap, delegates tasks to appropriate AI coding agents or workbenches (Claude Code, Codex, Antigravity, optional Hermes, Vibe Kanban), tracks execution, analyzes results/diffs, preserves knowledge, and orchestrates the transition to the next step.
+
+The target architecture is **orchestrator plus workbench**:
+- Agent Control Room is the brain: intent, planning, routing, prompts, approvals, handoffs, and next-step reasoning.
+- Vibe Kanban is the workbench: issue cards, workspace/session execution, git worktrees, diff/review UI, and previews.
+- The app should not spend MVP effort rebuilding Vibe Kanban's strongest surfaces. It should bridge to them and reserve its own UI for control, context, and decisions.
 
 ## 2. System Overview
 ### 2.1 Core Loop
 The orchestration follows a continuous iterative loop:
 ```txt
-User Input (Goal)
+Idea / Product Direction
         ↓
-Feature Plan Generator
+Senior Dev Translator
         ↓
-Execution Planner & Agent Router
+Roadmap Generator
         ↓
-Agent Execution
+Visual Development Roadmap Control Panel
+        ↓
+Task Decomposer & Agent Router
+        ↓
+Senior Dev Prompt Compiler
+        ↓
+Human Approval
+        ↓
+Agent Execution or Vibe Kanban Workbench
         ↓
 Git Diff & Outcome Analyzer
         ↓
-Plan Updater & Next Prompt Generator
+Roadmap Updater, Insight Memory & Next Prompt Generator
 ```
 
 ### 2.2 Target Architecture Layers
 
 ```mermaid
 graph TD
-    A[PM/User Input] --> B[Intent Analyzer]
-    B --> C[Feature Plan Generator]
-    C --> D[Execution Planner]
-    D --> E[Agent Router]
+    A[PM/User Idea] --> B[Intent Analyzer]
+    B --> C[Senior Dev Translator]
+    C --> D[Roadmap Generator]
+    D --> E[Execution Planner]
+    E --> P[Senior Dev Prompt Compiler]
+    P --> Q[Human Approval Gate]
+    Q --> R[Agent Router]
 
-    E --> F[Claude Code]
-    E --> G[Codex]
-    E --> H[Antigravity]
+    R --> LR[Local Runner Bridge]
+    
+    LR --> F[Claude Code<br/>CLI Local Spawn]
+    LR --> G[Codex<br/>Manual or CLI]
+    LR --> H[Antigravity<br/>Manual or IDE]
+    LR --> O[Hermes<br/>Background Worker]
+    LR --> M[Vibe Kanban<br/>Workbench]
 
     F --> I[Execution Result]
     G --> I
     H --> I
+    O --> I
+    M --> I
 
     I --> J[Git Diff Analyzer]
-    J --> K[Plan Progress Updater]
-    K --> L[HTML Plan View]
-    K --> M[Kanban Board]
+    J --> K[Roadmap Progress Updater]
+    K --> L[Visual Roadmap Control Panel]
     K --> N[Session Report]
+    K --> S[Obsidian Insight Memory]
 
-    N --> D
+    N --> E
 ```
 
 | Layer | Responsibility |
 |---|---|
 | **Intent Analyzer** | Parses user's natural language request to identify goals, constraints, and scope. |
-| **Feature Plan Generator** | Breaks down the goal into a structured, functional plan. |
+| **Senior Dev Translator** | Converts rough non-developer ideas into product and implementation context. |
+| **Roadmap Generator** | Breaks the goal into roadmap stages that can be visualized and checked off. |
 | **Execution Planner** | Organizes task sequence, dependencies, and execution strategy. |
-| **Agent Router** | Selects the appropriate execution environment (Claude Code, Codex, Antigravity). |
-| **Agent Execution Runner** | Safely executes the agent (e.g. via CLI `spawn`) within an isolated branch. |
+| **Senior Dev Prompt Compiler** | Produces precise prompts with goal, context, scope, non-goals, file boundaries, acceptance criteria, checks, and handoff rules. |
+| **Human Approval Gate** | User reviews and approves execution before proceeding. Token issued for one-time execution. |
+| **Agent Router** | Selects the appropriate local tool or workbench (Claude Code, Codex, Antigravity, Hermes, or Vibe Kanban). |
+| **Local Runner Bridge** | Integrates with already-authenticated local tools. No external paid APIs called by default. See `LOCAL_RUNNER_ARCHITECTURE.md`. |
+| **Agent Execution (Local)** | Safely executes local tool (e.g. Claude Code via `child_process.spawn("claude", ...)`) within an isolated git branch. |
 | **Git Diff Analyzer** | Inspects `git diff` to understand what the agent actually changed. |
-| **Plan Progress Updater** | Marks plan items as done/partial/blocked based on diff analysis. |
-| **HTML Plan View** | Presents the live implementation plan to the user. |
-| **Kanban Board** | Visualizes agent states and active work cards (Operational UI). |
+| **Roadmap Progress Updater** | Marks stages/tasks as completed, active, waiting, blocked, or user-input-required based on analysis. |
+| **Visual Roadmap Control Panel** | Presents the product roadmap, check marks, current task, next action, responsible agent, blockers, acceptance criteria, and prompts. |
+| **Vibe Kanban Workbench** | Integration with Vibe Kanban for richer board, workspace, agent session, diff/review, and preview surfaces. |
+| **Obsidian Insight Memory** | Exports durable decisions, insights, prompt patterns, handoffs, and agent performance notes as Markdown. |
 | **Session Report** | Documents the outcome of a session, generating the next prompt. |
 
 ## 3. Core Modules (Implemented & Future)
@@ -71,24 +98,53 @@ Converts product direction into small executable tasks. (Currently mapped to Dir
 ### 3.3 Advisor Mode (T015)
 When execution is blocked or ambiguous, this module provides interpretation, options, recommendations, and generates a copy-ready prompt for the next step.
 
-### 3.4 HTML Plan View & Kanban (T017 & Open-source Base)
-Visualizes the planned tasks and their real-time statuses. The Kanban board acts as the operational UI displaying agent tracks, while the HTML Plan View acts as the living implementation checklist.
+### 3.4 Control Panel & Plan View (T017)
+Visualizes the product roadmap and task statuses. The next direction is to make `/plan` a Visual Development Roadmap Control Panel: completed stages show check marks, active stages show current task and responsible agent, waiting stages show start conditions, and blocked/user-input-required stages show the exact decision needed. It may show lightweight kanban elements, but it should not grow into a duplicate of Vibe Kanban's full execution board.
 
-### 3.5 Agent Execution Runner (T018)
-The adapter that invokes Claude Code or Codex. It manages:
+### 3.5 Local Runner Bridge
+The integration layer between Agent Control Room and already-authenticated local tools.
+
+**Does NOT call external paid APIs by default.**
+
+Instead, it:
+- Routes to appropriate local tool adapter (Claude Code CLI, Codex, Antigravity, Vibe Kanban)
+- Manages approval tokens (server-issued, context-bound, one-time use)
+- Validates execution context (project path, agent allowlist, uncommitted changes)
+- Creates isolated git branches for execution
+- Spawns local tool processes
+- Captures logs and results
+- Analyzes diffs
+
+See `LOCAL_RUNNER_ARCHITECTURE.md` for full details on execution adapters and safety boundaries.
+
+### 3.6 Agent Execution Runner (T018)
+The local tool adapter that invokes Claude Code or other local tools. It manages:
 - Creating safe git worktrees/branches.
-- Spawning the CLI process.
-- Streaming stdout/stderr logs.
+- Spawning the local tool CLI process (e.g. `claude -p "..."`, not external API).
+- Streaming stdout/stderr logs via SSE.
 - Capturing the exit code.
+- No external paid API calls.
 
-### 3.6 Diff & Outcome Analyzer (T019)
+### 3.7 Diff & Outcome Analyzer (T019)
 Replaces manual session reporting. It reads `git diff --name-only` and `git diff`, sends it to an LLM, and automatically determines which tasks were completed and what files were modified.
 
+### 3.8 Agent Availability Manager
+Tracks agent availability manually in MVP. Supported statuses are `available`, `cooling_down`, `token_limited`, `blocked`, `context_overloaded`, `manual_only`, and `experimental`. If an agent is unavailable, the system generates a fallback handoff or Context Pack instead of pretending execution can continue normally.
+
+### 3.9 Context Reset Protocol
+When context is too long, token-limited, blocked, or ready for a new agent/session, generate a Context Pack with current goal, completed work, changed files, decisions, blockers, remaining work, next task, acceptance criteria, do-not-do rules, and the next prompt. Do not depend on literal `/clear` automation.
+
+### 3.10 Obsidian Knowledge Memory
+Future module for exporting development insights, decisions, failed attempts, successful prompt patterns, agent performance notes, handoffs, and checklists as Obsidian-compatible Markdown.
+
+### 3.11 Hermes Background Worker
+Hermes is optional and should be positioned as a background/status/memory worker for monitoring, summaries, retry candidates, and Obsidian note generation. It should not be responsible for high-risk autonomous code changes, DB migrations, deployment, or auto-merge without explicit user approval.
+
 ## 4. Open-Source Integration (Vibe Kanban)
-Agent Control Room integrates with **Vibe Kanban** (open-source) for operational UI and issue tracking.
+Agent Control Room integrates with **Vibe Kanban** (open-source) as an execution workbench and issue/workspace surface.
 
 ### 4.1 Vibe Kanban Bridge
-- **Purpose**: Sync feature plan tasks → Vibe Kanban issues for team visibility
+- **Purpose**: Send prepared feature plan tasks → Vibe Kanban issues/workspaces for execution visibility and richer agent-session workflows
 - **API Mode**: HTTP API to `/api/remote/issues` (real-time issue creation)
 - **Mock Mode**: Fallback when `VIBE_KANBAN_URL` is not set (development mode)
 - **Project Selection**: Dialog-based UI in `SendToVibeKanbanButton.tsx`
@@ -97,9 +153,16 @@ Agent Control Room integrates with **Vibe Kanban** (open-source) for operational
   - Fetches status list from selected project → `/api/vibe-kanban/statuses`
   - Creates issue with selected project_id + status_id
 
-### 4.2 Kanban as Viewer (not Dictator)
-- Visualizes the plan, but does not drive orchestration
-- One-way sync: Agent Control Room → Vibe Kanban (no reverse dependency)
+### 4.2 Brain vs Workbench Boundary
+- Agent Control Room drives orchestration decisions.
+- Vibe Kanban handles detailed execution-board/workspace surfaces.
+- One-way sync is acceptable for issue creation, but the next bridge should support result readback: Vibe Kanban execution outcome → Agent Control Room session report / diff summary / next prompt.
+- Do not deep-fork Vibe Kanban before the API/MCP bridge proves durable.
+
+### 4.3 UI Boundary
+- `/plan` should act as the Visual Development Roadmap Control Panel.
+- Vibe Kanban should be opened, linked, embedded, or synchronized for detailed board/workspace work.
+- Avoid building duplicate internal card/session/diff UI when Vibe Kanban already provides a better version and a stable bridge exists.
 
 ## 5. Storage Layer (Dual-Mode)
 
@@ -136,5 +199,7 @@ Each adapter checks `getSupabaseClient()` first, falls back to JSON if unavailab
 - **Phase 6: Loop UX Refinement (DONE)**: Feedback banners, error recovery, state messaging.
 - **Phase 7: Security Hardening (DONE)**: npm audit fixes, path validation, input verification.
 - **Phase 8: Integration (DONE)**: Vibe Kanban real HTTP API, Supabase schema deployment.
+- **Phase 9: Roadmap-First Control Tower UX (NEXT)**: Reframe `/plan`, prompts, availability, context reset, and memory around the AI Development Control Tower direction.
+- **Phase 10: Vibe Kanban Workbench Bridge**: Deepen Vibe Kanban usage for workspace/session launch, result import, open-workspace links, and reducing duplicate internal board behavior.
 
 *(For detailed Task and Data Models, see `TASK_MODEL.md` and `ROADMAP.md`)*
