@@ -1,0 +1,90 @@
+[
+  {
+    "id": "pattern-read-only-qa",
+    "title": "Read-Only QA 패턴",
+    "agentType": "codex",
+    "taskType": "qa",
+    "promptTemplate": "다음 코드를 검토해주세요. 변경 금지, 검토만:\n\n{{code}}\n\n검토 항목: 타입 안전성, 성능, 보안, 엣지케이스.",
+    "successRate": 0.9,
+    "usageCount": 0,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "tags": ["qa", "code-review", "safe"]
+  },
+  {
+    "id": "pattern-local-runner-approval",
+    "title": "로컬 Runner 사전 승인 패턴",
+    "agentType": "claude-code",
+    "taskType": "feature",
+    "promptTemplate": "다음 태스크를 구현하기 전에 접근 방식을 제안하고 승인을 받으세요.\n\n태스크: {{task}}\n컨텍스트: {{context}}\n\n변경 전 반드시 계획을 설명하세요.",
+    "successRate": 0.85,
+    "usageCount": 0,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "tags": ["approval-gate", "safe", "planning"]
+  },
+  {
+    "id": "pattern-ui-polish",
+    "title": "UI 폴리시 패턴",
+    "agentType": "antigravity",
+    "taskType": "ui-polish",
+    "promptTemplate": "다음 컴포넌트의 UI를 개선하세요. 로직 변경 금지.\n\n대상 파일: {{files}}\n개선 목표: {{goals}}\n\nTailwind CSS 기존 클래스 패턴 유지.",
+    "successRate": 0.8,
+    "usageCount": 0,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "tags": ["ui", "polish", "no-logic-change"]
+  },
+  {
+    "id": "pattern-bug-fix-bounded",
+    "title": "범위 제한 버그픽스 패턴",
+    "agentType": "codex",
+    "taskType": "bug-fix",
+    "promptTemplate": "다음 버그를 수정하세요. 수정 범위는 {{files}} 파일만.\n\n버그 설명: {{bug}}\n재현 방법: {{steps}}\n\n다른 파일 건드리지 마세요.",
+    "successRate": 0.88,
+    "usageCount": 0,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "tags": ["bug-fix", "bounded", "safe"]
+  },
+  {
+    "id": "pattern-test-coverage",
+    "title": "테스트 커버리지 패턴",
+    "agentType": "codex",
+    "taskType": "test",
+    "promptTemplate": "다음 모듈에 대한 단위 테스트를 작성하세요.\n\n대상: {{module}}\n테스트 프레임워크: {{framework}}\n커버리지 목표: 엣지케이스 포함.\n\n기존 테스트 수정 금지.",
+    "successRate": 0.82,
+    "usageCount": 0,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "tags": ["test", "coverage", "unit-test"]
+  },
+  {
+    "id": "pattern-refactor-types",
+    "title": "타입 리팩토링 패턴",
+    "agentType": "claude-code",
+    "taskType": "refactor",
+    "promptTemplate": "다음 파일의 TypeScript 타입을 개선하세요.\n\n대상: {{files}}\n목표: {{goals}}\n\nany 타입 제거, 인터페이스 분리, 명확한 유니온 타입 사용.",
+    "successRate": 0.78,
+    "usageCount": 0,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "tags": ["refactor", "typescript", "types"]
+  },
+  {
+    "id": "pattern-context-handoff",
+    "title": "컨텍스트 핸드오프 패턴",
+    "agentType": "hermes",
+    "taskType": "feature",
+    "promptTemplate": "이전 세션 컨텍스트를 기반으로 다음 작업을 계속하세요.\n\n완료된 작업: {{completed}}\n변경된 파일: {{files}}\n다음 태스크: {{next}}\n\n기존 코드 패턴을 유지하면서 구현하세요.",
+    "successRate": 0.75,
+    "usageCount": 0,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "tags": ["handoff", "context", "continuation"]
+  },
+  {
+    "id": "pattern-architecture-review",
+    "title": "아키텍처 검토 패턴",
+    "agentType": "claude-code",
+    "taskType": "qa",
+    "promptTemplate": "다음 구현을 아키텍처 관점에서 검토하세요. 코드 변경 금지.\n\n검토 대상: {{files}}\n검토 기준: {{criteria}}\n\n개선 제안을 목록으로 제시하세요.",
+    "successRate": 0.92,
+    "usageCount": 0,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "tags": ["architecture", "review", "read-only"]
+  }
+]

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import "./globals.css";
+
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopHeader } from "@/components/layout/TopHeader";
+import { ControlTowerNav } from "@/components/navigation/ControlTowerNav";
 
 export const metadata: Metadata = {
   title: "Agent Control Room",
@@ -14,24 +17,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className="dark">
-      <body className="bg-background text-text-primary">
-        <header className="border-b border-border bg-surface">
-          <nav className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-3 text-sm font-medium text-text-secondary">
-            <Link href="/" className="font-semibold text-text-primary hover:text-pink-primary">
-              Agent Control Room
-            </Link>
-            <Link href="/agent-status" className="hover:text-pink-primary">
-              Agent Status
-            </Link>
-            <Link href="/handoffs" className="hover:text-pink-primary">
-              Handoffs
-            </Link>
-            <Link href="/reports" className="hover:text-pink-primary">
-              Reports
-            </Link>
-          </nav>
-        </header>
-        {children}
+      <body className="bg-background text-text-primary min-h-screen flex flex-col">
+        <TopHeader />
+        <div className="flex-1 grid md:grid-cols-[240px_1fr] grid-cols-1">
+          <div className="hidden md:block">
+            <Sidebar />
+          </div>
+          <main className="overflow-auto relative">
+            <ControlTowerNav />
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );

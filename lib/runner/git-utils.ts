@@ -1,4 +1,5 @@
-import { execSync } from "child_process";
+import { execFileSync, execSync } from "child_process";
+import fs from "fs";
 import { resolve } from "path";
 
 /**
@@ -7,12 +8,25 @@ import { resolve } from "path";
  */
 export function validateCwdSafety(cwd: string, projectRoot: string): boolean {
   try {
-    const resolved = resolve(cwd);
-    const root = resolve(projectRoot);
-    // 해석된 경로가 프로젝트 루트로 시작하는지 확인
+    const resolved = fs.realpathSync(resolve(cwd));
+    const root = fs.realpathSync(resolve(projectRoot));
     return resolved === root || resolved.startsWith(root + require("path").sep);
   } catch {
     return false;
+  }
+}
+
+export function resolveRealPath(inputPath: string): string | null {
+  try {
+    return fs.realpathSync(resolve(inputPath));
+  } catch {
+    return null;
+  }
+}
+
+function assertSafeBranchSegment(segment: string): void {
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,79}$/.test(segment)) {
+    throw new Error(`Unsafe branch segment: ${segment}`);
   }
 }
 
@@ -22,6 +36,7 @@ export function validateCwdSafety(cwd: string, projectRoot: string): boolean {
  * 예: acr/pt-018-20260520-2100
  */
 export function generateBranchName(taskId: string, title?: string): string {
+  assertSafeBranchSegment(taskId);
   const now = new Date();
   const yyyymmdd = now.toISOString().split("T")[0].replace(/-/g, "");
   const hhmm = String(now.getHours()).padStart(2, "0") +
@@ -43,8 +58,7 @@ export async function checkUncommittedChanges(cwd: string): Promise<boolean> {
     });
     return output.trim().length > 0;
   } catch (error) {
-    // git command failed (not a git repo, etc.)
-    return false;
+    return true;
   }
 }
 
@@ -57,7 +71,11 @@ export async function createBranch(
   cwd: string,
 ): Promise<void> {
   try {
-    execSync(`git checkout -b "${branchName}"`, {
+    if (!/^acr\/[a-zA-Z0-9][a-zA-Z0-9._-]{0,79}-\d{8}-\d{4}$/.test(branchName)) {
+      throw new Error(`Unsafe branch name: ${branchName}`);
+    }
+
+    execFileSync("git", ["checkout", "-b", branchName], {
       cwd,
       stdio: "inherit",
     });

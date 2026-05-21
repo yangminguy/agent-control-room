@@ -314,3 +314,89 @@ export type ExecutionLog = {
   logLines: string[];           // 캡처된 stdout/stderr
   status: "running" | "done" | "failed";
 };
+
+// ─────────────────────────────────────────────────────────
+// T027 — Roadmap-First Control Tower UX
+// ─────────────────────────────────────────────────────────
+
+/** 로드맵 단계의 상태 */
+export type RoadmapStatus =
+  | "completed"           // 완료
+  | "active"              // 활성화 (현재 진행 중)
+  | "waiting"             // 대기 중 (이전 단계 완료 대기)
+  | "blocked"             // 차단됨 (특정 이유로 진행 불가)
+  | "user_input_required" // 사용자 입력 필요
+  | "failed"              // 실패
+  | "handoff_needed";     // 핸드오프 필요
+
+/** 로드맵 단계가 차단된 이유 */
+export type RoadmapBlocker = {
+  id: string;
+  title: string;          // e.g. "Token limit exceeded"
+  description: string;
+  blockedAgent?: AgentType;
+  blockedSince: string;
+  requiredAction?: string; // 차단 해제를 위한 필요 액션
+};
+
+/** 사용자 결정이 필요한 지점 */
+export type RoadmapUserDecision = {
+  id: string;
+  question: string;       // e.g. "Should we use Supabase or SQLite?"
+  options: string[];      // ["Supabase", "SQLite"]
+  selectedOption?: string; // 사용자가 선택한 옵션
+  decidedAt?: string;
+};
+
+/** 로드맵 단계 (보통은 한 개의 Phase) */
+export type RoadmapStage = {
+  id: string;
+  number: number;          // Phase 번호 (1, 2, 3...)
+  title: string;           // e.g. "Phase 2: Structured Planning"
+  description?: string;
+  goal: string;            // 단계의 목표
+  status: RoadmapStatus;
+
+  // ── 현재 상태 ──
+  responsibleAgent?: AgentType;           // 담당 에이전트
+  currentTaskId?: string;                 // 현재 진행 중인 task ID
+  completionPercentage: number;           // 0-100
+
+  // ── 구성 요소 ──
+  tasks: PlanTask[];       // 이 단계의 모든 태스크
+  acceptanceCriteria: string[]; // 단계 완료 기준
+
+  // ── 차단/결정 ──
+  blockers?: RoadmapBlocker[];
+  userDecisions?: RoadmapUserDecision[];
+
+  // ── 다음 단계 ──
+  nextAction?: string;     // 구체적인 다음 액션
+  nextAgentRecommendation?: AgentType;
+
+  // ── 메타 ──
+  estimatedDays?: number;
+  startedAt?: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/** 전체 로드맵 (프로젝트 개발 수명 주기) */
+export type Roadmap = {
+  id: string;
+  projectId: string;
+  title: string;          // e.g. "Agent Control Room Development Roadmap"
+  version: string;        // e.g. "1.0.0"
+  productVision: string;  // 제품의 장기 비전
+  stages: RoadmapStage[];
+
+  // ── 로드맵 메트릭 ──
+  overallProgress: number; // 0-100 (모든 stage의 completionPercentage 평균)
+  completedStageCount: number;
+  activeStageCount: number;
+  blockedStageCount: number;
+
+  createdAt: string;
+  updatedAt: string;
+};

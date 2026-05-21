@@ -74,6 +74,11 @@ export function AgentStatusCard({ agent }: AgentStatusCardProps) {
               패킷 드래프트 보기
             </Link>
           )}
+
+          <Link href="/prompt-compiler" className="flex items-center gap-2 text-xs font-medium text-pink-primary hover:text-pink-soft transition-colors">
+            <Sparkles className="w-3.5 h-3.5" />
+            프롬프트 컴파일러 이동
+          </Link>
         </div>
       )}
     </div>

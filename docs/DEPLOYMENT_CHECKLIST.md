@@ -5,8 +5,8 @@
 ### 필수 환경 변수 (.env.local 또는 배포 플랫폼)
 
 ```
-OPENAI_API_KEY=sk-...  # ✓ 설정됨
-VIBE_KANBAN_URL=http://localhost:3001  # (옵션) Vibe Kanban 로컬 서버
+OPENAI_API_KEY=sk-...  # 설정 필요
+VIBE_KANBAN_URL=http://localhost:3003  # (옵션) Vibe Kanban 로컬 backend
 ```
 
 **검증**

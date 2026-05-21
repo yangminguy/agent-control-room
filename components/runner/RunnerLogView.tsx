@@ -9,6 +9,7 @@ interface RunnerLogViewProps {
   prompt: string;
   agent: AgentType;
   projectPath: string;
+  approvalToken: string;
   onComplete?: (status: "done" | "failed", branchName?: string) => void;
 }
 
@@ -33,6 +34,7 @@ export function RunnerLogView({
   prompt,
   agent,
   projectPath,
+  approvalToken,
   onComplete,
 }: RunnerLogViewProps) {
   const [isRunning, setIsRunning] = useState(false);
@@ -69,6 +71,7 @@ export function RunnerLogView({
           prompt,
           cwd: projectPath,
           agent,
+          approvalToken,
         }),
       });
 
@@ -148,59 +151,98 @@ export function RunnerLogView({
   };
 
   const isComplete = exitCode !== null;
+  const isSuccess = isComplete && exitCode === 0;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
+      {/* Execution control and status */}
+      <div className="flex items-center justify-between gap-3 p-4 rounded-lg border border-border bg-surface-2">
         <button
           onClick={handleExecute}
           disabled={isRunning || isComplete}
-          className="rounded bg-pink-primary px-4 py-2 text-white hover:bg-pink-soft disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="rounded bg-pink-primary px-4 py-2 text-white hover:bg-pink-soft disabled:bg-gray-400 disabled:cursor-not-allowed font-medium text-sm"
         >
-          {isRunning ? "실행 중..." : "Execute"}
+          {isRunning ? "실행 중..." : isComplete ? "완료됨" : "승인 후 에이전트 실행"}
         </button>
 
-        {!isRunning && (
-          <div className="text-sm text-gray-600">
-            Branch:{" "}
-            <code className="rounded bg-gray-100 px-2 py-1">
-              {actualBranchName || branchName}
-            </code>
-          </div>
-        )}
-
-        {isComplete && (
-          <div className="flex items-center gap-2">
-            <span className={`text-lg font-semibold ${exitCode === 0 ? "text-green-600" : "text-red-600"}`}>
-              {exitCode === 0 ? "✅ Done" : "❌ Failed"}
-            </span>
-            <span className="text-sm text-gray-600">Exit code: {exitCode}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="rounded border border-gray-300 bg-black p-4 font-mono text-sm text-green-400">
-        <div className="max-h-96 overflow-y-auto space-y-0 whitespace-pre-wrap break-words">
-          {logs.length === 0 && !isRunning && (
-            <div className="text-gray-500">실행을 시작하려면 Execute 버튼을 클릭하세요.</div>
-          )}
-          {logs.map((entry, i) => (
-            <div
-              key={i}
-              className={`${
-                entry.type === "stderr"
-                  ? "text-red-400"
-                  : entry.type === "system"
-                  ? "text-yellow-400"
-                  : "text-green-400"
-              }`}
-            >
-              {entry.log}
+        <div className="flex items-center gap-4">
+          {!isRunning && actualBranchName && (
+            <div className="text-xs text-gray-600">
+              Branch: <code className="rounded bg-gray-100 px-2 py-0.5 font-mono">{actualBranchName}</code>
             </div>
-          ))}
-          <div ref={logsEndRef} />
+          )}
+
+          {isComplete && (
+            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg ${
+              isSuccess
+                ? 'bg-emerald-50 border border-emerald-200'
+                : 'bg-red-50 border border-red-200'
+            }`}>
+              <span className={`text-sm font-semibold ${
+                isSuccess ? 'text-emerald-700' : 'text-red-700'
+              }`}>
+                {isSuccess ? "✅ 성공" : "❌ 실패"}
+              </span>
+              <span className={`text-xs ${
+                isSuccess ? 'text-emerald-600' : 'text-red-600'
+              }`}>
+                종료 코드: {exitCode}
+              </span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Execution log */}
+      <div className="space-y-2">
+        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          실행 로그
+        </span>
+        <div className="rounded border border-gray-300 bg-black p-4 font-mono text-sm">
+          <div className="max-h-96 overflow-y-auto space-y-0 whitespace-pre-wrap break-words">
+            {logs.length === 0 && !isRunning && (
+              <div className="text-gray-500">실행을 시작하려면 위의 버튼을 클릭하세요.</div>
+            )}
+            {logs.map((entry, i) => (
+              <div
+                key={i}
+                className={`${
+                  entry.type === "stderr"
+                    ? "text-red-400"
+                    : entry.type === "system"
+                    ? "text-yellow-400"
+                    : "text-green-400"
+                }`}
+              >
+                {entry.log}
+              </div>
+            ))}
+            <div ref={logsEndRef} />
+          </div>
+        </div>
+      </div>
+
+      {/* Status summary for completion */}
+      {isComplete && (
+        <div className={`rounded-lg border p-4 space-y-2 ${
+          isSuccess
+            ? 'border-emerald-200 bg-emerald-50'
+            : 'border-red-200 bg-red-50'
+        }`}>
+          <p className={`text-sm font-semibold ${
+            isSuccess ? 'text-emerald-700' : 'text-red-700'
+          }`}>
+            {isSuccess ? "실행이 성공했습니다" : "실행이 실패했습니다"}
+          </p>
+          <p className={`text-xs ${
+            isSuccess ? 'text-emerald-600' : 'text-red-600'
+          }`}>
+            {isSuccess
+              ? "아래의 분석 결과를 확인하고 다음 단계를 진행하세요."
+              : "위의 로그를 확인하여 오류를 파악하고 조치하세요."}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

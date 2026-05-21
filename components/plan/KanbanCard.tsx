@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Bot,
   CheckCircle2,
@@ -18,8 +19,8 @@ import {
   EyeOff,
   RefreshCw,
   ChevronRight,
+  Lock,
 } from "lucide-react";
-import { RunnerLogView } from "@/components/runner/RunnerLogView";
 import type { PlanTask, PlanTaskStatus, AgentType, CompletionJudgment, DiffAnalysisOutput } from "@/lib/types";
 
 const STATUS_CONFIG: Record<
@@ -27,46 +28,46 @@ const STATUS_CONFIG: Record<
   { label: string; color: string; bg: string; icon: React.ReactNode }
 > = {
   planned: {
-    label: "Planned",
-    color: "text-gray-500",
-    bg: "bg-gray-100",
-    icon: <Circle className="w-3.5 h-3.5" />,
+    label: "계획됨",
+    color: "text-gray-400",
+    bg: "bg-surface-2",
+    icon: <span className="text-4xl">🟤</span>,
   },
   ready: {
-    label: "Ready",
+    label: "준비됨",
     color: "text-pink-primary",
-    bg: "bg-surface-2",
-    icon: <Clock className="w-3.5 h-3.5" />,
+    bg: "bg-pink-primary/10",
+    icon: <span className="text-4xl">🟡</span>,
   },
   running: {
-    label: "Running",
-    color: "text-amber-600",
-    bg: "bg-amber-50",
-    icon: <Loader2 className="w-3.5 h-3.5 animate-spin" />,
+    label: "실행중",
+    color: "text-sky-400",
+    bg: "bg-sky-500/10",
+    icon: <span className="text-4xl">🔵</span>,
   },
   done: {
-    label: "Done",
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
-    icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+    label: "완료",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    icon: <span className="text-4xl">✅</span>,
   },
   partial: {
-    label: "Partial",
-    color: "text-orange-600",
-    bg: "bg-orange-50",
-    icon: <RefreshCw className="w-3.5 h-3.5" />,
+    label: "부분완료",
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
+    icon: <span className="text-4xl">⚠️</span>,
   },
   blocked: {
-    label: "Blocked",
-    color: "text-red-600",
-    bg: "bg-red-50",
-    icon: <AlertTriangle className="w-3.5 h-3.5" />,
+    label: "블로킹됨",
+    color: "text-red-400",
+    bg: "bg-red-500/10",
+    icon: <span className="text-4xl">🚫</span>,
   },
   needs_review: {
-    label: "Needs Review",
-    color: "text-purple-600",
-    bg: "bg-purple-50",
-    icon: <Eye className="w-3.5 h-3.5" />,
+    label: "검토필요",
+    color: "text-purple-400",
+    bg: "bg-purple-500/10",
+    icon: <span className="text-4xl">👁️</span>,
   },
 };
 
@@ -244,7 +245,7 @@ export function KanbanCard({
 
   return (
     <div
-      className={`rounded-xl border bg-white shadow-sm transition-all duration-200 hover:shadow-md ${
+      className={`rounded-xl border bg-surface border-border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-pink-primary/10 overflow-hidden ${
         task.status === "done" ? "opacity-75" : ""
       }`}
     >
@@ -252,19 +253,17 @@ export function KanbanCard({
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            {/* 태스크 ID + 상태 뱃지 */}
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-mono text-gray-400">{task.id}</span>
-              <span
-                className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}
-              >
-                {cfg.icon}
-                {cfg.label}
-              </span>
+            {/* 상태 뱃지와 태스크 ID */}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="shrink-0 leading-none flex items-center justify-center w-10 h-10">{cfg.icon}</div>
+              <div className="flex flex-col">
+                <span className={`text-sm font-bold ${cfg.color}`}>{cfg.label}</span>
+                <span className="text-[10px] font-mono text-text-secondary">T{task.id}</span>
+              </div>
             </div>
 
             {/* 작업명 */}
-            <h3 className="font-semibold text-gray-900 text-sm leading-snug">
+            <h3 className="font-semibold text-text-primary text-sm leading-snug">
               {task.title}
             </h3>
           </div>
@@ -281,13 +280,13 @@ export function KanbanCard({
         </div>
 
         {/* 목표 */}
-        <p className="mt-2 text-xs text-gray-500 line-clamp-2 leading-relaxed">
+        <p className="mt-2 text-xs text-text-secondary line-clamp-2 leading-relaxed">
           {task.description}
         </p>
 
         {/* 브랜치 */}
         {task.branchName && (
-          <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
+          <div className="mt-2 flex items-center gap-1 text-xs text-text-secondary/70">
             <GitBranch className="w-3 h-3" />
             <span className="font-mono">{task.branchName}</span>
           </div>
@@ -312,7 +311,7 @@ export function KanbanCard({
         {/* 펼치기 버튼 */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-3 w-full flex items-center justify-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          className="mt-3 w-full flex items-center justify-center gap-1 text-xs text-text-secondary hover:text-text-primary transition-colors py-1"
         >
           {expanded ? (
             <>
@@ -320,7 +319,7 @@ export function KanbanCard({
             </>
           ) : (
             <>
-              <ChevronDown className="w-3.5 h-3.5" /> 실행 정보 보기
+              <ChevronDown className="w-3.5 h-3.5" /> 세부 정보 보기
             </>
           )}
         </button>
@@ -328,37 +327,47 @@ export function KanbanCard({
 
       {/* ── 확장 영역 ── */}
       {expanded && (
-        <div className="border-t divide-y divide-gray-100">
-          {/* 실행 */}
-          <div className="p-4">
-            <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-              실행
-            </span>
-            {canExecute && runnerAgent && task.generatedPrompt ? (
-              <div className="mt-3">
-                <RunnerLogView
-                  planId={planId}
-                  taskId={task.id}
-                  prompt={task.generatedPrompt}
-                  agent={runnerAgent}
-                  projectPath={projectPath}
-                  onComplete={(status, bn) => {
-                    const newStatus = status === "done" ? "done" : "blocked";
-                    onStatusChange(task.id, newStatus);
-
-                    if (status === "done" && bn) {
-                      setBranchName(bn);
-                      setLastAnalyzedBranch(bn);
-                      setShowLoopApproval(true);
-                      runAnalyzer(bn);
-                    }
-                  }}
-                />
+        <div className="border-t border-border divide-y divide-border animate-slideDown bg-surface-2/50">
+          {/* 실행 — Draft-only 패널 (자동 실행 비활성화) */}
+          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-t-2 border-amber-200">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Lock className="w-4 h-4 text-amber-700" />
+                  <span className="text-xs font-semibold text-amber-800 uppercase tracking-wide">
+                    실행 (승인 필요)
+                  </span>
+                </div>
+                <p className="text-xs text-amber-700 leading-relaxed max-w-md">
+                  Agent Control Room은 프롬프트와 검토 체크리스트를 준비합니다. 이 작업을 실행하려면 프롬프트를 복사하여 승인된 에이전트 환경에서 수동으로 실행하세요.
+                </p>
               </div>
-            ) : (
-              <p className="mt-1 text-xs text-gray-300">
-                {executionUnavailableMessage}
-              </p>
+            </div>
+            {canExecute && runnerAgent && task.generatedPrompt && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => copyToClipboard(task.generatedPrompt!, "prompt")}
+                  className="inline-flex items-center gap-1 rounded bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
+                  title="프롬프트 복사"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  프롬프트 복사
+                </button>
+                <button
+                  onClick={() => setShowPrompt(!showPrompt)}
+                  className="inline-flex items-center gap-1 rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  프롬프트 검토
+                </button>
+                <Link
+                  href={`/workbench?planId=${planId}&taskId=${task.id}`}
+                  className="inline-flex items-center gap-1 rounded border border-amber-400 bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                  실행 준비 검토 →
+                </Link>
+              </div>
             )}
           </div>
 

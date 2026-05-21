@@ -12,6 +12,10 @@ Agent Control Room is the brain. Vibe Kanban is the execution workbench.
 - Senior Dev Prompt Compiler should turn weak user direction into precise implementation prompts.
 - Context Reset Protocol, token handoff, and Obsidian-compatible memory are part of the control tower direction.
 - Hermes is optional as a background/status/memory worker, not a primary coding brain.
+- **Agent scheduling is strategic**: Multiple agents are used for task specialization + token distribution, not default parallelization.
+  - See `docs/AGENT_SCHEDULING_POLICY.md` for execution modes (Single / Sequential / Parallel Safe / Token Relay).
+  - See `docs/AGENT_RUN_POLICY.md` for how agents are executed (CLI / Workbench / Manual).
+  - See `docs/CONTEXT_TOKEN_RESUME_PROTOCOL.md` for token limit handoff flow.
 - Vibe Kanban should provide or inspire the richer board/workspace/session/diff/preview surfaces.
 - Future work should deepen the bridge to Vibe Kanban before expanding duplicate internal kanban/session UI.
 

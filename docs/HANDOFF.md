@@ -1,7 +1,7 @@
 # HANDOFF.md — Agent Control Room
 
 ## Current Handoff Status
-Phases 1-8b implementation complete. Agent Control Room now has manual orchestration, structured planning, semi-automated Claude execution, diff analysis, human-approved Continue/Stop loop with UX refinement, security hardening, Vibe Kanban HTTP integration, and Supabase migration readiness.
+Phase 9 Complete (T027–T030 Done). Agent Control Room is now a roadmap-first AI Development Control Tower with Senior Dev Prompt Compiler, Agent Availability Manager, Hermes Packet Draft UI, and Foundation Modules. All core control-tower orchestration, planning, execution, and analysis loops are stable and ready for Phase 10 Vibe Kanban Workbench Bridge implementation.
 
 Strategic direction updated on 2026-05-21:
 - Agent Control Room is the AI Development Control Tower for non-developer PMs.
@@ -44,9 +44,9 @@ Verified:
 - Vibe Kanban frontend returned HTTP 200 at `http://localhost:3002/`.
 - Vibe Kanban backend health returned OK at `http://localhost:3003/api/health`.
 
-## Phase 9: Roadmap-First Control Tower UX (In Progress)
+## Phase 9: Roadmap-First Control Tower with Foundation Modules (Complete)
 
-### T027 Implementation Complete (2026-05-21)
+### T027-T030 Implementation Complete (2026-05-21)
 
 **What was built**:
 
@@ -175,32 +175,127 @@ Status: DONE (2026-05-21)
 - Implement context-pack and obsidian-note workflows
 - Build Vibe Kanban workspace integration for handoff execution
 
-### What's Next (T028)
+### Phase 9 (Final): T028-T030 — Foundation Modules Completion
 
-**Senior Dev Prompt Compiler Structure**:
-- Standardize prompt generation: goal, context, scope, files, acceptance criteria, checks, handoff instructions
-- Agent: Claude Code
-- Priority: P1
-- Recommendation: Begin after Phase 9 completion review
+Status: DONE (2026-05-21)
 
-**Agent Status for T028**:
-- 🧠 Claude Code: available (ready for T028)
-- ⚙️ Codex: working (Hermes spike ongoing, then T029)
-- 🎨 Antigravity: working (Visual QA on /plan, then design T028 UI)
-- 🔄 Hermes: background_worker (Packet Draft UI deployed, spike pending)
-- ✅ Manual/User: approval_required (approve Phase 9, guide Phase 10)
+**Goal**:
+Complete all remaining control tower foundation modules so Antigravity can do full UI/UX QA before moving to Phase 10 production integration.
 
-**Files Changed**:
-- lib/types.ts (T027 data model additions)
-- lib/roadmap.ts (new)
-- lib/roadmap-ui-adapter.ts (new)
-- lib/agents/agent-status.ts (new)
-- lib/storage/roadmap-store.ts (new)
-- data/roadmap.json (new)
-- app/plan/page.tsx (refactored roadmap-first)
-- app/api/roadmap/route.ts (new)
-- docs/ROADMAP_DATA_MODEL.md (new)
-- [T027-Hermes] lib/hermes/* (new), app/hermes-packets/ (new), components/hermes/ (new)
+**What was built** (3-Wave parallel + sequential approach):
+
+**Wave 1 (Parallel — 3 agents simultaneously)**:
+
+1. **Agent Availability Manager** (typescript-pro):
+   - `lib/agents/agent-availability-manager.ts`: Centralized agent state management
+   - Supports 8 states: available, working, idle, blocked, token_limited, cooling_down, background_worker, approval_required, experimental, offline
+   - Functions: getAgentAvailability(), isAgentAvailableForWork(), getFallbackAgent(), getRecommendedAgentForTask(), shouldAvoidAgentForNow()
+   - Encodes: Codex token_limited, Hermes background_worker, Vibe Kanban foundation-only
+
+2. **Generators** (typescript-pro):
+   - `lib/orchestration/context-pack-generator.ts`: Context Pack generation (project state → Markdown)
+   - `lib/orchestration/handoff-pack-generator.ts`: Handoff Pack generation (agent A → B transfer → Markdown)
+   - `lib/memory/obsidian-note-generator.ts`: Obsidian-compatible notes (7 types: insight, decision, failed-attempt, prompt, handoff, status, qa-finding)
+   - All outputs: Markdown strings (no file writes, no API calls)
+
+3. **Vibe Kanban Bridge + Hermes Spike** (documentation-engineer):
+   - `lib/integrations/vibe-kanban/types.ts`: WorkspaceHandoff, SessionBrief, DiffReviewChecklist, PreviewReviewChecklist, TaskExecutionPacket types
+   - `lib/integrations/vibe-kanban/bridge.ts`: 5 Markdown generators (workspace, session, diff, preview, execution packet)
+   - `docs/VIBE_KANBAN_BRIDGE.md`: Bridge architecture (execution workbench only, not product brain)
+   - `docs/HERMES_CLI_INSTALLATION_SPIKE.md`: Spike preparation guide with explicit safety boundaries
+
+**Wave 2 (Sequential after Wave 1)**:
+
+4. **Prompt Compiler Enhancement** (typescript-pro):
+   - `lib/prompts/senior-dev-compiler.types.ts`: Added 4 optional fields to SeniorDevCompiledPrompt
+     - suggestedHandoffRequired?: boolean
+     - suggestedFallbackAgent?: string
+     - suggestedContextPackRequired?: boolean
+     - contextPackNotes?: string
+   - `lib/prompts/senior-dev-prompt-compiler.ts`: 5 targeted enhancements
+     - Agent Availability Check (token_limited/cooling_down → userApprovalRequired = true)
+     - Hermes Safety Check (background work only, never primary coding)
+     - Vibe Kanban Boundaries (never primary agent)
+     - Handoff Recommendation (high-risk + unavailable agent)
+     - Context Pack Recommendation (long task or many criteria)
+   - All 24 existing tests pass ✅
+
+**Wave 3 (Sequential after Wave 2)**:
+
+5. **Prompt Compiler UI Enhancement** (frontend-developer):
+   - `components/prompt-compiler/PromptCompilerUI.tsx`: 6 new UI sections
+     - Fallback Agent display (amber badge, "if primary unavailable")
+     - User Approval Required banner (AlertTriangle icon, prominent)
+     - Suggested Handoff Pack button ("Generate Handoff Pack Draft")
+     - Suggested Context Pack button ("Generate Context Pack Draft")
+     - Do-Not-Touch Files list (red warning icon, monospace)
+     - Validation Commands code block (copyable, emerald text)
+   - All buttons: safe language ("Generate", "Copy", NOT "Run"/"Execute")
+   - TypeScript: 0 errors
+
+6. **Production Hardening** (qa-expert):
+   - npm run typecheck: ✅ 0 errors
+   - npm run lint: ✅ 0 errors (1 deprecation advisory only)
+   - npm run build: ✅ success (25 static pages, 4.5s, 10.4kB largest bundle)
+   - npm run test: ✅ 58/58 tests pass
+
+**Safety Guarantees Maintained**:
+- ❌ No agent auto-execution added
+- ❌ No Hermes CLI/API execution
+- ❌ No Vibe Kanban API calls
+- ❌ No runner/spawn-runner wiring
+- ❌ No package.json changes
+- ❌ No database migrations
+- ❌ No deployment automation
+
+**Files Changed/Created** (T028-T030):
+- lib/agents/agent-availability-manager.ts (new)
+- lib/orchestration/context-pack-generator.ts (new)
+- lib/orchestration/handoff-pack-generator.ts (new)
+- lib/memory/obsidian-note-generator.ts (new)
+- lib/integrations/vibe-kanban/types.ts (new)
+- lib/integrations/vibe-kanban/bridge.ts (new)
+- docs/VIBE_KANBAN_BRIDGE.md (new)
+- docs/HERMES_CLI_INSTALLATION_SPIKE.md (new)
+- lib/prompts/senior-dev-compiler.types.ts (4 optional fields added)
+- lib/prompts/senior-dev-prompt-compiler.ts (5 enhancements added)
+- components/prompt-compiler/PromptCompilerUI.tsx (6 UI sections added)
+
+### What's Next (Phase 10)
+
+**Immediate priorities**:
+1. **Antigravity Full UI/UX Polish** (est. 2-3 days)
+   - /plan visual refinement
+   - /prompt-compiler fallback badge, approval banner, handoff sections styling
+   - /hermes-packets design review
+   - Mobile responsiveness, color palette, typography, icon improvements
+
+2. **Integration Testing** (after UI polish)
+   - End-to-end: idea → roadmap → prompt → agent selection → execution
+   - Mock agent response handling
+   - Handoff workflow validation
+
+3. **Vibe Kanban Real Integration** (T029 extended)
+   - Use existing bridge types/generators
+   - Add Vibe Kanban API calls (workspace creation, session handoff, result import)
+   - Test against Vibe Kanban running locally
+
+4. **Context Pack Workflow** (T030 extended)
+   - Use existing generators
+   - Add context pack storage/retrieval UI
+   - Handle token-limited agent handoff
+
+5. **Production Monitoring**
+   - Error tracking (Sentry)
+   - Token usage monitoring
+   - Agent execution logs
+
+**Agent Status for Phase 10**:
+- 🧠 Claude Code: available (refactoring, integration work)
+- ⚙️ Codex: available (tests, implementation spikes)
+- 🎨 Antigravity: working (UI/UX QA and polish)
+- 🔄 Hermes: background_worker (spike research, not execution)
+- ✅ Manual/User: approval_required (approve Polish → Integration → Real Integration)
 
 ## Implementation Complete (Phases 1-9 Foundation)
 

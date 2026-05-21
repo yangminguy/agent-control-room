@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CircleAlert } from "lucide-react";
+import { ArrowRight, AlertCircle } from "lucide-react";
 import { HandoffPreview } from "@/components/handoffs/HandoffPreview";
 import type { AgentStatus, AgentStatusValue, AgentType, Handoff } from "@/lib/types";
 
@@ -286,7 +286,7 @@ export default function AgentStatusPage() {
               {recommendation && (
                 <div className="mt-4 rounded border border-100 bg-surface-2 p-3 text-sm text-pink-primary">
                   <div className="flex items-start gap-2">
-                    <CircleAlert className="mt-0.5 h-4 w-4 flex-none" />
+                    <AlertCircle className="mt-0.5 h-4 w-4 flex-none" />
                     <div className="space-y-1">
                       <p>{recommendation.reason}</p>
                       {recommendation.agent && (

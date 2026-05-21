@@ -74,7 +74,7 @@ As of 2026-05-21, the codebase implements:
 - T025 Security & Dependency Hardening (npm audit fix, path validation).
 - T026 Supabase schema/storage migration readiness with JSON fallback.
 
-**Phase 9 (In Progress)**:
+**Phase 9 (Complete)**:
 - T027 `/plan` Visual Development Roadmap Control Panel ✅
   - Roadmap data model and types (RoadmapStage, RoadmapStatus, etc.)
   - Roadmap helper functions and storage layer with Supabase fallback
@@ -94,14 +94,30 @@ As of 2026-05-21, the codebase implements:
   - Safe link from Hermes agent card to `/hermes-packets`
   - Safety notice: "Hermes is not executed" (prominent on page)
 
-**Still missing**:
+- T028 Senior Dev Prompt Compiler Structure ✅
+  - Core compiler in `lib/prompts/senior-dev-prompt-compiler.ts`
+  - Type system in `lib/prompts/senior-dev-compiler.types.ts`
+  - Enhancements: agent availability, token limit tracking, handoff recommendation, context pack recommendation
 
-- T028 Senior Dev Prompt Compiler Structure (standardize prompt sections)
-- T029 Agent Availability Manager Status Model
-- T032 Hermes CLI Installation Spike
-- Deeper Vibe Kanban workbench usage: workspace/session launch, open workspace links, result import, and diff/review handoff.
-- Context Pack and Obsidian memory workflows (drafted in Hermes but not connected to execution)
-- Production hardening and monitoring.
+- T029 Agent Availability Manager & Foundation Modules ✅
+  - `lib/agents/agent-availability-manager.ts`: Centralized agent state (available, token_limited, cooling_down, background_worker, etc.)
+  - `lib/orchestration/context-pack-generator.ts`: Context Pack generation (Markdown)
+  - `lib/orchestration/handoff-pack-generator.ts`: Handoff Pack generation (Markdown)
+  - `lib/memory/obsidian-note-generator.ts`: Obsidian-compatible note generation (7 types)
+  - `lib/integrations/vibe-kanban/types.ts`: Vibe Kanban Bridge type system
+  - `lib/integrations/vibe-kanban/bridge.ts`: Bridge generator functions (5 markdown outputs)
+  - `/prompt-compiler` UI enhanced with fallback agent, approval notice, handoff/context pack suggestions, do-not-touch files, validation commands
+
+- T030 Hermes CLI Installation Spike Preparation ✅
+  - `docs/HERMES_CLI_INSTALLATION_SPIKE.md`: Spike guide with safety boundaries (no installation/execution)
+  - `docs/VIBE_KANBAN_BRIDGE.md`: Bridge architecture and integration roadmap
+
+**Next Phase (Phase 10)**:
+- Antigravity Full UI/UX Polish
+- Integration Testing (end-to-end flow validation)
+- Vibe Kanban Real API Integration
+- Context Pack Workflow & Storage
+- Production Monitoring Setup
 
 ## Recommended Tech Stack
 Use this unless the user explicitly changes direction.

@@ -4,14 +4,17 @@
 Build Agent Control Room as an AI Development Control Tower for non-developer PMs — a system where a user inputs an idea or product direction, the system translates it into requirements and a visual roadmap, decomposes tasks, routes work to the right AI agent or workbench, compiles senior-dev prompts, tracks execution, analyzes results/diffs, marks completion, handles token/context handoffs, and saves durable development insights.
 
 ## active_phase
-Phase 9 — Roadmap-First Control Tower UX (T027 Complete, T027-Hermes Complete)
+Phase 10 — Vibe Kanban Workbench Bridge (T027-T030 Complete, Phase 9 Foundation Done)
 
 ## active_task
-Phases 1-8 are implemented. Phase 9 foundation complete:
+Phases 1-9 are implemented. Phase 9 complete:
 - T027 `/plan` Visual Development Roadmap Control Panel ✅
 - T027-Hermes Hermes Packet Draft UI (safe, static generation) ✅
-- Next: T028 Senior Dev Prompt Compiler Structure, T029 Agent Availability Manager
-- Later: T032 Hermes CLI Spike, Phase 10 Vibe Kanban Bridge
+- T028 Senior Dev Prompt Compiler Structure ✅
+- T029 Agent Availability Manager & Foundation Modules ✅
+- T030 Hermes CLI Installation Spike (Research Complete) ✅
+- Next: T031 Obsidian Knowledge Memory Export, T032 Hermes Background Worker Positioning
+- Later: T033-T035 Vibe Kanban Workbench Bridge (Phase 10)
 
 ## current_agent
 Claude Code
@@ -82,5 +85,25 @@ Acceptance criteria:
 - Generated prompts include goal, context, scope, non-goals, files, acceptance criteria, checks, and handoff instructions.
 ```
 
+## agent_execution_policy
+Agent Control Room does NOT run all agents simultaneously by default.
+
+See [[AGENT_SCHEDULING_POLICY.md]] for execution modes:
+- **Single Agent Mode**: High-risk or tightly-coupled tasks (runner, auth, DB, package changes)
+- **Sequential Multi-Agent Mode**: Implementation then QA/verification in order
+- **Parallel Safe Mode**: Completely separate files (e.g., Claude Code API + Antigravity UI)
+- **Token Relay Mode**: Current agent hits token limit; handoff to another agent
+
+See [[CONTEXT_TOKEN_RESUME_PROTOCOL.md]] for token/context exhaustion flow.
+
+See [[AGENT_RUN_POLICY.md]] for how agents are executed (CLI, Workbench, Manual).
+
+## key_constraints
+- Hermes is never a primary coding agent; only monitoring, summaries, context packs, and memory
+- Two agents cannot edit the same files in parallel
+- High-risk work (runner, auth, DB, package) remains single-agent and approval-gated
+- No automatic token detection; status is manually set
+- No autonomous execution without explicit user approval
+
 ## last_updated
-2026-05-21 (strategic direction updated — AI Development Control Tower, roadmap-first UX)
+2026-05-21 (added agent scheduling + token relay policies)

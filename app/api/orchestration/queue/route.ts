@@ -11,6 +11,13 @@ import type { PlanTask } from "@/lib/types";
 // Global queue instance (in-memory, MVP scope)
 // NOTE: Queue state is lost on server restart. For production, replace with persistent storage (Redis, database).
 // Current behavior is acceptable for MVP but should be addressed before scaling.
+//
+// SAFETY: This queue is PLANNING-ONLY and does NOT execute agents.
+// - Does not call /api/runner or spawn agents
+// - Does not modify files or git operations
+// - Returns task metadata for UI display only
+// - Actual execution is gated through /api/runner with approval tokens
+// - See: /workbench for approved execution UI with safety checks
 let globalQueue = createExecutionQueue(3, {
   "claude-code": 1,
   codex: 2,

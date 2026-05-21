@@ -1,7 +1,7 @@
 # DECISIONS.md — Agent Control Room
 
 ## Decision 001 — MVP is prompt-first, not autonomy-first
-Status: Amended by Decision 013
+Status: Amended by Decisions 013 and 015
 
 ### Decision
 MVP 1 started with technical translations, task breakdowns, agent recommendations, prompts, handoffs, and session reports. It should not execute Claude Code, Codex, or Antigravity without an explicit user action.
@@ -18,7 +18,7 @@ The user can manually copy prompts into external tools. A limited Claude Code ru
 Status: Accepted
 
 ### Decision
-Agent status will be manually set as `available`, `limited`, `cooling_down`, `blocked`, or `manual_only`.
+Agent status will be manually set. Current Control Tower statuses are `available`, `cooling_down`, `token_limited`, `blocked`, `context_overloaded`, `manual_only`, and `experimental`.
 
 ### Reason
 Automatic token/usage detection is unreliable and out of scope for MVP 1.
@@ -113,7 +113,7 @@ The app needs `OPENAI_API_KEY` for the primary generation path, but can still re
 ---
 
 ## Decision 009 — Use Vibe Kanban as the first open-source base
-Status: Accepted
+Status: Amended by Decision 014
 
 ### Decision
 Use Vibe Kanban as the first open-source execution/work-board base to evaluate and integrate with Agent Control Room.
@@ -127,7 +127,7 @@ Agent Control Room should focus on the orchestration layer: product-direction tr
 ---
 
 ## Decision 010 — Keep Vibe Kanban integration MCP/API-first
-Status: Accepted
+Status: Amended by Decision 014
 
 ### Decision
 Do not deeply fork or redesign the Vibe Kanban UI at the beginning. Prefer MCP or local API integration for the first bridge.
@@ -179,3 +179,61 @@ The product has moved beyond prompt-only planning, but the user still needs cont
 
 ### Consequence
 Runner, analyzer, and loop features should prepare the next step and ask the user to continue instead of creating a fully autonomous coding loop.
+
+---
+
+## Decision 014 — Agent Control Room is the brain; Vibe Kanban is the workbench
+Status: Accepted
+
+### Decision
+Keep Agent Control Room as the orchestration brain and use Vibe Kanban as the execution workbench. Agent Control Room owns product intent, technical translation, task decomposition, agent routing, generated prompts, acceptance criteria, approval gates, session reports, and handoffs. Vibe Kanban should own or provide the richer execution surfaces: issue cards, workspaces, git worktrees, Claude/Codex sessions, diff/review UI, and previews.
+
+### Reason
+The product's differentiation is not a better kanban board. Its differentiation is reducing context loss and decision burden for a PM/non-developer using multiple AI coding tools. Vibe Kanban is already stronger at board/session/workspace mechanics, so rebuilding those surfaces inside Agent Control Room would create a weaker duplicate and dilute the core product.
+
+### Consequence
+Future work should deepen the Vibe Kanban bridge before expanding internal board features. Prefer API/MCP integration, open-workspace links, workspace/session launch, execution-result import, and diff/review handoff. `/plan` should become a control panel for readiness, prompts, acceptance criteria, and decisions rather than a full replacement for Vibe Kanban.
+
+Do not make Vibe Kanban the source of product intent or orchestration logic. Do not deep-fork Vibe Kanban until the bridge proves valuable and stable.
+
+---
+
+## Decision 015 — Agent Control Room is an AI Development Control Tower
+Status: Accepted
+
+### Decision
+Define Agent Control Room primarily as an AI Development Control Tower for non-developer PMs. Prompt generation and handoff generation remain core submodules, but they are not the full product definition.
+
+### Reason
+The user wants to input only an idea or product direction and have the system produce a roadmap, task breakdown, agent assignment, senior-dev prompts, execution tracking, completion checks, token/context handoffs, and durable insight memory.
+
+### Consequence
+Major docs and future UI work should use control-tower language. `/plan` should become a Visual Development Roadmap Control Panel. The next active phase is Roadmap-First Control Tower UX before deeper Vibe Kanban workbench expansion.
+
+---
+
+## Decision 016 — Context reset uses Context Packs, not literal `/clear`
+Status: Accepted
+
+### Decision
+When context is long, token-limited, overloaded, or ready for a new agent/session, Agent Control Room should generate a structured Context Pack and next-session prompt.
+
+### Reason
+Literal `/clear` is tool-specific and loses product intent unless the system preserves decisions, changed files, completed work, blockers, and next acceptance criteria.
+
+### Consequence
+Future implementation should add Context Pack generation and handoff recommendations for `token_limited` and `context_overloaded` agent states.
+
+---
+
+## Decision 017 — Hermes is optional background worker only
+Status: Accepted
+
+### Decision
+Hermes may be represented as an optional background/status/memory worker for monitoring, summaries, Obsidian note generation, development log summarization, and retry candidate discovery.
+
+### Reason
+Hermes can help with long-running memory and status work, but the product should not shift high-risk coding responsibility to an autonomous background agent.
+
+### Consequence
+Hermes must not be assigned high-risk autonomous code changes, DB migrations, deployment, or auto-merge without explicit user approval.

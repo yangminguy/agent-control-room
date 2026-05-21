@@ -5,13 +5,13 @@ import type { FeaturePlan, PlanTask, PlanTaskStatus } from "@/lib/types";
 import { KanbanCard } from "./KanbanCard";
 
 const COLUMNS: { key: PlanTaskStatus; label: string; color: string }[] = [
-  { key: "planned", label: "Backlog", color: "bg-surface-2 text-text-secondary" },
-  { key: "ready", label: "Ready", color: "bg-surface-2 text-pink-primary" },
-  { key: "running", label: "Running", color: "bg-surface-2 text-amber-500" },
-  { key: "needs_review", label: "Review", color: "bg-surface-2 text-pink-primary" },
-  { key: "done", label: "Done", color: "bg-surface-2 text-green-600" },
-  { key: "partial", label: "Partial", color: "bg-surface-2 text-amber-500" },
-  { key: "blocked", label: "Blocked", color: "bg-surface-2 text-error" },
+  { key: "planned", label: "계획됨", color: "bg-surface-2 text-text-secondary" },
+  { key: "ready", label: "준비됨", color: "bg-pink-primary/10 text-pink-primary" },
+  { key: "running", label: "실행중", color: "bg-sky-500/10 text-sky-400" },
+  { key: "needs_review", label: "검토필요", color: "bg-purple-500/10 text-purple-400" },
+  { key: "done", label: "완료", color: "bg-emerald-500/10 text-emerald-400" },
+  { key: "partial", label: "부분완료", color: "bg-amber-500/10 text-amber-400" },
+  { key: "blocked", label: "블로킹됨", color: "bg-red-500/10 text-red-400" },
 ];
 
 interface KanbanBoardProps {
@@ -48,20 +48,28 @@ export function KanbanBoard({ plan, projectPath }: KanbanBoardProps) {
 
   return (
     <div className="space-y-4">
-      {/* 통계 요약 */}
-      <div className="flex flex-wrap gap-2">
-        {COLUMNS.map((col) => {
-          const count = tasksByStatus(col.key).length;
-          if (count === 0) return null;
-          return (
-            <span
-              key={col.key}
-              className={`text-xs font-medium px-2.5 py-1 rounded-full ${col.color}`}
-            >
-              {col.label}: {count}
-            </span>
-          );
-        })}
+      {/* 진행률 플로우 (ProgressFlow) */}
+      <div className="bg-surface-2 rounded-xl border border-border p-4 mb-2 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
+          <div className="flex items-center flex-wrap gap-2 sm:gap-4">
+            <div className="flex items-center gap-1.5"><span className="text-lg leading-none">🟤</span><span className="text-text-secondary font-medium text-xs">계획됨 <span className="text-text-primary">{tasksByStatus('planned').length}</span></span></div>
+            <span className="text-border">→</span>
+            <div className="flex items-center gap-1.5"><span className="text-lg leading-none">🟡</span><span className="text-text-secondary font-medium text-xs">준비됨 <span className="text-text-primary">{tasksByStatus('ready').length}</span></span></div>
+            <span className="text-border">→</span>
+            <div className="flex items-center gap-1.5"><span className="text-lg leading-none">🔵</span><span className="text-text-secondary font-medium text-xs">실행중 <span className="text-text-primary">{tasksByStatus('running').length}</span></span></div>
+            <span className="text-border">→</span>
+            <div className="flex items-center gap-1.5"><span className="text-lg leading-none">✅</span><span className="text-text-secondary font-medium text-xs">완료 <span className="text-text-primary">{tasksByStatus('done').length}</span></span></div>
+          </div>
+          <div className="text-xs font-semibold text-text-primary bg-surface px-2.5 py-1 rounded-full border border-border">
+            전체 진행률: {tasks.length > 0 ? Math.round((tasksByStatus('done').length / tasks.length) * 100) : 0}%
+          </div>
+        </div>
+        <div className="h-2 w-full bg-surface rounded-full overflow-hidden flex">
+          <div className="bg-gray-500/50 transition-all" style={{ width: `${tasks.length ? (tasksByStatus('planned').length / tasks.length) * 100 : 0}%` }} />
+          <div className="bg-pink-primary/70 transition-all" style={{ width: `${tasks.length ? (tasksByStatus('ready').length / tasks.length) * 100 : 0}%` }} />
+          <div className="bg-sky-400 transition-all" style={{ width: `${tasks.length ? (tasksByStatus('running').length / tasks.length) * 100 : 0}%` }} />
+          <div className="bg-emerald-400 transition-all" style={{ width: `${tasks.length ? (tasksByStatus('done').length / tasks.length) * 100 : 0}%` }} />
+        </div>
       </div>
 
       {/* 칸반 보드 — 태스크가 있는 컬럼만 풀 표시, 나머지는 헤더만 */}

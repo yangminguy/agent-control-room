@@ -1,8 +1,9 @@
 # Agent Control Room
 
-Agent Control Room is a personal Human-in-the-loop AI Development Orchestrator.
-It turns product direction into technical tasks, recommends the right AI coding
-tool, generates execution prompts, tracks work, and preserves handoff context.
+Agent Control Room is a personal **AI Development Control Tower** for non-developer PMs.
+It turns an idea or product direction into a visual development roadmap,
+implementation tasks, agent recommendations, senior-dev prompts, execution
+tracking, completion checks, handoffs, and durable development memory.
 
 ## Run locally
 
@@ -28,14 +29,17 @@ Open the local URL printed by Next.js (typically `http://localhost:3000`).
 ## MVP flow
 
 1. **Register or select a project** at `/` → `/projects`
-2. **Enter product direction** in natural language → Direction input form
-3. **Generate orchestration output**:
+2. **Enter an idea or product direction** in natural language → Direction input form
+3. **Generate control-tower output**:
    - Technical translation (OpenAI structured output)
+   - Visual roadmap and stage/task breakdown
    - Task decomposition
    - Agent routing + recommendation
-   - Copy-ready prompt
+   - Senior-dev copy-ready prompt
 4. **Track execution** in `/plan`:
-   - Kanban board with task statuses
+   - Visual Development Roadmap Control Panel
+   - Completed/active/waiting/blocked/user-input-required states
+   - Check marks for completed stages
    - Execute button (spawns Claude Code or displays copy prompt)
    - Auto-analysis after execution
 5. **Loop control**:
@@ -50,6 +54,7 @@ Open the local URL printed by Next.js (typically `http://localhost:3000`).
 
 - `CLAUDE.md` — Main AI coding context file
 - `docs/README.md` — Active vs archived documentation map
+- `docs/CONTROL_TOWER_DIRECTION.md` — Canonical current product direction
 - `docs/PRD.md` — Current concise product requirements
 - `docs/ARCHITECTURE.md` — System architecture and module design
 - `docs/TASKS.md` — Current task status and next task
@@ -57,7 +62,7 @@ Open the local URL printed by Next.js (typically `http://localhost:3000`).
 - `docs/AGENT_STATE.md` — Current project state and next prompt
 - `docs/DECISIONS.md` — Product/technical decisions
 - `docs/ROADMAP.md` — Phase-level roadmap
-- `docs/TASK_MODEL.md` — Plan, task, kanban, diff, and execution log models
+- `docs/TASK_MODEL.md` — Plan, task, roadmap/kanban, diff, and execution log models
 - `docs/VIBE_KANBAN_INTEGRATION.md` — Vibe Kanban bridge notes
 - `docs/PROMPT_TEMPLATES.md` — Reusable prompts for Claude Code, Codex, Antigravity
 - `docs/DESIGN_SYSTEM.md` — Current UI design rules
@@ -85,13 +90,17 @@ Open the local URL printed by Next.js (typically `http://localhost:3000`).
    vercel --prod
    ```
 
-## Current Status (Phase 8 Complete)
+## Current Status
 
 ✅ **Completed Phases:**
 - Phase 1-5: Core orchestration, structured planning, execution, analysis, routing, autonomous loop
 - Phase 6: Loop UX refinement (feedback banners, error recovery)
 - Phase 7: Security hardening (npm audit, path validation)
 - Phase 8: Integration (Vibe Kanban HTTP API, Supabase schema)
+
+🔜 **Current Phase:**
+- Phase 9: Roadmap-First Control Tower UX
+- Next focus: `/plan` as Visual Development Roadmap Control Panel, Senior Dev Prompt Compiler structure, Context Packs, Obsidian-compatible insight memory, and Hermes background-worker positioning
 
 ✅ **Ready for Production:**
 - Zero critical/high security vulnerabilities (direct dependencies)
@@ -112,6 +121,7 @@ Open the local URL printed by Next.js (typically `http://localhost:3000`).
 
 ```txt
 Read CLAUDE.md, docs/PRD.md, docs/ARCHITECTURE.md, and docs/TASKS.md.
+Also read docs/CONTROL_TOWER_DIRECTION.md before changing product direction.
 Keep the change scoped to the current task and update docs if task status changes.
 ```
 

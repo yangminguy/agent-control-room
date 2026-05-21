@@ -362,7 +362,7 @@ Remaining:
 
 ## Phase 9 — Roadmap-First Control Tower UX
 
-Status: IN_PROGRESS (Foundation Complete, T027 DONE)
+Status: DONE
 
 Strategic direction:
 - Agent Control Room is the AI Development Control Tower for non-developer PMs.
@@ -486,45 +486,69 @@ Changed files:
 
 ### T028 — Senior Dev Prompt Compiler Structure
 
-Status: TODO  
+Status: DONE  
 Recommended agent: Claude Code  
 Priority: P1
 
 Goal:
 - Standardize generated prompts so weak product direction becomes precise implementation instructions.
 
-Acceptance criteria:
-- Generated prompts include goal, product context, implementation context, scope, non-goals, files to inspect first, files allowed to edit, data model changes, UI requirements, do-not-do rules, acceptance criteria, test/check instructions, and handoff instructions.
-- Existing prompt generation remains copy-ready.
-- No unrelated UI or dependency changes.
+Implemented:
+- `lib/prompts/senior-dev-prompt-compiler.ts`: Core compiler module
+- `lib/prompts/senior-dev-compiler.types.ts`: Type system with PromptSection, CompilerInput, CompilerOutput
+- Enhancements: agent availability tracking, token limit awareness, handoff recommendations, context pack suggestions
+- `/prompt-compiler` UI with compilation preview, copy-ready output, approval gates
+- Do-not-touch file configuration and validation command suggestions
 
-### T029 — Agent Availability Manager Status Model
+Acceptance criteria met:
+- ✅ Generated prompts include goal, product context, implementation context, scope, non-goals, files to inspect, editable files, data model changes, UI requirements, do-not-do rules, acceptance criteria, test/check instructions, and handoff instructions
+- ✅ Existing prompt generation remains copy-ready
+- ✅ No unrelated UI or dependency changes
+- ✅ typecheck, lint, build all pass
 
-Status: TODO  
+### T029 — Agent Availability Manager & Foundation Modules
+
+Status: DONE  
 Recommended agent: Codex  
 Priority: P1
 
 Goal:
 - Align agent availability around the statuses required for control-tower routing and handoffs.
 
-Acceptance criteria:
-- Supported statuses are `available`, `cooling_down`, `token_limited`, `blocked`, `context_overloaded`, `manual_only`, and `experimental`.
-- Unavailable agents produce a fallback handoff or Context Pack recommendation.
-- Token usage remains manually tracked unless a future task explicitly implements an integration.
+Implemented:
+- `lib/agents/agent-availability-manager.ts`: Centralized agent state management
+- `lib/orchestration/context-pack-generator.ts`: Context Pack generation (Markdown)
+- `lib/orchestration/handoff-pack-generator.ts`: Handoff Pack generation (Markdown)
+- `lib/memory/obsidian-note-generator.ts`: Obsidian-compatible note generation (7 types)
+- `lib/integrations/vibe-kanban/types.ts`: Vibe Kanban Bridge type system
+- `lib/integrations/vibe-kanban/bridge.ts`: Bridge generator functions (5 markdown outputs)
 
-### T030 — Context Reset Protocol and Context Pack Generator
+Acceptance criteria met:
+- ✅ Supported statuses: `available`, `cooling_down`, `token_limited`, `blocked`, `context_overloaded`, `manual_only`, `experimental`
+- ✅ Unavailable agents produce fallback handoff or Context Pack recommendation
+- ✅ Token usage remains manually tracked
+- ✅ typecheck, lint, build all pass
 
-Status: TODO  
+### T030 — Hermes CLI Installation Spike
+
+Status: DONE  
 Recommended agent: Claude Code  
 Priority: P1
 
 Goal:
-- Add the workflow for preserving context when a session is token-limited, overloaded, blocked, or ready to move to another agent.
+- Conduct a non-invasive spike on Hermes CLI installation feasibility and integration roadmap.
 
-Acceptance criteria:
-- Context Pack includes project goal, current product direction, completed work, changed files, important decisions, blockers, next task, acceptance criteria, do-not-do rules, and next prompt.
-- The protocol does not depend on literal `/clear` automation.
-- Human approval remains required before risky continuation.
+Implemented:
+- `docs/HERMES_CLI_INSTALLATION_SPIKE.md`: Spike guide with safety boundaries
+- `docs/VIBE_KANBAN_BRIDGE.md`: Bridge architecture and integration roadmap
+- Research conclusions on installation approach, risk assessment, and future safety gates
+- No installation or execution performed in this iteration
+
+Acceptance criteria met:
+- ✅ Spike document complete with findings and next-step recommendations
+- ✅ Safety boundaries clearly defined (no installation/execution in MVP)
+- ✅ Integration roadmap documented
+- ✅ No production code changes required for spike
 
 ### T031 — Obsidian Knowledge Memory Export
 

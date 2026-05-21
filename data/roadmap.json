@@ -1,0 +1,243 @@
+{
+  "id": "roadmap-agent-control-room",
+  "projectId": "agent-control-room",
+  "title": "Agent Control Room Development Roadmap",
+  "version": "1.0.0",
+  "productVision": "AI Development Control Tower for non-developer PMs: idea/direction → technical translation → visual roadmap → task decomposition → agent routing → prompt compilation → human approval → execution/workbench handoff → result/diff analysis → roadmap completion → insight memory → next task",
+  "stages": [
+    {
+      "id": "phase-1-manual-orchestration",
+      "number": 1,
+      "title": "Phase 1: Manual Orchestration",
+      "description": "수동 복사 중심의 오케스트레이션 구현",
+      "goal": "Direction to Prompt 기본 구조 완성",
+      "status": "completed",
+      "completionPercentage": 100,
+      "responsibleAgent": "claude-code",
+      "acceptanceCriteria": [
+        "사용자가 product direction을 입력할 수 있다",
+        "기술 번역이 자동으로 생성된다",
+        "작업이 분해되고 에이전트 추천이 표시된다",
+        "복사 가능한 프롬프트가 생성된다",
+        "세션 보고서가 저장된다",
+        "핸드오프 문서가 생성된다"
+      ],
+      "startedAt": "2026-04-15T00:00:00.000Z",
+      "completedAt": "2026-05-10T00:00:00.000Z",
+      "tasks": [],
+      "createdAt": "2026-04-15T00:00:00.000Z",
+      "updatedAt": "2026-05-10T00:00:00.000Z"
+    },
+    {
+      "id": "phase-2-structured-planning",
+      "number": 2,
+      "title": "Phase 2: Structured Planning",
+      "description": "CLI 실행 이전에 '무엇을 실행하는가'를 명확하게 구조화",
+      "goal": "Plan & Kanban 데이터 모델과 HTML 계획 뷰 구현",
+      "status": "completed",
+      "completionPercentage": 100,
+      "responsibleAgent": "antigravity",
+      "acceptanceCriteria": [
+        "FeaturePlan 모델이 N개의 PlanTask로 분해된다",
+        "각 태스크는 assigned agent, status, acceptance criteria를 가진다",
+        "Kanban 카드가 task, agent, status, prompt, result를 표시한다",
+        "/plan 페이지에서 계획을 시각적으로 추적할 수 있다"
+      ],
+      "startedAt": "2026-05-10T00:00:00.000Z",
+      "completedAt": "2026-05-20T00:00:00.000Z",
+      "nextAction": "Phase 3로 진행",
+      "nextAgentRecommendation": "claude-code",
+      "tasks": [],
+      "createdAt": "2026-05-10T00:00:00.000Z",
+      "updatedAt": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "phase-3-semi-automated-execution",
+      "number": 3,
+      "title": "Phase 3: Semi-Automated Execution",
+      "description": "사용자가 확인 후 버튼을 누르면 에이전트가 실행되고, 결과를 자동 분석",
+      "goal": "Agent Execution Runner와 Git Diff Analyzer 구현",
+      "status": "completed",
+      "completionPercentage": 100,
+      "responsibleAgent": "claude-code",
+      "acceptanceCriteria": [
+        "사용자가 Execute 버튼을 클릭하면 에이전트가 spawn된다",
+        "새 git 브랜치가 자동으로 생성된다",
+        "로그가 실시간으로 UI에 스트리밍된다",
+        "diff가 자동으로 분석되고 완료 판정이 표시된다"
+      ],
+      "startedAt": "2026-05-15T00:00:00.000Z",
+      "completedAt": "2026-05-20T00:00:00.000Z",
+      "tasks": [],
+      "createdAt": "2026-05-15T00:00:00.000Z",
+      "updatedAt": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "phase-4-multi-agent-routing",
+      "number": 4,
+      "title": "Phase 4: Multi-Agent Routing",
+      "description": "여러 AI 에이전트를 목적에 따라 자동으로 선택",
+      "goal": "Multi-Agent Router와 Token/Rate Limit Handoff",
+      "status": "completed",
+      "completionPercentage": 100,
+      "responsibleAgent": "claude-code",
+      "acceptanceCriteria": [
+        "에이전트 상태에 따라 자동으로 fallback이 추천된다",
+        "unavailable 상태에서 handoff 프롬프트가 생성된다",
+        "사용자가 /agent-status로 상태를 수동 설정할 수 있다"
+      ],
+      "startedAt": "2026-05-18T00:00:00.000Z",
+      "completedAt": "2026-05-20T00:00:00.000Z",
+      "tasks": [],
+      "createdAt": "2026-05-18T00:00:00.000Z",
+      "updatedAt": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "phase-5-human-approved-loop",
+      "number": 5,
+      "title": "Phase 5: Human-Approved Autonomous Loop",
+      "description": "실행 결과를 분석한 뒤 사용자가 Continue/Stop을 선택",
+      "goal": "Autonomous Execution Loop 구현 (사용자 승인 중심)",
+      "status": "completed",
+      "completionPercentage": 100,
+      "responsibleAgent": "claude-code",
+      "acceptanceCriteria": [
+        "실행 완료 후 Analyzer가 자동 호출된다",
+        "Continue/Stop 버튼이 사용자에게 표시된다",
+        "Continue 시 다음 태스크의 프롬프트가 자동으로 준비된다",
+        "Human-in-the-loop 설계가 유지된다"
+      ],
+      "startedAt": "2026-05-19T00:00:00.000Z",
+      "completedAt": "2026-05-20T00:00:00.000Z",
+      "tasks": [],
+      "createdAt": "2026-05-19T00:00:00.000Z",
+      "updatedAt": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "phase-6-loop-ux-refinement",
+      "number": 6,
+      "title": "Phase 6: Loop UX Refinement",
+      "description": "Continue/Stop 피드백, 에러 처리, Retry 버튼 추가",
+      "goal": "Loop 사용자 경험 개선",
+      "status": "completed",
+      "completionPercentage": 100,
+      "responsibleAgent": "frontend-developer",
+      "acceptanceCriteria": [
+        "Continue/Stop 피드백 배너가 명확하게 표시된다",
+        "Analyzer/Runner 실패 시 Retry 버튼이 제공된다",
+        "Loop Approval UI가 판정과 diff 요약을 표시한다"
+      ],
+      "startedAt": "2026-05-19T00:00:00.000Z",
+      "completedAt": "2026-05-21T00:00:00.000Z",
+      "tasks": [],
+      "createdAt": "2026-05-19T00:00:00.000Z",
+      "updatedAt": "2026-05-21T00:00:00.000Z"
+    },
+    {
+      "id": "phase-7-security-hardening",
+      "number": 7,
+      "title": "Phase 7: Security Hardening",
+      "description": "npm audit fix, path traversal 방어, input validation",
+      "goal": "보안 취약점 제거 및 의존성 업데이트",
+      "status": "completed",
+      "completionPercentage": 100,
+      "responsibleAgent": "codex",
+      "acceptanceCriteria": [
+        "Direct 의존성 critical/high 취약점: 0",
+        "Path traversal 공격 차단 (403)",
+        "모든 API input validation 완료"
+      ],
+      "startedAt": "2026-05-20T00:00:00.000Z",
+      "completedAt": "2026-05-21T00:00:00.000Z",
+      "tasks": [],
+      "createdAt": "2026-05-20T00:00:00.000Z",
+      "updatedAt": "2026-05-21T00:00:00.000Z"
+    },
+    {
+      "id": "phase-8-vibe-kanban-supabase",
+      "number": 8,
+      "title": "Phase 8: Vibe Kanban & Supabase Integration",
+      "description": "Real HTTP 이슈 생성, Supabase 스키마 마이그레이션",
+      "goal": "Vibe Kanban 이슈 생성 및 Supabase 스토리지 준비",
+      "status": "completed",
+      "completionPercentage": 100,
+      "responsibleAgent": "backend-developer",
+      "acceptanceCriteria": [
+        "Vibe Kanban HTTP API로 이슈를 생성할 수 있다",
+        "프로젝트/상태 선택 드롭다운이 작동한다",
+        "Supabase 7-table 스키마가 배포되었다",
+        "JSON fallback 패턴이 구현되었다"
+      ],
+      "startedAt": "2026-05-20T00:00:00.000Z",
+      "completedAt": "2026-05-21T00:00:00.000Z",
+      "tasks": [],
+      "createdAt": "2026-05-20T00:00:00.000Z",
+      "updatedAt": "2026-05-21T00:00:00.000Z"
+    },
+    {
+      "id": "phase-9-roadmap-first-control-tower",
+      "number": 9,
+      "title": "Phase 9: Roadmap-First Control Tower UX",
+      "description": "제품을 로드맵 중심 AI Development Control Tower로 재정의",
+      "goal": "/plan을 Visual Development Roadmap Control Panel로 변경",
+      "status": "user_input_required",
+      "completionPercentage": 30,
+      "responsibleAgent": "antigravity",
+      "acceptanceCriteria": [
+        "/plan이 roadmap stages를 completed/active/waiting/blocked/user_input_required 상태로 표시한다",
+        "완료된 단계는 체크마크를 보여준다",
+        "활성화된 단계는 담당 에이전트, 현재 작업, 다음 액션을 표시한다",
+        "차단된 단계는 차단 사유와 필요한 사용자 결정을 표시한다",
+        "각 단계는 승인 기준을 보여준다"
+      ],
+      "startedAt": "2026-05-21T05:00:00.000Z",
+      "completedAt": null,
+      "nextAction": "T027: `/plan` Visual Development Roadmap Control Panel 구현",
+      "nextAgentRecommendation": "antigravity",
+      "tasks": [],
+      "userDecisions": [
+        {
+          "id": "decision-1",
+          "question": "Roadmap UI를 기존 Kanban과 함께 표시할 것인가, 아니면 로드맵 뷰로 완전히 변경할 것인가?",
+          "options": [
+            "로드맵 뷰 (단계별 요약) + Kanban (상세 작업)",
+            "로드맵 뷰만 (단순화)",
+            "Kanban 뷰만 (기존 유지)"
+          ]
+        }
+      ],
+      "blockers": [],
+      "createdAt": "2026-05-21T00:00:00.000Z",
+      "updatedAt": "2026-05-21T00:00:00.000Z"
+    },
+    {
+      "id": "phase-10-vibe-kanban-workbench-bridge",
+      "number": 10,
+      "title": "Phase 10: Vibe Kanban Workbench Bridge",
+      "description": "Agent Control Room을 orchestration brain으로, Vibe Kanban을 execution workbench로 위치지음",
+      "goal": "Vibe Kanban 워크벤치와의 양방향 브릿지 구현",
+      "status": "waiting",
+      "completionPercentage": 0,
+      "responsibleAgent": "backend-developer",
+      "acceptanceCriteria": [
+        "준비된 작업을 Vibe Kanban으로 보낼 수 있다",
+        "Vibe Kanban 워크스페이스를 Agent Control Room에서 열 수 있다",
+        "Vibe Kanban 결과를 다시 import할 수 있다"
+      ],
+      "startedAt": null,
+      "completedAt": null,
+      "nextAction": "T033: Vibe Kanban Open Workspace/Card Link",
+      "nextAgentRecommendation": "codex",
+      "tasks": [],
+      "blockers": [],
+      "createdAt": "2026-05-21T00:00:00.000Z",
+      "updatedAt": "2026-05-21T00:00:00.000Z"
+    }
+  ],
+  "overallProgress": 83,
+  "completedStageCount": 8,
+  "activeStageCount": 0,
+  "blockedStageCount": 0,
+  "createdAt": "2026-05-21T00:00:00.000Z",
+  "updatedAt": "2026-05-21T00:00:00.000Z"
+}
