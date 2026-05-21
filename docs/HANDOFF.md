@@ -3,6 +3,16 @@
 ## Current Handoff Status
 Phases 1-8b implementation complete. Agent Control Room now has manual orchestration, structured planning, semi-automated Claude execution, diff analysis, human-approved Continue/Stop loop with UX refinement, security hardening, Vibe Kanban HTTP integration, and Supabase migration readiness.
 
+Strategic direction updated on 2026-05-21:
+- Agent Control Room is the AI Development Control Tower for non-developer PMs.
+- `/plan` should become the Visual Development Roadmap Control Panel.
+- Senior Dev Prompt Compiler should standardize generated prompts.
+- Context Reset Protocol should create Context Packs for token/context handoff.
+- Obsidian-compatible insight memory is planned, not fully implemented.
+- Hermes is optional background/status/memory worker, not primary coding brain.
+- Vibe Kanban is the execution workbench.
+- Future work should deepen Vibe Kanban workspace/session/result-readback integration before expanding duplicate internal board UI.
+
 Implemented:
 - Next.js App Router project scaffold.
 - TypeScript domain types.
@@ -21,7 +31,7 @@ Implemented:
 - Open-source analysis, base decision, and implementation mapping documents created.
 - Vibe Kanban issue draft converter added in `lib/integrations/vibe-kanban.ts`.
 - T016 Plan & Kanban Data Model implemented in `lib/types.ts`, `data/feature-plans.json`, and `lib/storage/feature-plan-store.ts`.
-- T017 HTML Implementation Plan View implemented at `/plan` with Kanban board/card components and manual status updates.
+- T017 HTML plan view implemented at `/plan` with card/status components and manual status updates; next direction is roadmap-first.
 - T018 Agent Execution Runner implemented with git branch creation, `child_process.spawn`, SSE log streaming, execution log storage, and `RunnerLogView`.
 - T019 Git Diff & Outcome Analyzer implemented with `lib/analyzer/git-diff-analyzer.ts` and `/api/analyzer` endpoint.
 - `/plan` task cards now wire `RunnerLogView` directly for Claude Code and Codex tasks.
@@ -34,9 +44,169 @@ Verified:
 - Vibe Kanban frontend returned HTTP 200 at `http://localhost:3002/`.
 - Vibe Kanban backend health returned OK at `http://localhost:3003/api/health`.
 
-## Implementation Complete (Phase 8)
+## Phase 9: Roadmap-First Control Tower UX (In Progress)
 
-All core phases (1-8) implemented and deployed.
+### T027 Implementation Complete (2026-05-21)
+
+**What was built**:
+
+1. **Data Model Foundation** (Claude Code):
+   - `lib/types.ts`: RoadmapStatus, RoadmapBlocker, RoadmapUserDecision, RoadmapStage, Roadmap types
+   - `lib/roadmap.ts`: Helper functions (getRoadmapProgress, getActiveRoadmapStage, getBlockedStages, getNextAction)
+   - `data/roadmap.json`: 10-phase sample roadmap (Phase 1 Manual Orchestration through Phase 10 Vibe Kanban Bridge)
+   - `lib/storage/roadmap-store.ts`: Storage layer with Supabase pattern and JSON fallback
+   - `app/api/roadmap/route.ts`: GET /api/roadmap?projectId=X endpoint
+   - `docs/ROADMAP_DATA_MODEL.md`: Implementation guide for Antigravity
+
+2. **UI Components** (Antigravity):
+   - `components/roadmap/RoadmapTimeline.tsx`: Timeline visualization with vertical line and markers
+   - `components/roadmap/RoadmapStageCard.tsx`: Individual stage cards with status, agent, task, blocker, user decision displays
+   - `components/roadmap/RoadmapStatusBadge.tsx`: Status icon badges (completed ✅, active 🔵, waiting ⏳, blocked 🚫, etc.)
+   - `components/roadmap/AgentBadge.tsx`: Agent type identification with color/icon coding
+
+3. **Integration** (Claude Code):
+   - `lib/roadmap-ui-adapter.ts`: Domain model ↔ UI model adapter (responsibleAgent → assignedAgent, blockers → blockerReason, etc.)
+   - `/plan` page refactored: roadmap-first layout (Header → Roadmap → Agents → Kanban)
+   - `lib/agents/agent-status.ts`: Static agent status data with 6 agents (Claude Code, Codex, Antigravity, Hermes, Vibe Kanban, Manual/User)
+   - Agent status data updated post-completion (Claude Code → available, Antigravity → working, Manual/User → approval_required)
+
+**Page Layout** (Roadmap-First Control Tower):
+```
+┌─────────────────────────────────┐
+│ Development Control Tower        │
+│ Roadmap + Agent Status + Tasks   │
+└─────────────────────────────────┘
+         ↓
+┌─ 개발 로드맵 (Roadmap)
+│  - Phase 1-8 (completed)
+│  - Phase 9 (active)
+│  - Phase 10 (waiting)
+│
+├─ 에이전트 시스템 상태 (Agent Status)
+│  - Total: 6 systems
+│  - Ready/Active: 3 (Claude Code, Codex, Antigravity)
+│  - Idle: 2 (Vibe Kanban, background worker)
+│  - Awaiting approval: 1 (Manual/User)
+│
+└─ 작업 상세 보기 (Kanban Detail)
+   - Feature Plans
+   - Task status tracking
+```
+
+**Verification**:
+- ✅ typecheck
+- ✅ lint
+- ✅ build
+- ✅ No breaking changes to existing Kanban functionality
+- ✅ Roadmap data safe with null checks
+- ✅ Agent status panel graceful empty state
+
+### Phase 9 (Continued): T027-Hermes — Hermes Packet Draft UI
+
+Status: DONE (2026-05-21)
+
+**Goal**:
+- Design and implement a safe, static UI for generating Hermes task packets without execution.
+- Users can choose packet kinds, generate drafts, preview Markdown, and copy packets.
+- Clearly communicate that Hermes is NOT being executed.
+
+**What was built**:
+
+1. **Hermes Type System** (lib/hermes/):
+   - `lib/hermes/types.ts`: HermesPacket, HermesSection, HermesPacketDraft, HermesPacketKind types
+   - 6 supported packet kinds: session-summary, context-pack, handoff-pack, failed-task-review, background-research, obsidian-note
+
+2. **Hermes Packet Generator** (lib/hermes/task-packets.ts):
+   - `generateSessionSummaryPacket()`: Create session work summaries
+   - `generateContextPackPacket()`: Create session reset/handoff context
+   - `generateHandoffPackPacket()`: Create agent handoff instructions
+   - `generateFailedTaskReviewPacket()`: Create failure analysis packets
+   - `generateBackgroundResearchPacket()`: Create research findings
+   - `generateObsidianNotePacket()`: Create personal knowledge notes
+   - `renderHermesPacketMarkdown()`: Convert packets to user-friendly Markdown
+   - `exportHermesPacketJSON()`: Export structured JSON
+
+3. **Example Packet Data** (data/hermes-task-packets.json):
+   - 6 example packets (one of each kind)
+   - All example packets follow the Hermes spec
+   - Ready for copy/paste workflows
+
+4. **Hermes Packet Draft UI** (app/hermes-packets/page.tsx + components/hermes/PacketDraftCard.tsx):
+   - Static server component with example packet data
+   - Grid layout showing all example packets
+   - View mode toggle: Markdown preview ↔ JSON data
+   - Copy-to-clipboard button for both formats
+   - Safety notice: "Hermes is not executed" (top of page)
+   - Kind-based packet filtering and display
+
+5. **Agent Status Integration** (components/agents/AgentStatusCard.tsx):
+   - Added safe link from Hermes agent card to `/hermes-packets`
+   - "패킷 드래프트 보기" (View Packet Drafts) link
+   - Minimal change: only 1 import + 1 Link element
+
+**Safety Guarantees**:
+- No execution code added
+- No runner/spawn-runner wiring
+- No Hermes CLI or API calls
+- No cron jobs
+- No package.json changes
+- No database modifications
+- No automatic execution paths
+- UI language emphasizes draft/preview state ("Generate", "Copy", not "Run"/"Execute")
+
+**Verification**:
+- ✅ npm run typecheck
+- ✅ npm run lint (no errors)
+- ✅ npm run build (success, `/hermes-packets` route created)
+- ✅ New route: `/hermes-packets` (static prerendered)
+- ✅ All 6 packet kinds displayed and functional
+
+**Files Changed/Created**:
+- lib/hermes/types.ts (new)
+- lib/hermes/task-packets.ts (new)
+- data/hermes-task-packets.json (new)
+- app/hermes-packets/page.tsx (new)
+- components/hermes/PacketDraftCard.tsx (new)
+- components/agents/AgentStatusCard.tsx (1 link added for Hermes agent)
+
+**Remaining Work** (Future phases):
+- T032: Hermes CLI installation spike (Codex) — validate agent installation
+- Connect packet drafts to actual Hermes execution (Phase 10+)
+- Implement context-pack and obsidian-note workflows
+- Build Vibe Kanban workspace integration for handoff execution
+
+### What's Next (T028)
+
+**Senior Dev Prompt Compiler Structure**:
+- Standardize prompt generation: goal, context, scope, files, acceptance criteria, checks, handoff instructions
+- Agent: Claude Code
+- Priority: P1
+- Recommendation: Begin after Phase 9 completion review
+
+**Agent Status for T028**:
+- 🧠 Claude Code: available (ready for T028)
+- ⚙️ Codex: working (Hermes spike ongoing, then T029)
+- 🎨 Antigravity: working (Visual QA on /plan, then design T028 UI)
+- 🔄 Hermes: background_worker (Packet Draft UI deployed, spike pending)
+- ✅ Manual/User: approval_required (approve Phase 9, guide Phase 10)
+
+**Files Changed**:
+- lib/types.ts (T027 data model additions)
+- lib/roadmap.ts (new)
+- lib/roadmap-ui-adapter.ts (new)
+- lib/agents/agent-status.ts (new)
+- lib/storage/roadmap-store.ts (new)
+- data/roadmap.json (new)
+- app/plan/page.tsx (refactored roadmap-first)
+- app/api/roadmap/route.ts (new)
+- docs/ROADMAP_DATA_MODEL.md (new)
+- [T027-Hermes] lib/hermes/* (new), app/hermes-packets/ (new), components/hermes/ (new)
+
+## Implementation Complete (Phases 1-9 Foundation)
+
+Phases 1-8 complete. Phase 9 T027 complete (Roadmap-First Control Tower).
+
+Ready for: T028 (Senior Dev Prompt Compiler) or Phase 10 (Vibe Kanban Bridge)
 
 Changed files from Phase 6-8 implementation:
 - `components/plan/KanbanCard.tsx` — Loop UX feedback and error handling
@@ -110,7 +280,8 @@ Remaining issues:
 - `data/feature-plans.json` currently uses `project-agent-control-room` while `data/projects.json` uses `agent-control-room`; UI handles both ids, but the seed data should be reconciled later.
 - npm audit: 2 moderate vulnerabilities in Next.js bundled PostCSS (GHSA-qx2v-qp2m-jg93, not exploitable in this app). Next.js upstream fix pending.
 - Supabase full integration requires: environment variables in deployment, SQL migration execution via dashboard, and optional JSON-to-Supabase data migration script.
-- Vibe Kanban `/api/scratch/` scratch API for project selection UX not yet implemented (current implementation uses generic `/api/issues` endpoint).
+- Vibe Kanban `/api/scratch/` scratch API for project selection UX not yet implemented; current implementation uses the remote issue bridge with project/status selection.
+- Phase 9 should validate Vibe Kanban workspace/session/result-readback APIs and add open-workspace links/result import.
 
 This document defines the handoff format that every AI coding tool should use when transferring work to another tool.
 
@@ -139,6 +310,9 @@ This document defines the handoff format that every AI coding tool should use wh
 ## Context Summary
 {shortContextSummary}
 
+## Product Direction
+{productDirection}
+
 ## Completed Work
 - {completedItem1}
 - {completedItem2}
@@ -153,6 +327,8 @@ This document defines the handoff format that every AI coding tool should use wh
 
 ## Files To Read First
 - CLAUDE.md
+- AGENTS.md
+- docs/CONTROL_TOWER_DIRECTION.md
 - docs/PRD.md
 - docs/ARCHITECTURE.md
 - docs/TASKS.md
@@ -166,6 +342,13 @@ This document defines the handoff format that every AI coding tool should use wh
 ## Acceptance Criteria
 - {criterion1}
 - {criterion2}
+
+## Context Reset / Token Notes
+{contextResetOrTokenNotes}
+
+## Obsidian Insight Candidates
+- {insightCandidate1}
+- {insightCandidate2}
 
 ## Cautions
 - {caution1}
@@ -270,8 +453,8 @@ Handoff must include:
 - Happy path, error scenarios, and security edge cases verified
 
 ## Recommended Next Work
-1. **Supabase Production Setup** — Execute SQL migration in Supabase dashboard, test Supabase ↔ app connectivity
-2. **Vibe Kanban Project Selection UX** — Implement `/api/scratch/` endpoint integration for real project/status selection
-3. **Seed Data Reconciliation** — Unify `project-agent-control-room` vs `agent-control-room` IDs in JSON files
-4. **PostCSS Vulnerability** — Monitor Next.js upstream for bundled PostCSS fix; re-run `npm audit fix` when available
-5. **Deployment Verification** — Test full flow on Vercel with environment variables set
+1. **Roadmap-First Control Tower UX** — Reframe `/plan` as a Visual Development Roadmap Control Panel with stage status, check marks, responsible agent, current task, next action, blockers, user decisions, and acceptance criteria.
+2. **Senior Dev Prompt Compiler** — Standardize prompt sections across generated Claude/Codex/Antigravity handoffs.
+3. **Context Reset + Obsidian Memory** — Generate Context Packs and Markdown insight notes from session reports and execution logs.
+4. **Vibe Kanban Workbench Bridge** — Add open-workspace/card link, workspace/session launch adapter research, result import, and next-prompt generation from imported outcomes.
+5. **Production Verification** — Test full flow on Vercel with environment variables set after the roadmap-first direction is reflected.

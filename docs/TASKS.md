@@ -161,7 +161,7 @@ Recommended agent: Codex
 Priority: P3
 
 Implemented:
-- `/agent-status` lets the user manually set `available`, `limited`, `cooling_down`, `blocked`, or `manual_only`.
+- `/agent-status` lets the user manually set agent availability; the next model alignment expands statuses to `available`, `cooling_down`, `token_limited`, `blocked`, `context_overloaded`, `manual_only`, and `experimental`.
 - Status changes persist through `/api/agent-status` and `data/agent-statuses.json`.
 - Runtime fallback recommendation is returned after a manual status change.
 - Handoff prompts are generated and saved when a status requires agent transfer.
@@ -359,3 +359,250 @@ Completed:
 Remaining:
 - Vibe Kanban scratch API project selection (future, optional)
 - Multi-user auth support (future, after MVP)
+
+## Phase 9 — Roadmap-First Control Tower UX
+
+Status: IN_PROGRESS (Foundation Complete, T027 DONE)
+
+Strategic direction:
+- Agent Control Room is the AI Development Control Tower for non-developer PMs.
+- `/plan` becomes a Visual Development Roadmap Control Panel, not only a kanban board.
+- Senior Dev Prompt Compiler becomes the standard prompt-generation module.
+- Agent availability, context reset, token handoff, Obsidian memory, and Hermes background-worker positioning are documented before implementation.
+- Vibe Kanban remains the execution workbench and should not be cloned.
+
+### T027 — `/plan` Visual Development Roadmap Control Panel
+
+Status: DONE  
+Recommended agent: Claude Code (Data Model) + Antigravity (UI Components)  
+Priority: P1
+
+Goal:
+- Reframe `/plan` around the full product development roadmap for a non-developer PM.
+
+Completed:
+- **Data Model Foundation (Claude)**:
+  - `lib/types.ts`: RoadmapStatus, RoadmapBlocker, RoadmapUserDecision, RoadmapStage, Roadmap types
+  - `lib/roadmap.ts`: Helper functions (getRoadmapProgress, getActiveRoadmapStage, getBlockedStages, etc.)
+  - `data/roadmap.json`: 10-phase sample roadmap with complete stage data
+  - `lib/storage/roadmap-store.ts`: Storage layer with Supabase fallback
+  - `app/api/roadmap/route.ts`: GET endpoint for roadmap data
+
+- **UI Components (Antigravity)**:
+  - `components/roadmap/RoadmapTimeline.tsx`: Timeline visualization
+  - `components/roadmap/RoadmapStageCard.tsx`: Individual stage cards
+  - `components/roadmap/RoadmapStatusBadge.tsx`: Status indicators
+  - `components/roadmap/AgentBadge.tsx`: Agent assignment display
+
+- **Integration (Claude)**:
+  - `lib/roadmap-ui-adapter.ts`: Data model ↔ UI component adapter
+  - `/plan` page updated with roadmap-first layout
+  - Existing Kanban board preserved as detail view
+
+Acceptance criteria met:
+- ✅ `/plan` shows roadmap stages with all required states (completed, active, waiting, blocked, user_input_required)
+- ✅ Completed stages show check marks
+- ✅ Active stages show responsible agent, current task, next action
+- ✅ Blocked stages show blocker reason
+- ✅ User-input-required stages show exact user question
+- ✅ Acceptance criteria visible
+- ✅ Existing Kanban functionality preserved
+- ✅ typecheck, lint, build all pass
+
+Completed Tasks:
+- Roadmap data model and types defined
+- Roadmap helper functions implemented
+- Sample roadmap data with 10 phases created
+- Storage layer with Supabase support
+- API endpoint for roadmap data
+- UI components for roadmap visualization
+- Adapter layer for data ↔ UI mapping
+- `/plan` page refactored as Control Tower (roadmap-first)
+- Agent Status Panel data layer added
+- Self-review and status corrections applied
+
+Branched from: acr/roadmap-foundation-20260521
+Changed files: lib/types.ts, lib/roadmap.ts, lib/roadmap-ui-adapter.ts, lib/agents/agent-status.ts, app/plan/page.tsx, data/roadmap.json, docs/ROADMAP_DATA_MODEL.md
+
+### T027-Hermes — Hermes Packet Draft UI (Safe Static Generation)
+
+Status: DONE  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Design and implement a safe, static UI for generating Hermes task packets without execution.
+- Clearly communicate that Hermes is a background worker, not an auto-executor.
+- Users should be able to preview, copy, and manually submit packets.
+
+Implemented:
+
+**Type System** (`lib/hermes/types.ts`):
+- HermesPacket, HermesSection, HermesPacketKind types
+- 6 supported packet kinds: session-summary, context-pack, handoff-pack, failed-task-review, background-research, obsidian-note
+
+**Packet Generators** (`lib/hermes/task-packets.ts`):
+- 6 generator functions (one per kind)
+- `renderHermesPacketMarkdown()`: Convert packets to copy-ready Markdown
+- `exportHermesPacketJSON()`: Export structured JSON
+- `HERMES_PACKET_KINDS`: Dictionary of kind labels and descriptions
+
+**Example Data** (`data/hermes-task-packets.json`):
+- 6 example packets (one of each kind)
+- All follow the Hermes spec with sections, metadata
+
+**UI** (`app/hermes-packets/page.tsx` + `components/hermes/PacketDraftCard.tsx`):
+- Static page with example packets
+- Grid layout with PacketDraftCard components
+- View mode toggle: Markdown preview ↔ JSON data
+- Copy-to-clipboard button (both formats)
+- Safety notice: "Hermes is not executed" (prominent, amber banner)
+- Kind-based filtering and display
+
+**Integration** (`components/agents/AgentStatusCard.tsx`):
+- Safe link from Hermes agent card to `/hermes-packets`
+- "패킷 드래프트 보기" (View Packet Drafts)
+- Minimal change: 1 import + 1 Link element
+
+Acceptance criteria met:
+- ✅ Hermes Packet Draft UI exists at `/hermes-packets`
+- ✅ All 6 packet kinds displayed and functional
+- ✅ Safety language clear: "Hermes is not executed" (top of page)
+- ✅ Users can preview Markdown and JSON
+- ✅ Copy-to-clipboard works for both formats
+- ✅ No execution code added (no runner/spawn wiring)
+- ✅ No package.json changes
+- ✅ No database migrations
+- ✅ typecheck, lint, build all pass
+- ✅ No unrelated file changes
+
+Changed files:
+- lib/hermes/types.ts (new)
+- lib/hermes/task-packets.ts (new)
+- data/hermes-task-packets.json (new)
+- app/hermes-packets/page.tsx (new)
+- components/hermes/PacketDraftCard.tsx (new)
+- components/agents/AgentStatusCard.tsx (1 import + 1 link for Hermes)
+
+### T028 — Senior Dev Prompt Compiler Structure
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Standardize generated prompts so weak product direction becomes precise implementation instructions.
+
+Acceptance criteria:
+- Generated prompts include goal, product context, implementation context, scope, non-goals, files to inspect first, files allowed to edit, data model changes, UI requirements, do-not-do rules, acceptance criteria, test/check instructions, and handoff instructions.
+- Existing prompt generation remains copy-ready.
+- No unrelated UI or dependency changes.
+
+### T029 — Agent Availability Manager Status Model
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- Align agent availability around the statuses required for control-tower routing and handoffs.
+
+Acceptance criteria:
+- Supported statuses are `available`, `cooling_down`, `token_limited`, `blocked`, `context_overloaded`, `manual_only`, and `experimental`.
+- Unavailable agents produce a fallback handoff or Context Pack recommendation.
+- Token usage remains manually tracked unless a future task explicitly implements an integration.
+
+### T030 — Context Reset Protocol and Context Pack Generator
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Add the workflow for preserving context when a session is token-limited, overloaded, blocked, or ready to move to another agent.
+
+Acceptance criteria:
+- Context Pack includes project goal, current product direction, completed work, changed files, important decisions, blockers, next task, acceptance criteria, do-not-do rules, and next prompt.
+- The protocol does not depend on literal `/clear` automation.
+- Human approval remains required before risky continuation.
+
+### T031 — Obsidian Knowledge Memory Export
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P2
+
+Goal:
+- Export durable development insights as Obsidian-compatible Markdown.
+
+Acceptance criteria:
+- Export supports development insights, technical decisions, failed attempts, successful prompt patterns, agent performance notes, handoffs, and reusable checklists.
+- Generated Markdown includes useful frontmatter where appropriate.
+- No external sync or vault automation is required in the first implementation.
+
+### T032 — Hermes Background Worker Positioning
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P2
+
+Goal:
+- Represent Hermes as an optional background/status/memory worker without making it the primary coding brain.
+
+Acceptance criteria:
+- Hermes is suitable for monitoring, recurring summaries, Obsidian note generation, development log summarization, and retry candidate discovery.
+- Hermes is explicitly blocked from high-risk autonomous code changes, DB migrations, deployment, and auto-merge without explicit user approval.
+
+## Phase 10 — Vibe Kanban Workbench Bridge
+
+Status: TODO
+
+Strategic direction:
+- Agent Control Room remains the orchestration brain/control tower.
+- Vibe Kanban becomes the execution workbench.
+- Do not expand internal kanban/session/diff UI when Vibe Kanban can provide the stronger surface through a stable bridge.
+
+### T033 — Vibe Kanban Open Workspace/Card Link
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- After sending a task to Vibe Kanban, store enough returned metadata to let the user open the created Vibe Kanban card/workspace from Agent Control Room.
+
+Acceptance criteria:
+- `SendToVibeKanbanButton` shows a durable open link after successful issue creation.
+- The link target is stored with the related project/task where feasible.
+- Missing `VIBE_KANBAN_URL` or mock mode produces clear UI copy instead of a broken link.
+- `npm run typecheck` and `npm run lint` pass.
+
+### T034 — Vibe Kanban Workspace/Session Launch Adapter
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Confirm the smallest stable Vibe Kanban API/MCP surface for starting or opening an execution workspace/session.
+
+Acceptance criteria:
+- Document the confirmed API/MCP endpoints and required IDs.
+- Add a small isolated adapter; do not couple orchestration logic to Vibe Kanban internals.
+- Claude Code/Codex executor hints are preserved.
+- Antigravity remains manual unless a reliable native executor exists.
+
+### T035 — Vibe Kanban Result Import
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- Import or paste a Vibe Kanban execution result back into Agent Control Room and convert it into a session report, diff summary, task status update, and next prompt.
+
+Acceptance criteria:
+- User can provide a Vibe Kanban result payload or summary for a specific task.
+- Imported result updates the related `FeaturePlan` task conservatively.
+- Generated next prompt includes changed files, remaining work, and acceptance criteria.
+- No auto-merge or fully autonomous continuation is added.

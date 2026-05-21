@@ -1,0 +1,209 @@
+{
+  "examples": [
+    {
+      "id": "session-001",
+      "kind": "session-summary",
+      "title": "Session Summary: Agent Control Room MVP Phase",
+      "description": "Example session summary for Agent Control Room development.",
+      "createdAt": "2026-05-21T10:00:00Z",
+      "updatedAt": "2026-05-21T10:00:00Z",
+      "content": {
+        "sections": [
+          {
+            "id": "summary",
+            "title": "Session Summary",
+            "level": 2,
+            "body": "Development session focused on Agent Control Room MVP Phase 9.",
+            "format": "markdown"
+          },
+          {
+            "id": "completed",
+            "title": "Completed",
+            "level": 2,
+            "body": "- Implemented roadmap-first control tower architecture\n- Created agent status panel with live availability tracking\n- Built task decomposition and agent routing\n- Generated senior dev prompts for Claude Code",
+            "format": "checklist"
+          },
+          {
+            "id": "next",
+            "title": "Next Steps",
+            "level": 2,
+            "body": "- Implement Context Pack workflow\n- Build Obsidian note export\n- Integrate Vibe Kanban deeper\n- Add handoff pack generation",
+            "format": "checklist"
+          }
+        ]
+      }
+    },
+    {
+      "id": "context-001",
+      "kind": "context-pack",
+      "title": "Context Pack: Agent Control Room",
+      "description": "Handoff context for Agent Control Room project continuation.",
+      "createdAt": "2026-05-21T10:00:00Z",
+      "updatedAt": "2026-05-21T10:00:00Z",
+      "content": {
+        "sections": [
+          {
+            "id": "project",
+            "title": "Project Context",
+            "level": 2,
+            "body": "Agent Control Room is an AI Development Control Tower for non-developer PMs. It converts product direction into roadmaps, tasks, and agent routing with human-in-the-loop approval gates.",
+            "format": "markdown"
+          },
+          {
+            "id": "completed-phases",
+            "title": "Completed Phases",
+            "level": 2,
+            "body": "- Phase 1-8: Core orchestration, routing, prompts, execution runner\n- Phase 9 in progress: Roadmap-first UI refactor",
+            "format": "checklist"
+          },
+          {
+            "id": "remaining",
+            "title": "Remaining Work",
+            "level": 2,
+            "body": "- Context Pack and Obsidian memory workflows\n- Vibe Kanban deeper integration\n- Production hardening and monitoring",
+            "format": "checklist"
+          },
+          {
+            "id": "decisions",
+            "title": "Important Decisions",
+            "level": 2,
+            "body": "- Hermes is background-only, never auto-executed\n- Vibe Kanban is execution workbench, not orchestration brain\n- All execution requires human approval gates\n- MVP uses local JSON storage, Supabase as upgrade path",
+            "format": "markdown"
+          }
+        ]
+      }
+    },
+    {
+      "id": "handoff-001",
+      "kind": "handoff-pack",
+      "title": "Handoff: Claude Code → Codex",
+      "description": "Example handoff from Claude Code to Codex for bounded implementation.",
+      "createdAt": "2026-05-21T10:00:00Z",
+      "updatedAt": "2026-05-21T10:00:00Z",
+      "content": {
+        "sections": [
+          {
+            "id": "handoff",
+            "title": "Handoff Instructions",
+            "level": 2,
+            "body": "Handoff from Claude Code (architecture/reasoning) to Codex (bounded implementation) for task packet rendering.",
+            "format": "markdown"
+          },
+          {
+            "id": "changed",
+            "title": "Changed Files",
+            "level": 2,
+            "body": "- lib/hermes/types.ts (new)\n- lib/hermes/task-packets.ts (new)\n- app/hermes-packets/page.tsx (new)\n- data/hermes-task-packets.json (new)",
+            "format": "code"
+          },
+          {
+            "id": "next-prompt",
+            "title": "Next Prompt for Codex",
+            "level": 2,
+            "body": "Implement the HermesPacketCard component to display packet drafts in a grid with kind selector. Use shadcn/ui Card. Show copy-to-clipboard button using lucide-react Copy icon. Do not add any execution logic.",
+            "format": "code"
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-001",
+      "kind": "failed-task-review",
+      "title": "Failed Task Review: Context Pack Markdown Export",
+      "description": "Example review of a failed attempt at context pack rendering.",
+      "createdAt": "2026-05-21T10:00:00Z",
+      "updatedAt": "2026-05-21T10:00:00Z",
+      "content": {
+        "sections": [
+          {
+            "id": "task",
+            "title": "Task",
+            "level": 2,
+            "body": "Render Context Pack as user-friendly Markdown with proper heading hierarchy.",
+            "format": "markdown"
+          },
+          {
+            "id": "error",
+            "title": "Error Summary",
+            "level": 2,
+            "body": "Rendered Markdown had improper heading levels (used H1 for all sections, should vary H2-H3).",
+            "format": "code"
+          },
+          {
+            "id": "root-cause",
+            "title": "Root Cause Analysis",
+            "level": 2,
+            "body": "The packet section structure used a fixed heading level, not the section.level field. Template did not follow the existing design pattern in renderHermesPacketMarkdown().",
+            "format": "markdown"
+          },
+          {
+            "id": "recommendations",
+            "title": "Recommendations",
+            "level": 2,
+            "body": "- Always use section.level from packet definition\n- Test Markdown output for proper heading hierarchy\n- Validate against Obsidian Markdown compatibility",
+            "format": "checklist"
+          }
+        ]
+      }
+    },
+    {
+      "id": "research-001",
+      "kind": "background-research",
+      "title": "Background Research: Hermes Design Patterns",
+      "description": "Research on effective patterns for background worker systems.",
+      "createdAt": "2026-05-21T10:00:00Z",
+      "updatedAt": "2026-05-21T10:00:00Z",
+      "content": {
+        "sections": [
+          {
+            "id": "research",
+            "title": "Research: Hermes Design Patterns",
+            "level": 2,
+            "body": "Investigation of how to design safe background worker systems that don't execute automatically.",
+            "format": "markdown"
+          },
+          {
+            "id": "findings",
+            "title": "Key Findings",
+            "level": 2,
+            "body": "- Separate packet generation (safe) from execution (gated)\n- Use explicit language: 'generate', 'preview', 'copy' instead of 'run', 'execute'\n- Store packets as static data, not active tasks\n- Require manual review before any agent work\n- UI should emphasize draft/preview state clearly",
+            "format": "markdown"
+          },
+          {
+            "id": "sources",
+            "title": "Sources",
+            "level": 2,
+            "body": "- CLAUDE.md: Agent Control Room orchestration principles\n- AGENT_STATE.md: Hermes experimental status and design intent\n- /plan page: Example of static preview patterns (no auto-execution)",
+            "format": "markdown"
+          }
+        ]
+      }
+    },
+    {
+      "id": "obsidian-001",
+      "kind": "obsidian-note",
+      "title": "Note: Hermes as Background Memory System",
+      "description": "Obsidian-compatible insight note on Hermes design principles.",
+      "createdAt": "2026-05-21T10:00:00Z",
+      "updatedAt": "2026-05-21T10:00:00Z",
+      "content": {
+        "sections": [
+          {
+            "id": "insight",
+            "title": "Hermes as Background Memory System",
+            "level": 2,
+            "body": "Hermes is designed as a background worker for summaries, memory, monitoring, and context packing. It should never auto-execute. Instead, it generates task packets (drafts) that users review, modify, and manually submit to other agents. This keeps the human in control while reducing context loss.",
+            "format": "markdown"
+          },
+          {
+            "id": "tags",
+            "title": "Tags",
+            "level": 2,
+            "body": "#hermes #background-worker #memory-system #human-approval #agent-control-room",
+            "format": "markdown"
+          }
+        ]
+      }
+    }
+  ]
+}

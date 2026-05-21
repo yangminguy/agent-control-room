@@ -1,22 +1,26 @@
 # AGENT_STATE.md — Agent Control Room
 
 ## current_goal
-Build Agent Control Room as a Human-in-the-loop AI Development Orchestrator — a system where a PM inputs a product goal, the system translates it into a functional plan, delegates tasks to appropriate AI coding agents (Claude Code, Codex, Antigravity), tracks execution, analyzes git diffs, and orchestrates the next step until the feature is complete.
+Build Agent Control Room as an AI Development Control Tower for non-developer PMs — a system where a user inputs an idea or product direction, the system translates it into requirements and a visual roadmap, decomposes tasks, routes work to the right AI agent or workbench, compiles senior-dev prompts, tracks execution, analyzes results/diffs, marks completion, handles token/context handoffs, and saves durable development insights.
 
 ## active_phase
-Phase 5 — Autonomous Loop Complete
+Phase 9 — Roadmap-First Control Tower UX (T027 Complete, T027-Hermes Complete)
 
 ## active_task
-Phases 1-4 fully implemented. T016-T022 are complete. T022 (Autonomous Execution Loop) enables human-in-the-loop execution: complete → analyze → approve (Continue/Stop). Next focus is MVP refinements and Vibe Kanban integration.
+Phases 1-8 are implemented. Phase 9 foundation complete:
+- T027 `/plan` Visual Development Roadmap Control Panel ✅
+- T027-Hermes Hermes Packet Draft UI (safe, static generation) ✅
+- Next: T028 Senior Dev Prompt Compiler Structure, T029 Agent Availability Manager
+- Later: T032 Hermes CLI Spike, Phase 10 Vibe Kanban Bridge
 
 ## current_agent
 Claude Code
 
 ## recommended_next_agent
-Codex or Design Team
+Antigravity, Claude Code, or Codex
 
 ## reason
-Next phase is refinement and integration. Codex can improve UX (auto-refresh Kanban, better progress display). Design team should review user flow for MVP polish before broader use.
+Antigravity is a fit for the roadmap-first `/plan` UI, Claude Code is a fit for prompt/context architecture, and Codex is a fit for bounded data/model updates. Vibe Kanban bridge work should follow after the control-tower UX is clearer.
 
 ## agent_statuses
 | Agent | Status | Reason |
@@ -24,11 +28,14 @@ Next phase is refinement and integration. Codex can improve UX (auto-refresh Kan
 | claude-code | available | Best for architecture, diff analysis, and complex reasoning |
 | codex | available | Best for bounded implementation and type-safe code |
 | antigravity | available | Best for visual/product UI iteration |
+| hermes | experimental | Optional background/status/memory worker, not primary coding brain |
 
 ## blockers
-- `npm install` reported 5 audit vulnerabilities; not blocking MVP usage but should be reviewed before broader use.
 - Vibe Kanban upstream README says the project is sunsetting; treat it as local-first base/reference.
-- Vibe Kanban local server is currently unreachable; the bridge is using `MockVibeKanbanClient`.
+- Vibe Kanban may be offline during normal Agent Control Room use; keep `MockVibeKanbanClient` as development fallback.
+- Roadmap-first `/plan` UI is documented but not fully implemented.
+- Context Pack and Obsidian memory workflows are documented but not fully implemented.
+- Stable Vibe Kanban workspace/session/result readback APIs still need to be confirmed.
 
 ## assumptions
 - MVP uses Next.js App Router + TypeScript + Tailwind.
@@ -39,36 +46,41 @@ Next phase is refinement and integration. Codex can improve UX (auto-refresh Kan
 - `RunnerLogView` is wired into `/plan` task cards for Claude Code and Codex tasks.
 - A new git branch is always created before any agent execution.
 - Agent token status is manually set by the user in MVP.
-- Vibe Kanban (or equivalent open-source) handles kanban visualization only — it is not the execution engine.
-- Agent Control Room is the independent orchestration layer on top of any kanban base.
+- Vibe Kanban handles detailed kanban/workspace/session/diff surfaces where possible.
+- Agent Control Room is the independent orchestration brain above any execution workbench.
+- `/plan` should become a Visual Development Roadmap Control Panel, not a full Vibe Kanban replacement.
+- Hermes is optional for background summaries/memory/monitoring only.
 
 ## next_task
-MVP Refinement: Improve Loop UX (auto-refresh, better feedback), integrate Vibe Kanban issue creation, add error recovery flows.
+Roadmap-First Control Tower UX: make `/plan` show the product journey, completion check marks, current task, next action, blocked decisions, responsible agent, and acceptance criteria; then align generated prompts and handoffs to the Senior Dev Prompt Compiler structure.
 
 ## next_prompt_target
-Codex or Design
+Antigravity for UI, Claude Code for prompt/context architecture, or Codex for bounded model updates
 
 ## next_prompt
 ```txt
-MVP Refinement & Integration
+Roadmap-First Control Tower UX
 
 Current state:
-- T022 (Autonomous Loop) is complete
-- Core execution flow: Task → Run → Analyze → Continue/Stop → Next Task
-- All major features implemented: routing, execution, analysis, approval loop
+- Agent Control Room is now defined as an AI Development Control Tower for non-developer PMs.
+- /plan should be a Visual Development Roadmap Control Panel, not only a kanban board.
+- Prompt and handoff generation remain submodules.
+- Vibe Kanban remains the execution workbench and should not be cloned.
 
 Next priorities:
-1. UX Refinement: Auto-refresh Kanban board after Continue, better progress indicators
-2. Error Recovery: Handle analyzer failures, network errors, gracefully
-3. Vibe Kanban Bridge: Real issue creation (currently MockClient)
-4. Security/Performance: Audit git operations, optimize analyzer queries
+1. Reframe /plan around roadmap stages, completion checks, current task, next action, responsible agent, blockers, and acceptance criteria.
+2. Standardize generated prompts with Senior Dev Prompt Compiler sections.
+3. Add Context Pack workflow for token/context reset.
+4. Prepare Obsidian-compatible Markdown export for insights and handoffs.
+5. Keep risky execution human-approved.
 
 Acceptance criteria:
-- User sees immediate feedback after Continue button
-- No hanging states or silent failures
-- Clean error messages for failures
-- Kanban board reflects task state changes without page refresh
+- A non-developer can understand total product progress at a glance.
+- Completed roadmap stages show check marks.
+- Active stages show responsible agent, current task, and next action.
+- Blocked stages show the exact user decision needed.
+- Generated prompts include goal, context, scope, non-goals, files, acceptance criteria, checks, and handoff instructions.
 ```
 
 ## last_updated
-2026-05-20 (T022 completed — MVP feature-complete)
+2026-05-21 (strategic direction updated — AI Development Control Tower, roadmap-first UX)
