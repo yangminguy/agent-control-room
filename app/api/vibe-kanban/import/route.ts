@@ -1,16 +1,5 @@
 import { NextResponse } from "next/server";
-
-function normalizeWorkspaceResult(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return "";
-
-  // Prepend a standard header so ResultReviewPanel can parse it consistently
-  const lines = trimmed.split("\n");
-  const hasHeader = lines[0].startsWith("#") || lines[0].startsWith("##");
-  if (hasHeader) return trimmed;
-
-  return `## Vibe Kanban Result\n\n${trimmed}`;
-}
+import { normalizeWorkspaceResult } from "@/lib/integrations/vibe-kanban-import";
 
 export async function POST(request: Request) {
   try {
@@ -41,6 +30,9 @@ export async function POST(request: Request) {
       rawResult,
       source: "vibe-kanban" as const,
       issueId,
+      reviewOnly: true,
+      message:
+        "Imported Vibe Kanban result for review only. No execution, approval bypass, roadmap update, or task completion was triggered.",
     });
   } catch (error: any) {
     console.error("[VibeKanban Import API] Error:", error);

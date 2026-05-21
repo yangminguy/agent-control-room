@@ -18,10 +18,7 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
   const { agent, prompt, cwd, onLog, onComplete } = options;
 
   if (agent === "antigravity") {
-    const msg = "[ERROR] Antigravity does not have a CLI interface. Generate a copy-ready prompt instead.";
-    onLog(msg);
-    onComplete(1);
-    return;
+    throw new Error("Antigravity CLI not found. Generate a copy-ready prompt instead.");
   }
 
   let cmd: string;
@@ -77,10 +74,7 @@ function buildCommand(
   }
 
   if (agent === "codex") {
-    // Codex CLI: 설치되지 않음 (MVP 범위 외)
-    throw new Error(
-      "Codex CLI is not available in this environment. Generate a copy-ready prompt for manual execution.",
-    );
+    throw new Error("Codex CLI not found. Install via 'npm install -g @anthropic/codex' or similar.");
   }
 
   throw new Error(`Unsupported agent for CLI: ${agent}`);

@@ -15,6 +15,8 @@ This roadmap defines three safe integration patterns that progressively enable H
 
 **Current State:** Pattern A (static generator) is complete and in production. Pattern B and C are documented for future phases.
 
+**Safety clarification:** This document is roadmap-only. It does not approve Hermes CLI execution, subprocess wiring, deployment hooks, DB migrations, auto-merge, git push, or code-running behavior. Any future Hermes CLI work must pass a separate user approval gate and keep Hermes limited to monitoring, recording, summarizing, context/handoff pack generation, Obsidian memory writing, and failed-task review.
+
 ---
 
 ## 1. Current State Analysis

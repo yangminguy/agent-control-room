@@ -8,6 +8,17 @@ import {
   extractChangedFilesFromResult,
   generateNextActions,
 } from "@/lib/orchestration/result-classifier";
+import { type AgentResult, type DispatchJob, type ResultStatus } from "@/lib/types";
+
+// ── AgentResult badge config ───────────────────────────────
+
+const RESULT_STATUS_BADGE: Record<ResultStatus, { label: string; cls: string }> = {
+  pass: { label: "Pass", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
+  minor_fix: { label: "Minor Fix", cls: "bg-yellow-900 text-yellow-300 border-yellow-700" },
+  qa_needed: { label: "QA Needed", cls: "bg-orange-900 text-orange-300 border-orange-700" },
+  blocked: { label: "Blocked", cls: "bg-red-900 text-red-300 border-red-700" },
+  safety_violation: { label: "Safety Violation", cls: "bg-red-950 text-red-200 border-red-800 font-bold" },
+};
 
 const CLASSIFICATION_CONFIG: Record<
   ResultClassification,
@@ -45,7 +56,12 @@ const AGENT_SUGGESTION: Record<ResultClassification, string> = {
 
 const ALL_CLASSIFICATIONS: ResultClassification[] = ["Pass", "MinorFix", "QA", "Blocked"];
 
-export function ResultReviewPanel() {
+interface ResultReviewPanelProps {
+  agentResult?: AgentResult;
+  dispatchJob?: DispatchJob;
+}
+
+export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPanelProps = {}) {
   const [rawResult, setRawResult] = useState("");
   const [classification, setClassification] =
     useState<ResultClassification | null>(null);
@@ -67,7 +83,7 @@ export function ResultReviewPanel() {
       const classified = classifyResult(rawResult);
       setClassification(classified);
       setChangedFiles(extractChangedFilesFromResult(rawResult));
-      setNextActions(generateNextActions(classified));
+      setNextActions(generateNextActions(classified, rawResult));
       setIsRetryCandidate(classified === "Blocked");
     } else {
       setClassification(null);
@@ -243,7 +259,7 @@ export function ResultReviewPanel() {
                       key={cls}
                       onClick={() => {
                         setClassification(cls);
-                        setNextActions(generateNextActions(cls));
+                        setNextActions(generateNextActions(cls, rawResult));
                         setIsRetryCandidate(cls === "Blocked");
                       }}
                       className={`px-3 py-1.5 rounded border text-xs font-medium transition-colors ${
@@ -354,6 +370,64 @@ export function ResultReviewPanel() {
             )}
           </div>
         </>
+      )}
+
+      {/* AgentResult section (Phase 13 integration) */}
+      {agentResult && (
+        <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
+          <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+            Collected Agent Result
+          </p>
+
+          {/* Result status badge + dispatch job link */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {(() => {
+              const cfg = RESULT_STATUS_BADGE[agentResult.resultStatus];
+              return (
+                <span className={`inline-flex items-center px-3 py-1 rounded border text-xs font-semibold ${cfg.cls}`}>
+                  {cfg.label}
+                </span>
+              );
+            })()}
+            <span className="text-xs text-text-secondary">
+              Job:{" "}
+              <span className="font-mono text-text-primary">{agentResult.dispatchJobId}</span>
+              {dispatchJob && (
+                <span className="ml-2">· Agent: {dispatchJob.agentId}</span>
+              )}
+            </span>
+          </div>
+
+          {/* Summary */}
+          {agentResult.extractedSummary && (
+            <div>
+              <p className="text-xs font-semibold text-text-secondary mb-1">Summary</p>
+              <p className="text-sm text-text-primary">{agentResult.extractedSummary}</p>
+            </div>
+          )}
+
+          {/* Changed files */}
+          {agentResult.changedFiles && agentResult.changedFiles.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-text-secondary mb-1">
+                Changed Files — {agentResult.changedFiles.length}
+              </p>
+              <ul className="space-y-1 max-h-32 overflow-y-auto">
+                {agentResult.changedFiles.map((f) => (
+                  <li key={f} className="flex items-center gap-1.5 text-xs text-text-secondary">
+                    <FileCode2 className="w-3 h-3 shrink-0" />
+                    <span className="font-mono truncate">{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Timestamp */}
+          <p className="text-xs text-text-secondary">
+            Collected: {new Date(agentResult.timestamp).toLocaleString()}
+          </p>
+        </div>
       )}
 
       {/* Empty state */}

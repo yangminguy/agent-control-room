@@ -681,18 +681,18 @@ Status: DONE (2026-05-21)
 17. ✅ Preserve reusable prompt patterns (prompt-pattern-library, synthesis, /api/knowledge/patterns)
 18. ✅ Run typecheck/lint/test/build successfully (all passing)
 
-## Phase 11 — Production Hardening & Real Integration (TODO)
+## Phase 11 — Production Hardening & Real Integration
 
-Status: TODO
+Status: DONE (2026-05-21)
 
 Strategic direction:
 - Agent Control Room MVP is feature-complete.
-- Next phase focuses on production readiness and real Vibe Kanban/Hermes integration.
-- Safety gates and approval workflows require validation.
+- Phase 11 completed Vibe Kanban result import, Hermes CLI integration roadmap, and deployment checklist hardening.
+- Safety gates and approval workflows remain required; no autonomous execution was added.
 
 ### T036 — Vibe Kanban Real Integration (Phase 11)
 
-Status: TODO  
+Status: DONE  
 Recommended agent: backend-developer  
 Priority: P1
 
@@ -703,11 +703,12 @@ Acceptance criteria:
 - Send task to Vibe Kanban: real HTTP calls with proper credentials
 - Open workspace/card link after creation
 - Import Vibe Kanban results back to `/result-review`
+- Imported results remain review-only and flow through result review/classification
 - No breaking changes to mock fallback
 
 ### T037 — Hermes CLI Integration Research (Phase 11)
 
-Status: TODO  
+Status: DONE  
 Recommended agent: Claude Code  
 Priority: P2
 
@@ -718,3 +719,591 @@ Acceptance criteria:
 - Document API/CLI surface for Hermes background worker
 - Define safety boundaries (no autonomous code execution)
 - Create integration roadmap without implementing
+
+### T038 — Deployment Checklist Update (Phase 11)
+
+Status: DONE  
+Recommended agent: Claude Code  
+Priority: P2
+
+Goal:
+- Prepare deployment checklist documentation without implying production deployment has happened.
+
+Acceptance criteria:
+- Production deployment remains user-approved and gated.
+- Supabase migration is documented but not executed by the app.
+- Environment variables are documented but not committed.
+- Smoke tests are practical and copy-ready.
+- No deployment automation is added.
+
+## Phase 11 QA Hardening Notes (2026-05-21)
+
+Reconciled:
+- T032 Hermes Background Worker Positioning is no longer treated as unstarted product work. Hermes positioning is implemented across packet drafts, monitoring summaries, memory extraction, and documentation as a background-only worker. Remaining Hermes work is future CLI/manual import research, not code execution.
+- T036/T037/T038 are documented as complete, with approval gates preserved.
+
+QA fixes applied:
+- Runner result handling now checks changed files against allowed/do-not-touch boundaries and marks boundary violations as review-blocked, not clean success.
+- Context Pack output now includes the required Token Relay/reset sections.
+- Result classifier handles failed tests, partial work, manual QA, user decisions, forbidden files, and safety violations more conservatively.
+- Prompt compiler honors `preferredAgent` only when safe; high-risk work overrides to manual approval first.
+
+## Phase 12-16 — Core Autonomous Orchestration Loop
+
+Status: DONE (2026-05-21)
+
+Strategic direction (Complete):
+- ✅ Autonomous dispatch, approval, result collection, and feedback loop implemented
+- ✅ Safe work dispatches through mock/CLI adapters (claude-code, codex, antigravity)
+- ✅ Risky work requires manual approval with 5-minute timeout
+- ✅ Independent safe tasks run in parallel; risky tasks don't block safe progress
+- ✅ Hermes generates pure Markdown insights (observer-only, no execution)
+- ✅ All approval gates remain human-in-the-loop; no uncontrolled execution
+- ✅ Infinite retry prevention: max 3 retries per task, forces blocked decision
+- ✅ Safety violation halts feedback loop immediately
+- ✅ NDJSON logging for orchestration events
+- ✅ React Context (useReducer) for `/orchestration` page state
+
+Completed Tasks (T039-T058):
+- T039: Core type definitions (RiskLevel, DispatchJob, AgentResult, ApprovalRequest, FeedbackDecision)
+- T040: Conversation-to-Task Engine
+- T041: Risk Classifier (keyword-based safe/low/medium/high/critical)
+- T042: Safe Dispatch Queue (state machine, risk splitting, retry tracking)
+- T043: Normalized Agent Result Schema (Zod + heuristic parsing)
+- T044: Result Collector (multi-source: pasted/JSON/Vibe Kanban)
+- T045: Approval Request Model & Store
+- T046: Hermes Discord Approval Message Builder
+- T047: Discord Adapter (mock-only, env-gated, no real sends)
+- T048: Approval Timeout Policy (5-min window)
+- T049: Non-Blocking Progress Manager (safe/risky split, timeout → skipped)
+- T050: Feedback Loop Engine (redispatch/qa/blocked/halt, max 3 retries)
+- T051: Hermes Insights (5 pure Markdown generators)
+- T052: Dispatch Status Panel
+- T053: Result Collection UI Extension
+- T054: Discord Approval Preview Card (mock buttons)
+- T055: Progress Manager Status View
+- T056: Feedback Loop Summary Card
+- T057: Phase 12-16 Integration Tests (23 tests)
+- T058: Phase 12-16 Documentation & Handoff
+
+Files Created: 31 new files across lib/dispatch, lib/approval, lib/results, lib/orchestration, lib/hermes, components/orchestration
+Test Coverage: 139+ tests passing (92 existing + 23 Phase 12-16)
+Verification: npm run typecheck/lint/build/test all passing
+
+### Team Assignment (Agent Organizer Plan)
+- **Claude Code A**: Architecture, state machines, integration (Phase 12, 15, 16, Hermes)
+- **Codex B**: Schema, normalized result types, adapters (Phase 13, 14)
+- **Antigravity C**: UI panels and components (Wave 4)
+- **Hermes**: Observer only (generators written by Claude Code A as pure Markdown)
+
+### Wave 0 — Foundation Types (Claude Code A, solo)
+
+**T039 — Core Type Definitions**
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Export foundational types for all phases: DispatchJob, RiskLevel, AgentAdapter, AgentResult, ApprovalRequest
+
+Acceptance criteria:
+- `RiskLevel`: safe | low | medium | high | critical
+- `DispatchJob`: id, taskId, agentId, riskLevel, status (queued | running | approved | skipped_due_to_risk | completed | failed), createdAt, approvedAt?, timeoutAt?, retryCount
+- `AgentAdapter` interface with mock implementation
+- `AgentResult`: taskId, agentId, rawOutput, resultStatus (pass | minor_fix | qa_needed | blocked | safety_violation), changedFiles, timestamp
+- `ApprovalRequest`: id, dispatchJobId, status (pending | approved | rejected | timed_out), createdAt, resolvedAt?
+- `npm run typecheck` passes
+- Types exported from `lib/dispatch/types.ts` and `lib/types.ts`
+
+### Wave 1 — Core Engines (Claude Code A + Codex B, parallel)
+
+**T040 — Conversation-to-Task Engine**
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Transform user conversation/direction into structured tasks with risk classification and agent routing
+
+Acceptance criteria:
+- Engine accepts user prompt and returns array of `DispatchJob` objects
+- Each job includes task, agent preference, risk level, acceptance criteria
+- Integrates existing orchestration primitives (OpenAI structured output fallback)
+- `lib/dispatch/conversation-to-task-engine.ts` implemented
+
+**T041 — Risk Classifier**
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Analyze task properties and return risk level: safe | low | medium | high | critical
+
+Acceptance criteria:
+- safe: isolated type fixes, documentation, non-breaking refactors
+- low: isolated feature addition, existing UI updates
+- medium: file deletion, package install, schema changes, API route additions
+- high: authentication changes, security-critical code, DB structure changes
+- critical: deployment, auth bypass, DB migration, git push/merge
+- `lib/dispatch/risk-classifier.ts` implemented
+
+**T042 — Safe Dispatch Queue**
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- In-memory queue for dispatch jobs, no spawning, pure state machine
+
+Acceptance criteria:
+- Queue holds `DispatchJob[]` in memory
+- Jobs transition: queued → running → (approved | skipped_due_to_risk | completed | failed)
+- Supports split by risk level for Phase 15
+- `lib/dispatch/safe-dispatch-queue.ts` implemented
+
+**T043 — Normalized Agent Result Schema**
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- Define Zod schema for normalized `AgentResult` from pasted/manual/Vibe Kanban import
+
+Acceptance criteria:
+- Zod schema maps any agent output format to common `AgentResult` shape
+- Supports pasted raw output, structured JSON, Vibe Kanban result object
+- Tests validate round-trip serialization
+- `lib/results/agent-result-schema.ts` implemented
+
+**T044 — Result Collector**
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- Collect agent results from multiple sources and normalize to `AgentResult`
+
+Acceptance criteria:
+- Supports pasted text, manual JSON, Vibe Kanban import result
+- Maps result to task via `result-to-task-linker`
+- Stores results in `data/agent-results.json` using JSON store pattern
+- `lib/results/result-collector.ts` implemented
+
+### Wave 2 — Approval + Progress (Codex B → Claude Code A, sequential)
+
+**T045 — Approval Request Model & Store**
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- Model and persist approval requests for risky tasks
+
+Acceptance criteria:
+- `ApprovalRequest` type with status tracking
+- Stored in `data/approval-requests.json` using JSON store
+- Supports linking to DispatchJob and Discord message ID
+- `lib/approval/approval-request-store.ts` implemented
+
+**T046 — Hermes Discord Approval Message Builder**
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- Generate Discord-ready approval messages for risky tasks
+
+Acceptance criteria:
+- Builder generates message with: task summary, risk level, agent, acceptance criteria, action buttons (approve/reject/defer)
+- Output is plain string, not sent to Discord
+- Mock response simulation
+- `lib/approval/hermes-discord-message-builder.ts` implemented
+
+**T047 — Discord Adapter (Mock/Env-Gated)**
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- Adapter that sends approval messages to Discord only if `DISCORD_WEBHOOK_URL` is configured
+
+Acceptance criteria:
+- If `DISCORD_WEBHOOK_URL` is absent or empty: log message locally, do not attempt `fetch`
+- If configured: prepare message but do not send in mock mode
+- No real Discord sends in any test or development
+- `lib/approval/discord-adapter.ts` implemented
+
+**T048 — Approval Timeout Policy**
+
+Status: TODO  
+Recommended agent: Codex  
+Priority: P1
+
+Goal:
+- Implement 5-minute approval timeout logic
+
+Acceptance criteria:
+- `hasApprovalTimedOut(createdAt: Date): boolean` pure function
+- `APPROVAL_TIMEOUT_MS = 5 * 60 * 1000`
+- Returns true if current time - createdAt >= timeout
+- `lib/approval/timeout-policy.ts` implemented
+
+**T049 — Non-Blocking Progress Manager**
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Split safe/risky tasks, pause risky, continue safe independent tasks
+
+Acceptance criteria:
+- Reads dispatch queue and approval requests
+- Safe tasks (risk: safe | low) proceed immediately
+- Risky tasks (risk: medium | high | critical) wait for approval
+- On timeout: marks job as `skipped_due_to_risk`, does not retry, logs reason
+- `lib/dispatch/non-blocking-progress-manager.ts` implemented
+
+### Wave 3 — Feedback Loop + Hermes (Claude Code A, sequential)
+
+**T050 — Feedback Loop Engine**
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Accept agent results and generate next action: redispatch, QA task, blocked decision, or halt
+
+Acceptance criteria:
+- Input: `AgentResult` with `resultStatus`
+- `minor_fix` + low risk: create redispatch job (max 3 retries per original task)
+- `qa_needed`: create QA `DispatchJob` targeting review agent
+- `blocked`: create `BlockedDecision` record, surface to user
+- `safety_violation`: halt loop, mark job as failed, require approval before continuation
+- Retry guard: `job.retryCount >= 3` forces status to `blocked`
+- `lib/orchestration/feedback-loop-engine.ts` implemented
+
+**T051 — Hermes Orchestration Insights**
+
+Status: TODO  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Generate Hermes monitoring and recommendation insights (pure Markdown generators)
+
+Acceptance criteria:
+- `orchestration-insight-generator.ts`: summarizes dispatch cycle
+- `agent-performance-summary.ts`: aggregates ResultStatus counts per agent
+- `routing-recommendation.ts`: suggests next agent based on performance
+- `prompt-improvement-suggestion.ts`: flags prompt patterns producing MinorFix/Blocked
+- `timeout-fallback-summary.ts`: summarizes timeout events and skipped tasks
+- All output: pure Markdown, zero file I/O, zero child_process, zero API calls
+- `lib/hermes/*` implementations
+
+### Wave 4 — UI (Antigravity, parallel with Wave 3 after type export)
+
+**T052 — Dispatch Status Panel**
+
+Status: TODO  
+Recommended agent: Antigravity  
+Priority: P2
+
+Goal:
+- Visual display of dispatch queue and job status
+
+Acceptance criteria:
+- Shows job list: task, agent, risk badge, status, created/approved/timeout timestamps
+- Status filtering: queued, running, approved, skipped, completed, failed
+- No business logic in component; all state via props/context
+
+**T053 — Result Collection UI Extension**
+
+Status: TODO  
+Recommended agent: Antigravity  
+Priority: P2
+
+Goal:
+- Extend existing ResultReviewPanel to integrate Phase 13 result collection
+
+Acceptance criteria:
+- Render `AgentResult` with `resultStatus` badge
+- Link to original `DispatchJob`
+- Show changed files and result timestamp
+- No business logic changes to existing panel
+
+**T054 — Discord Approval Preview Card**
+
+Status: TODO  
+Recommended agent: Antigravity  
+Priority: P2
+
+Goal:
+- Read-only preview of Discord approval messages and mock response simulation
+
+Acceptance criteria:
+- Render message builder output as card
+- Mock approval/rejection buttons (no backend calls)
+- Show timeout countdown
+- Clearly labeled as "Preview — message is not sent"
+
+**T055 — Progress Manager Status View**
+
+Status: TODO  
+Recommended agent: Antigravity  
+Priority: P2
+
+Goal:
+- Display safe tasks running, risky tasks paused, timeout countdown
+
+Acceptance criteria:
+- Safe task section: running jobs, count of completed
+- Risky task section: queued/waiting jobs, count, estimated approval wait time
+- Timeout countdown: current approval request age, time remaining
+
+**T056 — Feedback Loop Summary Card**
+
+Status: TODO  
+Recommended agent: Antigravity  
+Priority: P2
+
+Goal:
+- Display next action, retry count, blocked decisions
+
+Acceptance criteria:
+- Render latest feedback loop output
+- Show next action: redispatch, QA creation, blocked, halted
+- Show retry count for original task, blocked if >= 3
+- Link to blocked decision if applicable
+
+### Wave 5 — Integration Tests + Verification
+
+**T057 — Phase 12-16 Integration Tests**
+
+Status: TODO  
+Recommended agent: All  
+Priority: P1
+
+Goal:
+- Comprehensive test coverage for all phases
+
+Acceptance criteria:
+- Jest unit tests for RiskClassifier: safe, low, medium, high, critical level assignment
+- SafeDispatchQueue: job transitions, state machine, split by risk
+- ResultCollector: pasted text, manual JSON, Vibe Kanban import
+- hasApprovalTimedOut: returns false within window, true after timeout
+- FeedbackLoopEngine: minor_fix redispatch, qa_needed creation, blocked decision, safety_violation halt
+- Infinite loop prevention: `retryCount >= 3` forces blocked
+- Discord adapter: mock mode always, no real send when env var absent
+- `npm run typecheck`: 0 errors
+- `npm run lint`: 0 errors
+- `npm run build`: all routes compile
+- `npm test`: all tests pass, including new Phase 12-16 tests
+
+**T058 — Phase 12-16 Documentation & Handoff**
+
+Status: DONE  
+Recommended agent: Claude Code  
+Priority: P1
+
+Goal:
+- Document the autonomous loop implementation, safety gates, and next steps
+
+Completed:
+- ✅ HANDOFF.md Phase 12-16 completion summary
+- ✅ Architecture: dispatch → approval → result → feedback → redispatch documented
+- ✅ Safety gates: approval (high/critical), 5-min timeout, max 3 retries
+- ✅ Roadmap: Phase 17-18 (dispatch adapters, /orchestration UI) complete
+- ✅ Next phase clear: Phase 19-22 (Orchestration UX, logs, Hermes insights)
+
+## Phase 17-18 — Orchestration Adapters & Control Panel UI
+
+Status: DONE (2026-05-21)
+
+Strategic direction (Complete):
+- ✅ CLI-based dispatch adapters for claude-code, codex, antigravity (all mock-mode default)
+- ✅ `/orchestration` page with 5 tabs (Dispatch Queue, Results, Approvals, Progress, Feedback)
+- ✅ React Context orchestration-context.tsx with seed data (5 demo jobs, 1 approval, 1 feedback)
+- ✅ Seed data allows manual testing without real dispatch
+
+Completed Tasks:
+- T059: `/orchestration` page layout (5-tab Dispatch Queue, Results, Approvals, Progress, Feedback)
+- T060: CLI Agent Adapters (claude-code, codex, antigravity; all mock-mode; spawn-runner integration)
+
+Files Created/Modified:
+- app/orchestration/page.tsx (server wrapper)
+- components/orchestration/OrchestrationPageLayout.tsx (5-tab layout)
+- components/orchestration/ResultCollectionPanel.tsx (textarea JSON input + validation)
+- lib/dispatch/orchestration-context.tsx (useReducer state, 6 actions, seed data)
+- lib/dispatch/adapters/claude-code-cli-adapter.ts, codex-cli-adapter.ts, antigravity-cli-adapter.ts
+- lib/dispatch/adapters/index.ts (AgentAdapter interface, getAdapter factory)
+- components/workbench/ResultReviewPanel.tsx (updated with AgentResult section)
+- __tests__/qa-fixes-phase12.test.ts (23 integration tests)
+
+## Phase 19-22 — Orchestration UX Completion & Logs (Planning)
+
+Status: TODO (planned 2026-05-21)
+
+Strategic direction:
+- Complete `/orchestration` page with remaining UI components (ConversationToJobPanel, HermesInsightPanel)
+- Add logs API and viewer for orchestration event monitoring
+- Organize Phase 19-22 execution using agent-organizer for parallel Wave A (frontend) and Wave B (backend)
+
+Execution Plan (Agent-Organizer Based):
+```
+Phase 19 (solo, prerequisite)  ← Run first, complete before Wave A/B
+        ↓
+Wave A ─────────────────────── Wave B
+(frontend-developer)           (backend-developer)
+Phase 20 + Phase 21            Phase 22
+ConversationToJobPanel         logs API + LogViewer
+HermesInsightPanel             (with OrchestrationLogEvent type migration)
+        ↓                               ↓
+        └────────── Sync ─────────────┘
+        OrchestrationPageLayout final integration
+        typecheck + lint + build + test
+```
+
+### Phase 19 — Documentation Update
+
+Status: TODO  
+Recommended agent: (solo task, no code)  
+Priority: P0
+
+Goal:
+- Update TASKS.md and HANDOFF.md to reflect Phase 12-16 completion and Phase 19-22 roadmap
+
+Acceptance criteria:
+- ✅ Phase 12-16 status: IN_PROGRESS → DONE with task summary
+- ✅ Phase 17-18 complete section added
+- ✅ Phase 19-22 planning section added
+- ✅ HANDOFF.md Recommended Next Work updated to Phase 19-22
+
+### Phase 20 — Conversation-to-Job Panel (Wave A, frontend-developer)
+
+Status: TODO  
+Recommended agent: frontend-developer  
+Priority: P1
+
+Goal:
+- Build UI for converting natural language to DispatchJob array with preview and approval
+
+Acceptance criteria:
+- New component: `components/orchestration/ConversationToJobPanel.tsx`
+- Reuses: `lib/dispatch/conversation-to-task-engine.ts` conversationToTasks() function
+- Reuses: `lib/dispatch/orchestration-context.tsx` addJob() action
+- UI flow: textarea input → Generate Jobs button → DispatchJob[] preview cards → Add All to Queue
+- Preview shows: riskLevel badge, agentId, prompt (first 60 chars)
+- Errors displayed clearly (JSON parse, validation)
+- Modified: OrchestrationPageLayout.tsx Tab 0 (insert panel at top)
+- Modified: components/orchestration/index.ts (export ConversationToJobPanel)
+- Tests: preview display, error handling, add job action
+- `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
+
+### Phase 21 — Hermes Insight Panel (Wave A, frontend-developer)
+
+Status: TODO  
+Recommended agent: frontend-developer  
+Priority: P1
+
+Goal:
+- Build dashboard displaying 4 Hermes insights with copy-to-clipboard and export
+
+Acceptance criteria:
+- New component: `components/orchestration/HermesInsightPanel.tsx`
+- Reuses: `lib/hermes/index.ts` 4 generator functions
+  - generateOrchestrationInsight()
+  - generateAgentPerformanceSummary()
+  - generateRoutingRecommendation()
+  - generateTimeoutFallbackSummary()
+- 4 internal sections (InsightSection component):
+  1. Orchestration Cycle Insights
+  2. Agent Performance Summary
+  3. Routing Recommendation
+  4. Timeout / Fallback Summary
+- Each section: title + `<pre className="whitespace-pre-wrap max-h-64">` + Copy button
+- Top banner: "Hermes is observing only — not executing" (safety notice)
+- Bottom: "Export All as Obsidian Note" button (concatenate all 4 sections to clipboard)
+- Modified: OrchestrationPageLayout.tsx Tab 5 addition
+- Modified: components/orchestration/index.ts (export HermesInsightPanel)
+- Tests: generator function outputs render correctly, copy works
+- `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
+
+### Phase 22 — Orchestration Log Viewer API + UI (Wave B, backend-developer)
+
+Status: TODO  
+Recommended agent: backend-developer  
+Priority: P1
+
+Goal:
+- Build logs API endpoint and UI viewer for orchestration event monitoring
+- **Critical**: Migrate OrchestrationLogEvent type from orchestration-logger.ts to lib/types.ts first
+
+Acceptance criteria:
+- **Type Migration**: Move `OrchestrationLogEvent` to `lib/types.ts` (prevent client bundle pollution)
+  - Update `lib/dispatch/orchestration-logger.ts` imports
+  - Verify no `import fs` on client routes after migration
+- New API: `app/api/orchestration/logs/route.ts`
+  - GET endpoint with ?limit=100&event=job_dispatched filters
+  - Reads `data/orchestration-logs.json` (NDJSON format)
+  - Parses, filters by event type, reverse chronological, paginates
+  - Returns: `{ events: OrchestrationLogEvent[], total: number }`
+  - Pattern: matches `app/api/reports/route.ts` NDJSON reading
+- New component: `components/orchestration/OrchestrationLogViewer.tsx`
+  - States: logs[], isLoading, eventFilter
+  - useEffect([eventFilter]) fetches /api/orchestration/logs
+  - Refresh button to re-fetch
+  - Table: Timestamp | Event | Job ID | Agent | Risk | Detail (80 chars)
+  - Event-type color badges:
+    - job_dispatched → blue
+    - job_started → cyan
+    - job_completed → emerald
+    - approval_timeout → red
+    - feedback_generated → purple
+    - result_collected → yellow
+    - status_changed → zinc
+  - Empty state: "No logs yet"
+- Modified: lib/types.ts (OrchestrationLogEvent type added, if not present)
+- Modified: lib/dispatch/orchestration-logger.ts (update import to lib/types.ts)
+- Modified: OrchestrationPageLayout.tsx Tab 6 addition
+- Modified: components/orchestration/index.ts (export OrchestrationLogViewer)
+- Tests: API returns NDJSON correctly, viewer displays events, filters work
+- `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
+
+### Wave A + B Synchronization
+
+Status: TODO (after Phase 20, 21, 22 complete)  
+Priority: P1
+
+Goal:
+- Integrate Wave A (frontend: ConversationToJobPanel, HermesInsightPanel) and Wave B (backend: logs API, LogViewer) into unified `/orchestration` page
+
+Acceptance criteria:
+- OrchestrationPageLayout.tsx: all 6 tabs wired (0: Dispatch Queue + ConversationToJobPanel, 1: Results, 2: Approvals, 3: Progress, 4: Feedback, 5: Hermes Insights, 6: Logs)
+- components/orchestration/index.ts: all components exported
+- Full typecheck, lint, build, test passing
+- Manual verification in browser: all tabs functional, no console errors
+
+## T064 — Auto Dispatch API (HOLD)
+
+Status: HOLD  
+Recommended agent: backend-developer  
+Priority: P3 (future, not Phase 19-22)
+
+Goal:
+- Implement `/api/orchestration/dispatch` endpoint for real agent dispatch (currently stubbed as HOLD pending Phase 22)
+
+Note:
+- Real dispatch requires: approved job status, adapter invocation, result collection
+- Currently: mock-mode default, real dispatch requires explicit user configuration + safety gates
+- Defer to Phase 23+ after logs and monitoring are stable

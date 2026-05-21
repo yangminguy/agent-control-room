@@ -9,6 +9,7 @@ import {
   type VibeKanbanIssueDraft,
   type CreateIssueResponse,
 } from "@/lib/integrations/vibe-kanban";
+import { normalizeWorkspaceResult } from "@/lib/integrations/vibe-kanban-import";
 
 const SAMPLE_DRAFT: VibeKanbanIssueDraft = {
   title: "Test Issue",
@@ -19,16 +20,6 @@ const SAMPLE_DRAFT: VibeKanbanIssueDraft = {
   sort_order: 0,
   extension_metadata: {},
 };
-
-// --- normalizeWorkspaceResult (inline mirror of route logic for unit testing) ---
-function normalizeWorkspaceResult(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return "";
-  const lines = trimmed.split("\n");
-  const hasHeader = lines[0].startsWith("#") || lines[0].startsWith("##");
-  if (hasHeader) return trimmed;
-  return `## Vibe Kanban Result\n\n${trimmed}`;
-}
 
 // --- CreateIssueResponse type check ---
 describe("CreateIssueResponse", () => {

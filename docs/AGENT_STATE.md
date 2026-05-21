@@ -4,17 +4,21 @@
 Build Agent Control Room as an AI Development Control Tower for non-developer PMs — a system where a user inputs an idea or product direction, the system translates it into requirements and a visual roadmap, decomposes tasks, routes work to the right AI agent or workbench, compiles senior-dev prompts, tracks execution, analyzes results/diffs, marks completion, handles token/context handoffs, and saves durable development insights.
 
 ## active_phase
-Phase 10 — Vibe Kanban Workbench Bridge (T027-T030 Complete, Phase 9 Foundation Done)
+Phase 11 — Production Hardening & Real Integration (T036-T038 Complete, QA hardening in progress)
 
 ## active_task
-Phases 1-9 are implemented. Phase 9 complete:
+Phases 1-11 are implemented. Phase 11 complete:
 - T027 `/plan` Visual Development Roadmap Control Panel ✅
 - T027-Hermes Hermes Packet Draft UI (safe, static generation) ✅
 - T028 Senior Dev Prompt Compiler Structure ✅
 - T029 Agent Availability Manager & Foundation Modules ✅
 - T030 Hermes CLI Installation Spike (Research Complete) ✅
-- Next: T031 Obsidian Knowledge Memory Export, T032 Hermes Background Worker Positioning
-- Later: T033-T035 Vibe Kanban Workbench Bridge (Phase 10)
+- T031 Full MVP Integration / Hermes Memory Loop ✅
+- T032 Hermes Background Worker Positioning ✅ (background-only; no code execution)
+- T036 Vibe Kanban result/workbench integration ✅
+- T037 Hermes CLI integration roadmap ✅ (documentation only)
+- T038 deployment checklist update ✅
+- Current: fix QA hardening findings and run final verification
 
 ## current_agent
 Claude Code
@@ -36,9 +40,8 @@ Antigravity is a fit for the roadmap-first `/plan` UI, Claude Code is a fit for 
 ## blockers
 - Vibe Kanban upstream README says the project is sunsetting; treat it as local-first base/reference.
 - Vibe Kanban may be offline during normal Agent Control Room use; keep `MockVibeKanbanClient` as development fallback.
-- Roadmap-first `/plan` UI is documented but not fully implemented.
-- Context Pack and Obsidian memory workflows are documented but not fully implemented.
-- Stable Vibe Kanban workspace/session/result readback APIs still need to be confirmed.
+- Stable Vibe Kanban workspace/session APIs may still vary by local Vibe Kanban version; mock fallback remains required.
+- Production deployment remains gated and has not been performed.
 
 ## assumptions
 - MVP uses Next.js App Router + TypeScript + Tailwind.
@@ -55,10 +58,10 @@ Antigravity is a fit for the roadmap-first `/plan` UI, Claude Code is a fit for 
 - Hermes is optional for background summaries/memory/monitoring only.
 
 ## next_task
-Roadmap-First Control Tower UX: make `/plan` show the product journey, completion check marks, current task, next action, blocked decisions, responsible agent, and acceptance criteria; then align generated prompts and handoffs to the Senior Dev Prompt Compiler structure.
+Finish QA hardening verification: runner file-boundary checks, complete Context Pack fields, result classifier edge cases, preferred agent handling, Phase 11 docs, and final typecheck/lint/build/test.
 
 ## next_prompt_target
-Antigravity for UI, Claude Code for prompt/context architecture, or Codex for bounded model updates
+Codex for bounded QA fixes and verification
 
 ## next_prompt
 ```txt

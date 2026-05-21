@@ -3,6 +3,11 @@ import { spawnAgent } from "@/lib/runner/spawn-runner";
 import { addExecutionLog, updateExecutionLog } from "@/lib/storage/execution-log-store";
 import { getFeaturePlanById, updatePlanTaskStatus } from "@/lib/storage/feature-plan-store";
 import { validateAndConsumeApprovalToken } from "@/lib/orchestration/approval-token-store";
+import {
+  checkFileBoundaries,
+  collectChangedFiles,
+  extractFileBoundariesFromPrompt,
+} from "@/lib/runner/file-boundary";
 
 /**
  * /api/runner — Internal Local Runner Endpoint
@@ -180,16 +185,38 @@ export async function POST(request: Request) {
               },
               onComplete: async (exitCode: number) => {
                 try {
-                  // ExecutionLog 상태: done 또는 failed (exitCode 기반)
-                  const executionStatus = exitCode === 0 ? "done" : "failed";
-                  // PlanTask 상태: done 또는 blocked (exitCode 기반)
-                  const planTaskStatus = exitCode === 0 ? "done" : "blocked";
+                  const promptBoundaries = extractFileBoundariesFromPrompt(planTask.generatedPrompt || prompt);
+                  const boundaryCheck = checkFileBoundaries(collectChangedFiles(cwd), {
+                    allowedFiles: planTask.allowedFiles ?? promptBoundaries.allowedFiles,
+                    doNotTouchFiles: planTask.doNotTouchFiles ?? promptBoundaries.doNotTouchFiles,
+                  });
+                  const boundaryViolation = boundaryCheck.hasViolation;
+
+                  // ExecutionLog 상태: boundary violations are review-blocked even with exitCode 0.
+                  const executionStatus = boundaryViolation
+                    ? "boundary_violation"
+                    : exitCode === 0
+                      ? "done"
+                      : "failed";
+                  // PlanTask 상태: boundary violations require human review, not clean success.
+                  const planTaskStatus = boundaryViolation
+                    ? "needs_review"
+                    : exitCode === 0
+                      ? "done"
+                      : "blocked";
+                  const boundaryLogLines = boundaryViolation
+                    ? [
+                        `[BOUNDARY] Forbidden files touched: ${boundaryCheck.forbiddenFiles.join(", ")}`,
+                        `[BOUNDARY] Why it matters: ${boundaryCheck.reason}`,
+                        `[BOUNDARY] Next action: ${boundaryCheck.nextAction}`,
+                      ]
+                    : [];
 
                   // ExecutionLog 업데이트
                   await updateExecutionLog(executionLog.id, {
                     completedAt: new Date().toISOString(),
                     exitCode,
-                    logLines: logBuffer,
+                    logLines: [...logBuffer, ...boundaryLogLines],
                     status: executionStatus,
                   });
 
@@ -198,6 +225,13 @@ export async function POST(request: Request) {
                     await updatePlanTaskStatus(planId, taskId, planTaskStatus);
                   } catch (error) {
                     controller.enqueue(encode(`[ERROR] Failed to update task status: ${error instanceof Error ? error.message : String(error)}`, "system"));
+                  }
+
+                  if (boundaryViolation) {
+                    controller.enqueue(encode("[REVIEW_BLOCKED] File boundary violation detected. This run is not a clean success.", "system"));
+                    controller.enqueue(encode(`[REVIEW_BLOCKED] Forbidden files touched: ${boundaryCheck.forbiddenFiles.join(", ")}`, "system"));
+                    controller.enqueue(encode(`[REVIEW_BLOCKED] Why it matters: ${boundaryCheck.reason}`, "system"));
+                    controller.enqueue(encode(`[REVIEW_BLOCKED] What to do next: ${boundaryCheck.nextAction}`, "system"));
                   }
 
                   controller.enqueue(encode(`[DONE] Exit code: ${exitCode}`, "system"));

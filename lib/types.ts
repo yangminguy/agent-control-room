@@ -227,6 +227,8 @@ export type PlanTask = {
   acceptanceCriteria: string[];
   subAgentTracks: SubAgentTrack[];
   generatedPrompt?: string;           // copy-ready 프롬프트
+  allowedFiles?: string[];             // 실행 경계: 수정 허용 파일/패턴
+  doNotTouchFiles?: string[];          // 실행 경계: 수정 금지 파일/패턴
   lastSessionReportId?: string | null; // 실행 결과 링크
   branchName?: string | null;          // 이 태스크용 git branch
 
@@ -312,7 +314,7 @@ export type ExecutionLog = {
   completedAt?: string;
   exitCode?: number;
   logLines: string[];           // 캡처된 stdout/stderr
-  status: "running" | "done" | "failed";
+  status: "running" | "done" | "failed" | "review_blocked" | "boundary_violation";
 };
 
 // ─────────────────────────────────────────────────────────
@@ -399,4 +401,138 @@ export type Roadmap = {
 
   createdAt: string;
   updatedAt: string;
+};
+
+// ─────────────────────────────────────────────────────────
+// Phase 12-16 — Core Autonomous Orchestration Loop
+// ─────────────────────────────────────────────────────────
+
+/** Phase 12: Risk classification level */
+export type RiskLevel = "safe" | "low" | "medium" | "high" | "critical";
+
+/** Phase 12: Dispatch job status state machine */
+export type DispatchJobStatus =
+  | "queued"               // 디스패치 대기 중
+  | "running"              // 에이전트 실행 중
+  | "approved"             // 승인됨 (risky 작업)
+  | "skipped_due_to_risk"  // 위험으로 인해 스킵됨 (타임아웃)
+  | "completed"            // 완료
+  | "failed";              // 실패
+
+/** Phase 12: Dispatch job for autonomous execution */
+export type DispatchJob = {
+  id: string;
+  taskId: string;                    // 원본 task ID
+  agentId: AgentType;                // 할당된 에이전트
+  riskLevel: RiskLevel;              // 위험도
+  status: DispatchJobStatus;         // 현재 상태
+
+  // ── 타임스탬프 ──
+  createdAt: string;                 // 생성 시간
+  approvedAt?: string;               // 승인 시간 (risky 작업만)
+  timeoutAt?: string;                // 타임아웃 시간
+  completedAt?: string;              // 완료 시간
+
+  // ── 재시도 ──
+  retryCount: number;                // 재시도 횟수
+  maxRetries?: number;               // 최대 재시도 횟수 (기본값: 3)
+
+  // ── 메타 ──
+  prompt?: string;                   // 실행할 프롬프트
+  resultId?: string;                 // 연결된 결과 ID
+};
+
+/** Phase 13: Normalized result status from any agent */
+export type ResultStatus =
+  | "pass"              // 성공
+  | "minor_fix"         // 경미한 수정 필요
+  | "qa_needed"         // QA 필요
+  | "blocked"           // 차단됨
+  | "safety_violation"; // 보안 위반
+
+/** Phase 13: Normalized agent result */
+export type AgentResult = {
+  id: string;
+  dispatchJobId: string;             // 원본 dispatch job
+  taskId: string;                    // 원본 task ID
+  agentId: AgentType;                // 실행한 에이전트
+
+  // ── 결과 데이터 ──
+  rawOutput: string;                 // 원본 출력 (pasted/JSON/import)
+  resultStatus: ResultStatus;        // 자동 분류된 상태
+  changedFiles?: string[];           // 변경된 파일 목록
+
+  // ── 메타 ──
+  extractedSummary?: string;         // 요약 추출
+  timestamp: string;                 // 수집 시간
+};
+
+/** Phase 14: Approval request for risky tasks */
+export type ApprovalRequestStatus =
+  | "pending"    // 대기 중
+  | "approved"   // 승인됨
+  | "rejected"   // 거부됨
+  | "timed_out"; // 타임아웃됨
+
+export type ApprovalRequest = {
+  id: string;
+  dispatchJobId: string;             // 연결된 dispatch job
+
+  // ── 상태 ──
+  status: ApprovalRequestStatus;
+
+  // ── 타임스탬프 ──
+  createdAt: string;
+  resolvedAt?: string;               // 승인/거부 시간
+
+  // ── Discord 정보 ──
+  discordMessageId?: string;         // Discord 메시지 ID (실제 전송 시)
+  discordMessagePreview?: string;    // 메시지 미리보기 (로컬)
+};
+
+/** Phase 15: Safe vs risky task split result */
+export type ProgressSplitResult = {
+  safeTasks: DispatchJob[];          // 즉시 진행할 작업
+  riskyTasks: DispatchJob[];         // 승인 대기 작업
+  pendingApprovals: ApprovalRequest[]; // 대기 중인 승인
+};
+
+/** Phase 16: Feedback loop decision for next action */
+export type FeedbackDecision =
+  | "redispatch"         // 재시도 (minor_fix 시)
+  | "create_qa_task"     // QA 작업 생성
+  | "create_blocked_decision" // 사용자 결정 필요
+  | "halt_safety_violation";  // 보안 위반으로 중단
+
+export type FeedbackLoopOutput = {
+  decision: FeedbackDecision;
+  reason: string;
+  nextDispatchJob?: DispatchJob;      // redispatch 시
+  blockedDecision?: {                 // create_blocked_decision 시
+    question: string;
+    options: string[];
+  };
+  qaTask?: PlanTask;                  // create_qa_task 시
+};
+
+// ─────────────────────────────────────────────────────────
+// Phase 22 — Orchestration Log Event
+// ─────────────────────────────────────────────────────────
+
+/** Structured event logged by the orchestration system */
+export type OrchestrationLogEvent = {
+  event:
+    | "job_dispatched"
+    | "job_started"
+    | "job_completed"
+    | "approval_timeout"
+    | "approval_resolved"
+    | "feedback_generated"
+    | "result_collected"
+    | "status_changed";
+  jobId: string;
+  agentId?: AgentType;
+  riskLevel?: RiskLevel;
+  timestamp: string;
+  detail?: string; // first 200 chars of relevant data
 };

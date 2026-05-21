@@ -1,4 +1,6 @@
-# 배포 준비 체크리스트 (Phase 10)
+# 배포 준비 체크리스트 (Phase 11, deployment not yet performed)
+
+이 문서는 배포 준비용 체크리스트입니다. Production deployment는 아직 실행된 상태가 아니며, Preview smoke test 통과 후 사용자가 명시적으로 승인해야 합니다.
 
 ## 환경 설정
 
@@ -294,7 +296,7 @@ npm install --save @sentry/nextjs
 
 ---
 
-## 최종 배포 체크리스트 (Phase 10)
+## 최종 배포 체크리스트 (Phase 11)
 
 ### 빌드 및 보안 검증
 - [x] `npm run build` 성공 (0 에러)
@@ -329,7 +331,7 @@ npm install --save @sentry/nextjs
 - [ ] GitHub repo 연결 (또는 manual git push)
 - [ ] Environment Variables 설정 (대시보드 또는 CLI)
 - [ ] Preview deployment 실행 및 smoke test 통과
-- [ ] Production deployment 승인 및 실행
+- [ ] Production deployment 승인 및 실행 (사용자 명시 승인 전 금지)
 
 ### 배포 후 모니터링
 - [ ] 배포 후 24시간 스모크 테스트 반복

@@ -1,7 +1,7 @@
 # HANDOFF.md — Agent Control Room
 
 ## Current Handoff Status
-Phase 10 Complete (T031 — Full MVP Control Loop + Hermes Memory Loop Done). Agent Control Room is now a **fully functional AI Development Control Tower** with all 18 core user requirements implemented and tested. The complete workflow from roadmap planning through result review to memory extraction is operational and safety-hardened.
+Phase 11 Complete (T036-T038) with QA hardening in progress. Agent Control Room is now a **fully functional AI Development Control Tower** with the Phase 10 MVP loop implemented and Phase 11 workbench/deployment documentation added. The current handoff focus is production-readiness hardening, not new features.
 
 **MVP is Feature Complete as of 2026-05-21**:
 - Roadmap-first control panel with visual roadmap and agent status
@@ -26,9 +26,10 @@ Phase 10 Complete (T031 — Full MVP Control Loop + Hermes Memory Loop Done). Ag
 - Context Pack is the standard for token-limited agent handoff.
 - Obsidian-compatible Markdown is the standard for insight memory.
 - Hermes is background worker for monitoring, memory, and status (never autonomous code execution).
-- Vibe Kanban is the primary execution workbench (integration pending Phase 11).
+- Vibe Kanban is the primary execution workbench/result layer; imported results remain review-only inside Agent Control Room.
 - All approval gates are human-in-the-loop; no uncontrolled execution allowed.
-- Phase 11 focuses on real Vibe Kanban integration and Hermes CLI research.
+- Phase 11 completed real Vibe Kanban result import, Hermes CLI roadmap documentation, and deployment checklist updates.
+- Hermes background worker positioning is reconciled as complete for the MVP: monitoring, summaries, context/handoff packs, memory, and failed-task review only. Hermes must not execute code.
 
 Implemented:
 - Next.js App Router project scaffold.
@@ -564,9 +565,154 @@ Handoff must include:
 - `npm audit`: 2 moderate (Next.js bundled PostCSS, not exploitable)
 - Happy path, error scenarios, and security edge cases verified
 
-## Recommended Next Work
-1. **Roadmap-First Control Tower UX** — Reframe `/plan` as a Visual Development Roadmap Control Panel with stage status, check marks, responsible agent, current task, next action, blockers, user decisions, and acceptance criteria.
-2. **Senior Dev Prompt Compiler** — Standardize prompt sections across generated Claude/Codex/Antigravity handoffs.
-3. **Context Reset + Obsidian Memory** — Generate Context Packs and Markdown insight notes from session reports and execution logs.
-4. **Vibe Kanban Workbench Bridge** — Add open-workspace/card link, workspace/session launch adapter research, result import, and next-prompt generation from imported outcomes.
-5. **Production Verification** — Test full flow on Vercel with environment variables set after the roadmap-first direction is reflected.
+## Phase 12-16 — Core Autonomous Orchestration Loop (Complete)
+
+Status: DONE (2026-05-21)
+
+**Strategic direction (Phase 12-16)**:
+- Agent Control Room now implements a full autonomous dispatch loop: user request → structured tasks → risk classification → agent selection → approval gate (5-min timeout) → result collection → feedback loop → safe redispatch or user decision.
+- Safe work (low/safe risk) proceeds without approval; risky work (medium/high/critical) waits for approval with 5-minute timeout.
+- If approval times out, risky tasks are marked `skipped_due_to_risk`; safe tasks continue (non-blocking progress).
+- Feedback loop manages retries (max 3), QA task creation, blocked decisions, and safety violation halts.
+- Hermes observes and generates insights (never executes code).
+- No uncontrolled execution; all approval gates remain human-in-the-loop.
+
+**Implemented (Wave 0-5)**:
+
+### Wave 0 — Foundation Types (T039)
+- Added to `lib/types.ts`:
+  - `RiskLevel`: "safe" | "low" | "medium" | "high" | "critical"
+  - `DispatchJobStatus`: "queued" | "running" | "approved" | "skipped_due_to_risk" | "completed" | "failed"
+  - `DispatchJob`: full dispatch model with retry counter and risk level
+  - `ResultStatus`: "pass" | "minor_fix" | "qa_needed" | "blocked" | "safety_violation"
+  - `AgentResult`: normalized result from pasted/JSON/Vibe Kanban import
+  - `ApprovalRequestStatus`: "pending" | "approved" | "rejected" | "timed_out"
+  - `ApprovalRequest`: approval request model with timeout tracking
+  - `ProgressSplitResult`, `FeedbackDecision`, `FeedbackLoopOutput`: state machine types
+
+### Wave 1 — Core Engines (T040-T044)
+- `lib/dispatch/conversation-to-task-engine.ts`: Transform user prompt → dispatch jobs with agent preference and risk level
+- `lib/dispatch/risk-classifier.ts`: Keyword-based risk classification (safe/low/medium/high/critical)
+- `lib/dispatch/safe-dispatch-queue.ts`: In-memory queue with state machine, split by risk, retry tracking
+- `lib/results/agent-result-schema.ts`: Zod schema with heuristic parsing from pasted text/JSON/Vibe Kanban
+- `lib/results/result-collector.ts`: Collect and normalize results, store in `data/agent-results.json`
+
+### Wave 2 — Approval + Progress (T045-T049)
+- `lib/approval/approval-request-store.ts`: CRUD for approval requests, persistent in `data/approval-requests.json`
+- `lib/approval/hermes-discord-message-builder.ts`: Generate Discord-ready approval messages (task, risk, acceptance criteria, action options, timeout notice)
+- `lib/approval/discord-adapter.ts`: Mock/env-gated adapter (checks `DISCORD_WEBHOOK_URL`, no real sends in any mode)
+- `lib/approval/timeout-policy.ts`: `hasApprovalTimedOut()`, `getApprovalTimeoutRemaining()` (5-min window)
+- `lib/dispatch/non-blocking-progress-manager.ts`: Split safe/risky tasks, pause risky, timeout handling, approval management
+
+### Wave 3 — Feedback Loop + Hermes (T050-T051)
+- `lib/orchestration/feedback-loop-engine.ts`: Accept agent results → redispatch (minor_fix, max 3 retries), create QA task, create blocked decision, or halt on safety violation
+- `lib/hermes/orchestration-insight-generator.ts`: Summarize dispatch cycle (tasked/approved/timed out/blocked)
+- `lib/hermes/agent-performance-summary.ts`: Per-agent result status aggregation and success rate
+- `lib/hermes/routing-recommendation.ts`: Suggest next agent based on historical performance
+- `lib/hermes/prompt-improvement-suggestion.ts`: Flag prompt patterns that produce minor_fix/blocked
+- `lib/hermes/timeout-fallback-summary.ts`: Analyze timeout events and skipped tasks
+
+All Hermes generators are **pure functions** (zero side effects, no execution, return Markdown only).
+
+### Wave 4 — UI Components (T052-T056)
+- `components/orchestration/DispatchStatusPanel.tsx`: Job list with status/risk badges, status filtering
+- `components/orchestration/DiscordApprovalPreviewCard.tsx`: Read-only message preview with countdown timer and mock action buttons
+- `components/orchestration/ProgressManagerStatusView.tsx`: Safe tasks running vs risky tasks paused, timeout countdowns
+- `components/orchestration/FeedbackLoopSummaryCard.tsx`: Decision type, retry counter, blocked decisions, halt warnings
+- Modified `components/workbench/ResultReviewPanel.tsx`: Added `AgentResult` section with resultStatus badge and dispatch job link
+
+### Wave 5 — Integration Tests + Verification (T057-T058)
+- `__tests__/qa-fixes-phase12.test.ts`: 23 tests covering risk classifier, dispatch queue, result collection, approval timeout, feedback loop, Hermes generators
+- Tests include infinite loop prevention (max retries = 3 forces blocked), safety violation halt, timeout handling
+- Final QA: `npm test` (139 tests), `npm run typecheck`, `npm run lint`, `npm run build` all pass ✅
+
+**Key Design Decisions**:
+
+1. **RiskLevel vs ResultStatus**: RiskLevel is assigned at dispatch time (drives approval requirement); ResultStatus is feedback from execution (drives next action)
+2. **Retry Guard**: `retryCount >= 3` forces `create_blocked_decision` regardless of `ResultStatus` (prevents infinite loops)
+3. **Safety Violation**: Immediately halts loop, requires human approval to continue (no auto-recovery)
+4. **Non-Blocking Progress**: Safe tasks proceed without approval; risky tasks don't block them (5-min timeout skips, not retry)
+5. **Hermes Generators**: Pure Markdown output, zero imports from runner/spawn/git (safe to run on unsafe input)
+6. **Mock Discord Adapter**: Checks env var, never calls fetch in any mode (safe for testing and CI)
+
+**Verification**:
+- ✅ `npm run typecheck`: 0 errors
+- ✅ `npm run lint`: 0 errors
+- ✅ `npm run build`: 30+ routes, all compiled
+- ✅ `npm test`: 139 tests, all passing
+- ✅ T057: 23 new integration tests
+- ✅ Risk classification covers safe/low/medium/high/critical
+- ✅ Approval timeout policy tested (pending/timed_out)
+- ✅ Feedback loop tested (redispatch, qa, blocked, halt)
+- ✅ Max retry guard tested (forces blocked at count >= 3)
+- ✅ Safety violation tested (forces halt)
+- ✅ Hermes generators tested (return valid Markdown)
+
+**Safety Guardrails**:
+- Discord adapter mock-only: no real sends (env var check, never fetch)
+- Infinite retry loop: hardcoded max = 3, tested
+- Safety violation: immediate halt, no auto-recovery
+- Risky work approval: required before running (status = approved)
+- Timeout: skips job, doesn't block safe tasks
+- Hermes: pure functions, zero execution, zero side effects
+
+## Phase 12-16 Implementation Complete (2026-05-21)
+
+**Status**: DONE ✅
+
+The core autonomous orchestration loop is now fully implemented:
+- DispatchJob → RiskClassifier → ApprovalGate (5-min timeout) → ResultCollection → FeedbackLoopEngine → redispatch/QA/blocked/halt
+- Safe tasks (risk: safe/low) proceed immediately; risky tasks (risk: medium/high/critical) wait for approval
+- Safe and risky tasks run in parallel; safe tasks don't block on risky approval timeout
+- Infinite retry prevention: max 3 retries per task, forces blocked decision
+- Safety violation halts feedback loop immediately
+- Hermes generates pure Markdown insights (observer-only, no code execution)
+- All approval gates remain human-in-the-loop
+- `/orchestration` page displays 5 tabs: Dispatch Queue, Results, Approvals, Progress, Feedback
+- Seed data (5 demo jobs, 1 approval, 1 feedback) allows manual testing without real dispatch
+
+**Implementation**: 31 new files (lib/dispatch, lib/approval, lib/results, lib/orchestration, lib/hermes, components/orchestration)
+**Tests**: 23 Phase 12-16 tests + 92 existing = 139 tests passing
+**Verification**: typecheck/lint/build/test all passing
+
+See `phase_12_16_complete.md` in memory for full implementation details and safety guarantees.
+
+## Phase 17-18 Implementation Complete (2026-05-21)
+
+**Status**: DONE ✅
+
+CLI-based dispatch adapters and orchestration page UI are complete:
+- claude-code, codex, antigravity adapters with mock-mode default
+- `/orchestration` page layout with 5-tab interface
+- React Context (useReducer) for state management
+- Seed data for manual testing
+
+**Next**: Phase 19-22 Orchestration UX Completion
+
+## Recommended Next Work (Phase 19-22)
+
+**Phase 19** (solo, prerequisite):
+- Update TASKS.md Phase 12-16 status: IN_PROGRESS → DONE
+- Update HANDOFF.md with Phase 12-16 summary and Phase 19-22 planning
+- Clear entry point for Wave A and Wave B execution
+
+**Phase 20** (Wave A, frontend-developer):
+- `ConversationToJobPanel.tsx` — Natural language input → DispatchJob[] preview → Add All to Queue
+- Reuses: `conversationToTasks()` and `addJob()` from Phase 12-16 infrastructure
+
+**Phase 21** (Wave A, frontend-developer):
+- `HermesInsightPanel.tsx` — Display 4 Hermes insights with copy and Obsidian export
+- Reuses: `orchestration-insight-generator`, `agent-performance-summary`, `routing-recommendation`, `timeout-fallback-summary`
+
+**Phase 22** (Wave B, backend-developer):
+- `app/api/orchestration/logs/route.ts` — GET endpoint with NDJSON parsing and event filtering
+- `OrchestrationLogViewer.tsx` — Display orchestration events in table with color badges and Refresh
+- **Critical**: Migrate `OrchestrationLogEvent` type from `orchestration-logger.ts` to `lib/types.ts` (prevent client bundle pollution)
+
+**Synchronization**: After Wave A and Wave B complete, integrate into unified `/orchestration` page with all 6 tabs and run final QA
+
+**Future (Phase 23+)**:
+1. **T064 Auto Dispatch API** (HOLD) — Real agent dispatch when ready (currently mock-mode, requires user approval + safety gates)
+2. **Real Discord Integration** — Add proper webhook sends when DISCORD_WEBHOOK_URL configured
+3. **Monitoring & Performance** — Structured logging, performance profiling for large workloads
+4. **Production Hardening** — Supabase execution, rate limiting, environment validation

@@ -267,8 +267,30 @@ function assessRiskLevel(highRiskActions: HighRiskAction[]): {
 function routeAgent(
   requestText: string,
   riskLevel: RiskLevel,
+  preferredAgent?: AgentType | "auto",
 ): AgentRoutingDecision {
   const text = requestText.toLowerCase();
+
+  if (preferredAgent && preferredAgent !== "auto") {
+    if (riskLevel === "high") {
+      return {
+        recommendedAgent: "manual",
+        primaryReason:
+          `Preferred agent ${AGENT_ROLES[preferredAgent]?.name || preferredAgent} was overridden because high-risk work requires explicit user approval first.`,
+        fallbackAgent: preferredAgent,
+        fallbackReason:
+          "After the user approves the risk, the preferred agent can be used if it remains within the approved file boundaries.",
+        handoffRequired: true,
+      };
+    }
+
+    return {
+      recommendedAgent: preferredAgent,
+      primaryReason:
+        `User preferred ${AGENT_ROLES[preferredAgent]?.name || preferredAgent}; this preference is honored because no high-risk action was detected.`,
+      handoffRequired: false,
+    };
+  }
 
   // Architecture/integration → Claude Code (check first for specificity)
   if (/(architecture|integrate|integration|refactor|connect|model.*layer|data.*layer|bridge|redesign.*architecture)/i.test(text)) {
@@ -485,7 +507,7 @@ export async function compileSeniorDevPrompt(
   let riskDescription = riskDescriptionBase;
 
   // Step 3: Route to appropriate agent
-  const routing = routeAgent(input.userRequest, riskLevel);
+  const routing = routeAgent(input.userRequest, riskLevel, input.preferredAgent);
   const targetAgent = routing.recommendedAgent;
 
   // Step 4: Assess parallel safety
