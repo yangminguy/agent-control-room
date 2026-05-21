@@ -73,10 +73,15 @@ export function toVibeKanbanIssueDraft(input: {
   };
 }
 
+export interface CreateIssueResponse {
+  success: boolean;
+  issueId?: string;
+  workspaceUrl?: string;
+  message?: string;
+}
+
 export interface VibeKanbanClient {
-  createIssue(
-    draft: VibeKanbanIssueDraft
-  ): Promise<{ success: boolean; issueId?: string; message?: string }>;
+  createIssue(draft: VibeKanbanIssueDraft): Promise<CreateIssueResponse>;
   listProjects(
     orgId: string
   ): Promise<{ success: boolean; projects?: any[]; message?: string }>;
@@ -92,9 +97,7 @@ export class HttpVibeKanbanClient implements VibeKanbanClient {
     this.baseUrl = process.env.VIBE_KANBAN_URL || "http://localhost:3003";
   }
 
-  async createIssue(
-    draft: VibeKanbanIssueDraft
-  ): Promise<{ success: boolean; issueId?: string; message?: string }> {
+  async createIssue(draft: VibeKanbanIssueDraft): Promise<CreateIssueResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/api/remote/issues`, {
         method: "POST",
@@ -109,7 +112,13 @@ export class HttpVibeKanbanClient implements VibeKanbanClient {
       }
 
       const data = await response.json();
-      return { success: true, issueId: data.id || data.issueId || "unknown", message: "Issue created successfully" };
+      const workspaceUrl = data.data?.workspace_url ?? data.data?.workspaceUrl ?? undefined;
+      return {
+        success: true,
+        issueId: data.id || data.issueId || "unknown",
+        workspaceUrl,
+        message: "Issue created successfully",
+      };
     } catch (error: any) {
       return { success: false, message: `Error creating issue: ${error.message}` };
     }
@@ -163,13 +172,12 @@ export function isMockVibeKanbanClient(
 }
 
 export class MockVibeKanbanClient implements VibeKanbanClient {
-  async createIssue(
-    draft: VibeKanbanIssueDraft
-  ): Promise<{ success: boolean; issueId?: string; message?: string }> {
+  async createIssue(draft: VibeKanbanIssueDraft): Promise<CreateIssueResponse> {
     console.log("[MockVibeKanbanClient] createIssue called with:", draft);
     return Promise.resolve({
       success: true,
       issueId: `mock-issue-${Date.now()}`,
+      workspaceUrl: "http://localhost:3002/workspaces/vibe-demo",
       message: "Mock issue created successfully",
     });
   }

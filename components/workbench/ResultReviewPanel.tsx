@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy, Check, FileCode2 } from "lucide-react";
+import { Copy, Check, FileCode2, ChevronDown, ChevronUp, Download } from "lucide-react";
 import {
   type ResultClassification,
   classifyResult,
@@ -54,6 +54,14 @@ export function ResultReviewPanel() {
   const [isRetryCandidate, setIsRetryCandidate] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Vibe Kanban import state
+  const [importOpen, setImportOpen] = useState(false);
+  const [importIssueId, setImportIssueId] = useState("");
+  const [importWorkspaceResult, setImportWorkspaceResult] = useState("");
+  const [importLoading, setImportLoading] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState(false);
+
   useEffect(() => {
     if (rawResult.length > 0) {
       const classified = classifyResult(rawResult);
@@ -68,6 +76,40 @@ export function ResultReviewPanel() {
       setIsRetryCandidate(false);
     }
   }, [rawResult]);
+
+  async function handleVibeKanbanImport() {
+    if (!importIssueId.trim() || !importWorkspaceResult.trim()) {
+      setImportError("issueId와 결과를 모두 입력하세요.");
+      return;
+    }
+    setImportLoading(true);
+    setImportError(null);
+    setImportSuccess(false);
+    try {
+      const res = await fetch("/api/vibe-kanban/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          issueId: importIssueId.trim(),
+          workspaceResult: importWorkspaceResult,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setImportError(data.message ?? "임포트 실패");
+        return;
+      }
+      setRawResult(data.rawResult);
+      setImportSuccess(true);
+      setImportOpen(false);
+      setImportIssueId("");
+      setImportWorkspaceResult("");
+    } catch (err: any) {
+      setImportError(err.message ?? "네트워크 오류");
+    } finally {
+      setImportLoading(false);
+    }
+  }
 
   async function copyToClipboard() {
     if (!classification) return;
@@ -86,6 +128,76 @@ export function ResultReviewPanel() {
 
   return (
     <div className="space-y-6 max-w-3xl">
+      {/* Vibe Kanban import section */}
+      <div className="rounded-lg border border-border bg-surface-2">
+        <button
+          type="button"
+          onClick={() => {
+            setImportOpen((prev) => !prev);
+            setImportError(null);
+          }}
+          className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-text-primary hover:bg-surface transition-colors rounded-lg"
+        >
+          <span className="flex items-center gap-2">
+            <Download className="w-4 h-4 text-text-secondary" />
+            Vibe Kanban에서 가져오기
+          </span>
+          {importOpen ? (
+            <ChevronUp className="w-4 h-4 text-text-secondary" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-text-secondary" />
+          )}
+        </button>
+
+        {importOpen && (
+          <div className="px-4 pb-4 space-y-3 border-t border-border pt-3">
+            <p className="text-xs text-text-secondary">
+              Vibe Kanban에서 작업 완료 후 issueId와 결과를 붙여넣으세요. 임포트하면 아래 결과 영역이 자동으로 채워집니다.
+            </p>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-text-secondary">
+                Issue ID
+              </label>
+              <input
+                type="text"
+                className="w-full rounded border border-border bg-surface px-3 py-1.5 text-sm font-mono text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-pink-primary"
+                placeholder="예: vibe-issue-123"
+                value={importIssueId}
+                onChange={(e) => setImportIssueId(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-text-secondary">
+                작업 결과 (Vibe Kanban에서 복사)
+              </label>
+              <textarea
+                className="w-full h-32 resize-y rounded border border-border bg-surface p-3 text-sm font-mono text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-pink-primary"
+                placeholder="Vibe Kanban 워크스페이스에서 완료된 작업 결과를 붙여넣으세요..."
+                value={importWorkspaceResult}
+                onChange={(e) => setImportWorkspaceResult(e.target.value)}
+              />
+            </div>
+            {importError && (
+              <p className="text-xs text-red-600 font-medium">{importError}</p>
+            )}
+            <button
+              type="button"
+              onClick={handleVibeKanbanImport}
+              disabled={importLoading}
+              className="inline-flex items-center gap-1.5 rounded bg-pink-primary px-4 py-1.5 text-xs font-medium text-white hover:bg-pink-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {importLoading ? "임포트 중..." : "임포트"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {importSuccess && (
+        <p className="text-xs text-emerald-600 font-medium px-1">
+          Vibe Kanban 결과가 아래 영역에 자동으로 채워졌습니다.
+        </p>
+      )}
+
       {/* Input area */}
       <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
         <label
