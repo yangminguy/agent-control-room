@@ -13,7 +13,8 @@ export type ObsidianNoteType =
   | "handoff"
   | "status"
   | "qa-finding"
-  | "session-summary";
+  | "session-summary"
+  | "context-limit-event";
 
 export function generateObsidianNote(
   type: ObsidianNoteType,
@@ -216,6 +217,44 @@ function buildBody(
           ? ["## Changed Files", "", ...changedFiles.map((f: string) => `- \`${f}\``), ""]
           : []),
         ...(nextTask ? ["## Next Task", "", nextTask, ""] : []),
+      ].join("\n");
+    }
+
+    case "context-limit-event": {
+      const agentId = data.agentId ?? data.agent_id ?? "unknown";
+      const tokensUsed = data.tokensUsed ?? data.tokens_used ?? 0;
+      const tokenLimit = data.tokenLimit ?? data.token_limit ?? 0;
+      const percentage = tokenLimit > 0 ? Math.round((tokensUsed / tokenLimit) * 100) : 0;
+      const completedJobs = data.completedJobs ?? data.completed_jobs ?? 0;
+      const recommendations = Array.isArray(data.recommendations) ? data.recommendations : [];
+      const contextPackId = data.contextPackId ?? data.context_pack_id ?? "";
+      return [
+        `# Context Limit Event: ${agentId}`,
+        "",
+        `**Date:** ${date}`,
+        `**Agent:** ${agentId}`,
+        `**Tokens Used:** ${tokensUsed} / ${tokenLimit} (${percentage}%)`,
+        `**Jobs Completed:** ${completedJobs}`,
+        ...(contextPackId ? [`**Context Pack ID:** ${contextPackId}`, ""] : [""]),
+        "## Status",
+        "",
+        `⚠️ Agent **${agentId}** has reached ${percentage}% of context limit.`,
+        "Consider switching to a fallback agent or saving a context pack for continuation.",
+        "",
+        ...(recommendations.length > 0
+          ? [
+              "## Recommendations",
+              "",
+              ...recommendations.map((r: string) => `- ${r}`),
+              "",
+            ]
+          : []),
+        "## Action Items",
+        "",
+        "- [ ] Review and save context pack",
+        "- [ ] Switch to fallback agent or new session",
+        "- [ ] Document progress and blockers",
+        "",
       ].join("\n");
     }
 

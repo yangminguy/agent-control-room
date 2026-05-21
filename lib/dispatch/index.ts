@@ -41,3 +41,11 @@ export {
   AntigravityCliAdapter,
   type AgentAdapter,
 } from "./adapters/index";
+
+// T-AUTO-011 — Context Budget Tracking
+export {
+  ContextBudgetTracker,
+  getContextBudgetTracker,
+  resetContextBudgetTracker,
+  type ContextBudget,
+} from "./context-budget-tracker";

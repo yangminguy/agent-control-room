@@ -575,3 +575,16 @@ export type OrchestrationLogEvent = {
   timestamp: string;
   detail?: string; // first 200 chars of relevant data
 };
+
+// ─────────────────────────────────────────────────────────
+// T-AUTO-011 — Context Budget Tracking
+// ─────────────────────────────────────────────────────────
+
+/** Agent context budget: tracks cumulative token usage per session */
+export type ContextBudget = {
+  agentId: AgentType;
+  promptChars: number; // cumulative prompt character count
+  outputChars: number; // cumulative output character count
+  jobCount: number; // number of jobs processed
+  estimatedTokens: number; // (promptChars + outputChars) / 4
+};

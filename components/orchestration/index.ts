@@ -10,3 +10,4 @@ export { OrchestrationLogViewer } from "./OrchestrationLogViewer";
 export { OrchestrationMetricsPanel } from "./OrchestrationMetricsPanel";
 export { AutoDispatchControl } from "./AutoDispatchControl";
 export { HermesLivePanel } from "./HermesLivePanel";
+export { ContextBudgetPanel } from "./ContextBudgetPanel";

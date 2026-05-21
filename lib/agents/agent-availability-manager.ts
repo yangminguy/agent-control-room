@@ -121,3 +121,24 @@ export function shouldAvoidAgentForNow(agentId: string): boolean {
     availability === "manual_only"
   );
 }
+
+/**
+ * Mark an agent as token_limited.
+ * This is intended for in-memory runtime state tracking.
+ * Note: agent-status.ts provides the static availability data.
+ * This function documents the intent to mark agents as limited at runtime.
+ */
+export function markTokenLimited(
+  agentId: string,
+  contextPackId: string
+): void {
+  // In a real implementation, this would update a runtime state store.
+  // For now, we log the intent to allow tracking.
+  // The actual implementation depends on how agent status is stored at runtime.
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.debug(
+      `[Agent Availability] Marking ${agentId} as token_limited with context pack: ${contextPackId}`
+    );
+  }
+}

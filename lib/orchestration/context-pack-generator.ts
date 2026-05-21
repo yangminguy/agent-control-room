@@ -5,7 +5,7 @@
  * Generates Markdown Context Pack documents for agent handoffs and session resets.
  */
 
-export function generateContextPackMarkdown(params: {
+export interface ContextPackParams {
   projectName: string;
   projectSummary?: string;
   currentSituation?: string;
@@ -25,7 +25,16 @@ export function generateContextPackMarkdown(params: {
   acceptanceCriteria: string[];
   nextSessionPrompt?: string;
   finalHandoffExpectations?: string[];
-}): string {
+  // T-AUTO-011: Context limit tracking
+  contextLimitStatus?: {
+    tokensUsed: number;
+    tokenLimit: number;
+    percentage: number;
+    recommendedFallbackAgent?: string;
+  };
+}
+
+export function generateContextPackMarkdown(params: ContextPackParams): string {
   const {
     projectName,
     projectSummary,
@@ -137,6 +146,22 @@ export function generateContextPackMarkdown(params: {
     "",
     nextSessionPrompt || nextTask || "Review this Context Pack and continue with the next approved task.",
     "",
+    ...(params.contextLimitStatus
+      ? [
+          "## Context Limit Status",
+          "",
+          `**Tokens Used:** ${params.contextLimitStatus.tokensUsed} / ${params.contextLimitStatus.tokenLimit} (${params.contextLimitStatus.percentage}%)`,
+          "",
+          "⚠️ Context limit is approaching. Consider saving this pack and resuming in a new session.",
+          "",
+          ...(params.contextLimitStatus.recommendedFallbackAgent
+            ? [
+                `**Recommended Fallback Agent:** \`${params.contextLimitStatus.recommendedFallbackAgent}\``,
+                "",
+              ]
+            : []),
+        ]
+      : []),
     "## Final Handoff Expectations",
     "",
     ...listOrNone(finalHandoffExpectations ?? [

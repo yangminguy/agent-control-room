@@ -241,6 +241,34 @@ const NOTE_TYPES: Record<ObsidianNoteType, NoteTypeDef> = {
       nextTask: inputs.nextTask,
     }),
   },
+  "context-limit-event": {
+    label: "컨텍스트 한계 이벤트",
+    fields: [
+      { key: "agentId", label: "에이전트", placeholder: "claude-code" },
+      { key: "tokensUsed", label: "토큰 사용량", placeholder: "120000" },
+      { key: "tokenLimit", label: "토큰 제한", placeholder: "150000" },
+      { key: "completedJobs", label: "완료된 작업 수", placeholder: "5" },
+      { key: "contextPackId", label: "컨텍스트 팩 ID", placeholder: "pack-001" },
+      {
+        key: "recommendations",
+        label: "권장사항 (줄바꿈 구분)",
+        multiline: true,
+        rows: 3,
+        placeholder: "Switch to fallback agent\nSave context pack",
+      },
+    ],
+    dataMap: (inputs) => ({
+      agentId: inputs.agentId,
+      tokensUsed: parseInt(inputs.tokensUsed || "0", 10),
+      tokenLimit: parseInt(inputs.tokenLimit || "0", 10),
+      completedJobs: parseInt(inputs.completedJobs || "0", 10),
+      contextPackId: inputs.contextPackId,
+      recommendations: (inputs.recommendations ?? "")
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean),
+    }),
+  },
 };
 
 const NOTE_TYPE_ORDER: ObsidianNoteType[] = [
@@ -252,6 +280,7 @@ const NOTE_TYPE_ORDER: ObsidianNoteType[] = [
   "status",
   "qa-finding",
   "session-summary",
+  "context-limit-event",
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
