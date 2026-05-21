@@ -222,6 +222,15 @@ describe("Execution safety regression guardrails", () => {
     expect(runPanel).toContain("지원하지 않는 에이전트");
   });
 
+  it("keeps Antigravity dispatch implementation free of process spawning", () => {
+    const adapter = read("lib/dispatch/adapters/antigravity-cli-adapter.ts");
+
+    expect(adapter).not.toContain("child_process");
+    expect(adapter).not.toContain("spawn(");
+    expect(adapter).toContain("manual prompt-copy target");
+    expect(adapter).toContain("No Antigravity CLI process was spawned");
+  });
+
   it("validates workbench approval gate requires both auto and manual checks", () => {
     const readinessGate = read("components/workbench/ExecutionReadinessGate.tsx");
     expect(readinessGate).toContain("allAutoChecksPassed");

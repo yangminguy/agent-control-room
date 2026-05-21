@@ -7,13 +7,19 @@ import type { ApprovalRequest, ApprovalRequestStatus } from "@/lib/types";
 const DATA_DIR = path.join(process.cwd(), "data");
 const APPROVAL_FILE = "approval-requests.json";
 
+function approvalFilePath(): string {
+  return process.env.APPROVAL_REQUESTS_PATH
+    ? path.resolve(process.cwd(), process.env.APPROVAL_REQUESTS_PATH)
+    : path.join(DATA_DIR, APPROVAL_FILE);
+}
+
 function generateId(): string {
   return `approval-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 async function readAll(): Promise<ApprovalRequest[]> {
   try {
-    const raw = await fs.readFile(path.join(DATA_DIR, APPROVAL_FILE), "utf8");
+    const raw = await fs.readFile(approvalFilePath(), "utf8");
     return JSON.parse(raw) as ApprovalRequest[];
   } catch {
     return [];
@@ -21,11 +27,9 @@ async function readAll(): Promise<ApprovalRequest[]> {
 }
 
 async function writeAll(records: ApprovalRequest[]): Promise<void> {
-  await fs.writeFile(
-    path.join(DATA_DIR, APPROVAL_FILE),
-    `${JSON.stringify(records, null, 2)}\n`,
-    "utf8",
-  );
+  const filePath = approvalFilePath();
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, `${JSON.stringify(records, null, 2)}\n`, "utf8");
 }
 
 // ─── ApprovalRequestStore ─────────────────────────────────────────────────────

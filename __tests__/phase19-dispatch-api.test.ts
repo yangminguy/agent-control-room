@@ -1,6 +1,8 @@
 import { describe, expect, it, afterEach } from "@jest/globals";
 import { POST } from "../app/api/orchestration/dispatch/route";
 import type { DispatchJob } from "../lib/types";
+import { AntigravityCliAdapter } from "../lib/dispatch/adapters/antigravity-cli-adapter";
+import { classifyCodexOutput } from "../lib/dispatch/adapters/codex-cli-adapter";
 
 const baseJob: DispatchJob = {
   id: "job-test-001",
@@ -26,6 +28,7 @@ describe("Phase 19 dispatch API", () => {
 
   afterEach(() => {
     delete process.env.MOCK_DISPATCH;
+    delete process.env.CODEX_MOCK_MODE;
     process.env.PATH = originalPath;
   });
 
@@ -102,5 +105,43 @@ describe("Phase 19 dispatch API", () => {
     expect(payload.success).toBe(true);
     expect(payload.result.resultStatus).toBe("blocked");
     expect(payload.result.rawOutput).toContain("Codex CLI not found");
+  });
+
+  it("honors CODEX_MOCK_MODE when MOCK_DISPATCH is unset", async () => {
+    process.env.CODEX_MOCK_MODE = "false";
+    process.env.PATH = "";
+
+    const response = await POST(requestFor({ ...baseJob, id: "job-codex-env-real-001" }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.result.resultStatus).toBe("blocked");
+    expect(payload.result.rawOutput).toContain("Codex CLI not found");
+  });
+
+  it("classifies Codex output keywords into normalized result statuses", () => {
+    expect(classifyCodexOutput("QA needed before merge", 0)).toBe("qa_needed");
+    expect(classifyCodexOutput("Minor fix required in tests", 0)).toBe("minor_fix");
+    expect(classifyCodexOutput("Blocked pending user decision", 0)).toBe("blocked");
+    expect(classifyCodexOutput("Safety violation: forbidden file touched", 0)).toBe(
+      "safety_violation",
+    );
+    expect(classifyCodexOutput("All checks passed", 0)).toBe("pass");
+    expect(classifyCodexOutput("All checks passed", 1)).toBe("blocked");
+  });
+
+  it("keeps Antigravity as manual prompt-copy without spawning a CLI", async () => {
+    const adapter = new AntigravityCliAdapter(false);
+    const result = await adapter.dispatch({
+      ...baseJob,
+      id: "job-antigravity-manual-001",
+      agentId: "antigravity",
+      prompt: "Polish the plan UI.",
+    });
+
+    expect(result.agentId).toBe("antigravity");
+    expect(result.resultStatus).toBe("blocked");
+    expect(result.rawOutput).toContain("manual prompt-copy target");
+    expect(result.rawOutput).toContain("No Antigravity CLI process was spawned");
   });
 });

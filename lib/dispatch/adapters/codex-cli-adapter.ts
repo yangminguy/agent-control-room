@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
-import type { AgentResult, DispatchJob } from "../../types";
+import type { AgentResult, DispatchJob, ResultStatus } from "../../types";
 import { logOrchestrationEvent } from "../orchestration-logger";
 import type { AgentAdapter } from "./index";
 
@@ -38,6 +38,50 @@ function commandExists(command: string): boolean {
       return false;
     }
   });
+}
+
+export function classifyCodexOutput(rawOutput: string, exitCode: number | null): ResultStatus {
+  const normalized = rawOutput.toLowerCase();
+
+  if (
+    normalized.includes("safety violation") ||
+    normalized.includes("security violation") ||
+    normalized.includes("forbidden file") ||
+    normalized.includes("destructive operation")
+  ) {
+    return "safety_violation";
+  }
+
+  if (
+    normalized.includes("qa needed") ||
+    normalized.includes("needs qa") ||
+    normalized.includes("requires qa") ||
+    normalized.includes("needs review") ||
+    normalized.includes("requires review")
+  ) {
+    return "qa_needed";
+  }
+
+  if (
+    normalized.includes("minor fix") ||
+    normalized.includes("minor_fix") ||
+    normalized.includes("small fix") ||
+    normalized.includes("follow-up fix")
+  ) {
+    return "minor_fix";
+  }
+
+  if (
+    normalized.includes("blocked") ||
+    normalized.includes("error") ||
+    normalized.includes("failed") ||
+    normalized.includes("cannot proceed") ||
+    normalized.includes("needs user decision")
+  ) {
+    return "blocked";
+  }
+
+  return exitCode === 0 ? "pass" : "blocked";
 }
 
 export class CodexCliAdapter implements AgentAdapter {
@@ -133,7 +177,7 @@ export class CodexCliAdapter implements AgentAdapter {
           settled = true;
           clearTimeout(timer);
           const rawOutput = [...stdout, ...stderr].join("\n");
-          const resultStatus: AgentResult["resultStatus"] = code === 0 ? "pass" : "blocked";
+          const resultStatus = classifyCodexOutput(rawOutput, code);
           const result = makeResult(job, rawOutput, resultStatus);
           logOrchestrationEvent({
             event: "job_completed",

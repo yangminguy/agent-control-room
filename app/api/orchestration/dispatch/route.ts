@@ -77,6 +77,23 @@ function canDispatch(job: DispatchJob): { ok: true } | { ok: false; status: numb
   return { ok: true };
 }
 
+function readBooleanEnv(name: string): boolean | undefined {
+  const value = process.env[name];
+  if (value === undefined) return undefined;
+  return !["false", "0", "no"].includes(value.toLowerCase());
+}
+
+function shouldUseMockDispatch(agentId: AgentType): boolean {
+  const globalMock = readBooleanEnv("MOCK_DISPATCH");
+  if (globalMock !== undefined) return globalMock;
+
+  if (agentId === "codex") {
+    return readBooleanEnv("CODEX_MOCK_MODE") ?? true;
+  }
+
+  return true;
+}
+
 export async function POST(req: Request) {
   try {
     const ip =
@@ -106,7 +123,7 @@ export async function POST(req: Request) {
       return Response.json({ success: false, error: gate.error }, { status: gate.status });
     }
 
-    const mockMode = process.env.MOCK_DISPATCH !== "false";
+    const mockMode = shouldUseMockDispatch(job.agentId);
 
     logOrchestrationEvent({
       event: "job_dispatched",

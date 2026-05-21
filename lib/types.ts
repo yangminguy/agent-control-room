@@ -588,3 +588,89 @@ export type ContextBudget = {
   jobCount: number; // number of jobs processed
   estimatedTokens: number; // (promptChars + outputChars) / 4
 };
+
+// ─────────────────────────────────────────────────────────
+// Phase 33 — Production Hardening & Error Recovery
+// ─────────────────────────────────────────────────────────
+
+/** Retry policy configuration for job recovery */
+export type RetryPolicy = {
+  maxRetries: number;
+  initialDelayMs: number;
+  maxDelayMs: number;
+  backoffMultiplier: number; // exponential backoff (default: 2.0)
+};
+
+/** Error recovery attempt log */
+export type ErrorRecoveryLog = {
+  id: string;
+  jobId: string;
+  errorMessage: string;
+  errorCode?: string;
+  attemptNumber: number;
+  nextRetryAt?: string;
+  recoveryAction: string; // "retry", "escalate", "manual_review"
+  timestamp: string;
+  resolvedAt?: string;
+};
+
+/** Data integrity checkpoint for recovery */
+export type DataIntegrityCheckpoint = {
+  id: string;
+  jobId: string;
+  checksum: string;
+  changedFiles: string[];
+  timestamp: string;
+  status: "valid" | "corrupted" | "unknown";
+};
+
+// ─────────────────────────────────────────────────────────
+// Phase 34 — Hermes LLM Validation & Auto-Decision Layer
+// ─────────────────────────────────────────────────────────
+
+/** Hermes LLM validation request */
+export type HermesValidationRequest = {
+  id: string;
+  planId: string;
+  stageIndex: number;
+  stageName: string;
+  acceptanceCriteria: string[];
+  completedWork: string[];
+  contextSummary: string;
+  riskFlags?: string[];
+  timestamp: string;
+};
+
+/** Hermes LLM validation result */
+export type HermesValidationResult = {
+  validationId: string;
+  requestId: string;
+  isValid: boolean;
+  confidenceScore: number; // 0-100
+  reasoning: string;
+  suggestedAction: "approve" | "reject" | "manual_review";
+  risks?: string[];
+  recommendations?: string[];
+  timestamp: string;
+};
+
+/** Auto-decision log (user-approved or manual review) */
+export type AutoDecisionLog = {
+  id: string;
+  validationId: string;
+  decision: "auto_approved" | "auto_rejected" | "user_confirmation_required";
+  decisionMaker?: string; // "hermes", "user", "system"
+  userApproval?: boolean;
+  userNote?: string;
+  approvalTimestamp?: string;
+  timestamp: string;
+};
+
+/** Validation configuration */
+export type ValidationConfig = {
+  enableHermesValidation: boolean;
+  confidenceThreshold: number; // 0-100 (default: 75)
+  autoApproveAboveThreshold: boolean; // if true, auto-approve high-confidence validations
+  requiresUserConfirmationForRejects: boolean;
+  loggingLevel: "minimal" | "standard" | "verbose";
+};
