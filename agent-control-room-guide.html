@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
         .gradient-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+
         .phase-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -16,20 +18,35 @@
             font-size: 12px;
             font-weight: 600;
         }
-        .phase-done { background-color: #d1fae5; color: #065f46; }
-        .phase-progress { background-color: #fef3c7; color: #92400e; }
-        .phase-todo { background-color: #fee2e2; color: #991b1b; }
+
+        .phase-done {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .phase-progress {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .phase-todo {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
         .diagram-box {
             background: #f9fafb;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             padding: 16px;
         }
+
         .workflow-step {
             display: flex;
             align-items: center;
             margin: 12px 0;
         }
+
         .step-number {
             background: #667eea;
             color: white;
@@ -43,19 +60,34 @@
             margin-right: 12px;
             flex-shrink: 0;
         }
+
         .arrow-down {
             text-align: center;
             color: #667eea;
             font-size: 24px;
             margin: 8px 0;
         }
+
         .table-header {
             background: #f3f4f6;
             font-weight: 600;
         }
-        .priority-high { color: #dc2626; font-weight: 600; }
-        .priority-medium { color: #d97706; font-weight: 600; }
-        .priority-low { color: #16a34a; font-weight: 600; }
+
+        .priority-high {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .priority-medium {
+            color: #d97706;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
         .tab-button {
             padding: 8px 16px;
             border: 2px solid #e5e7eb;
@@ -64,30 +96,36 @@
             margin-right: 8px;
             transition: all 0.2s;
         }
+
         .tab-button.active {
             background: #667eea;
             color: white;
             border-color: #667eea;
         }
+
         .expandable {
             cursor: pointer;
             user-select: none;
         }
+
         .expandable:hover {
             background: #f3f4f6;
             border-radius: 4px;
         }
+
         .expandable-content {
             display: none;
             padding: 12px 0 12px 24px;
             border-left: 2px solid #e5e7eb;
             margin-left: 0;
         }
+
         .expandable-content.open {
             display: block;
         }
     </style>
 </head>
+
 <body class="bg-white">
     <!-- Header -->
     <div class="gradient-header text-white py-16 px-6">
@@ -128,7 +166,8 @@
         <section class="mb-12 bg-gray-50 p-8 rounded-lg border border-gray-200">
             <h2 class="text-2xl font-bold mb-4 text-gray-900">👤 타켓 사용자</h2>
             <p class="text-gray-700 mb-4">
-                <strong>PM 또는 비개발자</strong>가 Claude Code, Codex, Antigravity 같은 AI 코딩 도구를 사용해 제품을 구현하고 싶을 때 필요한 것들을 체계적으로 관리하는 도구입니다.
+                <strong>PM 또는 비개발자</strong>가 Claude Code, Codex, Antigravity 같은 AI 코딩 도구를 사용해 제품을 구현하고 싶을 때 필요한 것들을
+                체계적으로 관리하는 도구입니다.
             </p>
             <ul class="list-disc pl-6 space-y-2 text-gray-700">
                 <li><strong>무엇</strong>을 해야 할지 알고 싶다</li>
@@ -310,31 +349,38 @@
                 <h3 class="text-lg font-bold text-gray-900 mb-4">아키텍처 레이어</h3>
                 <div class="space-y-3 text-sm text-gray-700">
                     <div class="flex gap-4">
-                        <div class="bg-blue-100 text-blue-900 px-3 py-2 rounded font-semibold min-w-fit">Intent Analyzer</div>
+                        <div class="bg-blue-100 text-blue-900 px-3 py-2 rounded font-semibold min-w-fit">Intent Analyzer
+                        </div>
                         <div>사용자의 자연어 요청을 목표/제약/범위로 분석</div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="bg-blue-100 text-blue-900 px-3 py-2 rounded font-semibold min-w-fit">Feature Plan Generator</div>
+                        <div class="bg-blue-100 text-blue-900 px-3 py-2 rounded font-semibold min-w-fit">Feature Plan
+                            Generator</div>
                         <div>목표를 구조화된 기능 계획으로 분해</div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="bg-blue-100 text-blue-900 px-3 py-2 rounded font-semibold min-w-fit">Execution Planner</div>
+                        <div class="bg-blue-100 text-blue-900 px-3 py-2 rounded font-semibold min-w-fit">Execution
+                            Planner</div>
                         <div>작업 순서와 의존성 조직화</div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="bg-blue-100 text-blue-900 px-3 py-2 rounded font-semibold min-w-fit">Agent Router</div>
+                        <div class="bg-blue-100 text-blue-900 px-3 py-2 rounded font-semibold min-w-fit">Agent Router
+                        </div>
                         <div>Claude Code / Codex / Antigravity 중 선택</div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="bg-green-100 text-green-900 px-3 py-2 rounded font-semibold min-w-fit">Agent Execution Runner</div>
+                        <div class="bg-green-100 text-green-900 px-3 py-2 rounded font-semibold min-w-fit">Agent
+                            Execution Runner</div>
                         <div>CLI로 에이전트 실행, 로그 스트리밍, 안전한 브랜치 격리</div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="bg-purple-100 text-purple-900 px-3 py-2 rounded font-semibold min-w-fit">Git Diff Analyzer</div>
+                        <div class="bg-purple-100 text-purple-900 px-3 py-2 rounded font-semibold min-w-fit">Git Diff
+                            Analyzer</div>
                         <div>변경사항을 분석해 작업 상태 업데이트</div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="bg-orange-100 text-orange-900 px-3 py-2 rounded font-semibold min-w-fit">HTML Plan View & Kanban</div>
+                        <div class="bg-orange-100 text-orange-900 px-3 py-2 rounded font-semibold min-w-fit">HTML Plan
+                            View & Kanban</div>
                         <div>실시간 계획 진행 상황 시각화</div>
                     </div>
                 </div>
@@ -658,7 +704,8 @@
                         </tr>
                         <tr>
                             <td class="border border-gray-300 p-3">T024: Vibe Kanban 연동</td>
-                            <td class="border border-gray-300 p-3"><strong>Claude Code</strong> (우선) 또는 <strong>Codex</strong></td>
+                            <td class="border border-gray-300 p-3"><strong>Claude Code</strong> (우선) 또는
+                                <strong>Codex</strong></td>
                             <td class="border border-gray-300 p-3">외부 API 분석 (Claude Code) 또는 구현 (Codex)</td>
                         </tr>
                         <tr class="bg-gray-50">
@@ -729,43 +776,51 @@
         <section class="mb-12">
             <h2 class="text-3xl font-bold mb-8 text-gray-900">❓ 자주 묻는 질문</h2>
             <div class="space-y-4">
-                <div class="border border-gray-300 rounded-lg p-6 cursor-pointer" onclick="this.querySelector('.faq-content').classList.toggle('open')">
+                <div class="border border-gray-300 rounded-lg p-6 cursor-pointer"
+                    onclick="this.querySelector('.faq-content').classList.toggle('open')">
                     <div class="expandable flex justify-between items-center">
                         <h3 class="font-bold text-gray-900">Q: 왜 아직 Supabase가 아니라 JSON을 쓰나요?</h3>
                         <span class="text-2xl">+</span>
                     </div>
                     <div class="faq-content expandable-content">
                         <p class="text-gray-700 mt-4">
-                            <strong>A:</strong> MVP는 빠른 검증이 중요합니다. JSON은 Supabase보다 설정이 간단하고, 데이터 모델이 정해진 후에 마이그레이션하면 됩니다. Phase 6에서 Supabase 스키마를 설계하고 Phase 8에서 마이그레이션합니다.
+                            <strong>A:</strong> MVP는 빠른 검증이 중요합니다. JSON은 Supabase보다 설정이 간단하고, 데이터 모델이 정해진 후에 마이그레이션하면
+                            됩니다. Phase 6에서 Supabase 스키마를 설계하고 Phase 8에서 마이그레이션합니다.
                         </p>
                     </div>
                 </div>
 
-                <div class="border border-gray-300 rounded-lg p-6 cursor-pointer" onclick="this.querySelector('.faq-content').classList.toggle('open')">
+                <div class="border border-gray-300 rounded-lg p-6 cursor-pointer"
+                    onclick="this.querySelector('.faq-content').classList.toggle('open')">
                     <div class="expandable flex justify-between items-center">
-                        <h3 class="font-bold text-gray-900">Q: Claude Code만 Runner가 있는데, 왜 Codex와 Antigravity는 아직 없나요?</h3>
+                        <h3 class="font-bold text-gray-900">Q: Claude Code만 Runner가 있는데, 왜 Codex와 Antigravity는 아직 없나요?
+                        </h3>
                         <span class="text-2xl">+</span>
                     </div>
                     <div class="faq-content expandable-content">
                         <p class="text-gray-700 mt-4">
-                            <strong>A:</strong> Claude Code Runner가 먼저 완성되어야 반복할 수 있는 패턴이 명확해집니다. 그 패턴을 Codex (Phase 7)에 적용하고, Antigravity는 독특한 특성 때문에 별도 설계가 필요합니다.
+                            <strong>A:</strong> Claude Code Runner가 먼저 완성되어야 반복할 수 있는 패턴이 명확해집니다. 그 패턴을 Codex (Phase 7)에
+                            적용하고, Antigravity는 독특한 특성 때문에 별도 설계가 필요합니다.
                         </p>
                     </div>
                 </div>
 
-                <div class="border border-gray-300 rounded-lg p-6 cursor-pointer" onclick="this.querySelector('.faq-content').classList.toggle('open')">
+                <div class="border border-gray-300 rounded-lg p-6 cursor-pointer"
+                    onclick="this.querySelector('.faq-content').classList.toggle('open')">
                     <div class="expandable flex justify-between items-center">
                         <h3 class="font-bold text-gray-900">Q: Loop UX를 먼저 하는 게 안정성에 정말 중요한가요?</h3>
                         <span class="text-2xl">+</span>
                     </div>
                     <div class="faq-content expandable-content">
                         <p class="text-gray-700 mt-4">
-                            <strong>A:</strong> 네. 현재 Loop에 버그가 있으면, Vibe Kanban을 연동할 때 원인이 뭔지 찾기 어렵습니다. 보안도 마찬가지입니다. 기초가 탄탄해야 위에 쌓는 것이 안전합니다.
+                            <strong>A:</strong> 네. 현재 Loop에 버그가 있으면, Vibe Kanban을 연동할 때 원인이 뭔지 찾기 어렵습니다. 보안도 마찬가지입니다.
+                            기초가 탄탄해야 위에 쌓는 것이 안전합니다.
                         </p>
                     </div>
                 </div>
 
-                <div class="border border-gray-300 rounded-lg p-6 cursor-pointer" onclick="this.querySelector('.faq-content').classList.toggle('open')">
+                <div class="border border-gray-300 rounded-lg p-6 cursor-pointer"
+                    onclick="this.querySelector('.faq-content').classList.toggle('open')">
                     <div class="expandable flex justify-between items-center">
                         <h3 class="font-bold text-gray-900">Q: 전체 개발까지 얼마나 걸리나요?</h3>
                         <span class="text-2xl">+</span>
@@ -835,4 +890,5 @@
         });
     </script>
 </body>
+
 </html>

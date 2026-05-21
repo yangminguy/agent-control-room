@@ -1,4 +1,20 @@
 import { execSync } from "child_process";
+import { resolve } from "path";
+
+/**
+ * 제공된 경로가 프로젝트 범위 내인지 검증한다. (경로 순회 방지)
+ * projectRoot로부터 상대 경로로만 접근 가능하도록 제한.
+ */
+export function validateCwdSafety(cwd: string, projectRoot: string): boolean {
+  try {
+    const resolved = resolve(cwd);
+    const root = resolve(projectRoot);
+    // 해석된 경로가 프로젝트 루트로 시작하는지 확인
+    return resolved === root || resolved.startsWith(root + require("path").sep);
+  } catch {
+    return false;
+  }
+}
 
 /**
  * 태스크 ID와 제목으로부터 안전한 git 브랜치 이름을 생성한다.

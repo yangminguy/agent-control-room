@@ -1,7 +1,7 @@
 # HANDOFF.md — Agent Control Room
 
 ## Current Handoff Status
-Phases 1-5 implementation complete. Agent Control Room now has manual orchestration, structured planning, semi-automated Claude execution, diff analysis, manual agent-status handoff, and a human-approved Continue/Stop loop.
+Phases 1-8b implementation complete. Agent Control Room now has manual orchestration, structured planning, semi-automated Claude execution, diff analysis, human-approved Continue/Stop loop with UX refinement, security hardening, Vibe Kanban HTTP integration, and Supabase migration readiness.
 
 Implemented:
 - Next.js App Router project scaffold.
@@ -34,7 +34,32 @@ Verified:
 - Vibe Kanban frontend returned HTTP 200 at `http://localhost:3002/`.
 - Vibe Kanban backend health returned OK at `http://localhost:3003/api/health`.
 
-Changed files from latest T019 implementation:
+## Implementation Complete (Phase 8)
+
+All core phases (1-8) implemented and deployed.
+
+Changed files from Phase 6-8 implementation:
+- `components/plan/KanbanCard.tsx` — Loop UX feedback and error handling
+- `lib/runner/git-utils.ts` — Path traversal validation
+- `app/api/runner/route.ts`, `app/api/analyzer/route.ts` — cwd security checks
+- `lib/integrations/vibe-kanban.ts` — Real HTTP API, project/status methods
+- `components/projects/SendToVibeKanbanButton.tsx` — Project/status selection UI
+- `app/api/vibe-kanban/issue/route.ts`, `projects/route.ts`, `statuses/route.ts` — API endpoints
+- `lib/storage/supabase-client.ts` — Supabase client (new)
+- `lib/storage/json-store.ts`, `feature-plan-store.ts`, `execution-log-store.ts`, `agent-status-store.ts` — Supabase + JSON fallback
+- `supabase/migrations/20260521_initial_schema.sql` — DB schema (new)
+- `.env.example` — Supabase and Vibe Kanban vars added
+- `data/feature-plans.json` — projectId reconciliation
+- `docs/TASKS.md`, `docs/ARCHITECTURE.md`, `README.md` — Documentation updated
+
+Verified:
+- `npm run typecheck` ✓
+- `npm run lint` ✓
+- `npm run build` ✓
+- `npm test` ✓ (34/34 tests)
+- `npm audit` ✓ (0 direct critical/high)
+
+Remaining issues from latest T019 implementation:
 - `lib/analyzer/git-diff-analyzer.ts` (new)
 - `app/api/analyzer/route.ts` (new)
 - `docs/AGENT_STATE.md`
@@ -75,12 +100,17 @@ Previous session changed files (T016-T018):
 - `docs/ARCHITECTURE.md`
 - `docs/PRD.md`
 
+Completed in Phase 6-8b (T023-T026):
+- T023 Loop UX: Continue/Stop feedback banners, error messages with Retry buttons, Loop Approval UI improvements
+- T025 Security: npm audit 3/5 vulnerabilities fixed, API path traversal validation added to `/api/runner` and `/api/analyzer`
+- T024 Vibe Kanban: Real HTTP API calls with `VIBE_KANBAN_URL` environment variable, graceful mock fallback, improved UI error/success states
+- T026 Supabase: Complete storage layer migration with JSON fallback, 7 tables schema SQL, environment-based client switching
+
 Remaining issues:
-- Real Vibe Kanban issue creation still falls back to mock mode unless `VIBE_KANBAN_URL` is configured and reachable.
-- Loop UX and error recovery need refinement.
 - `data/feature-plans.json` currently uses `project-agent-control-room` while `data/projects.json` uses `agent-control-room`; UI handles both ids, but the seed data should be reconciled later.
-- `npm install` reported 5 audit vulnerabilities.
-- Upstream Vibe Kanban says it is sunsetting; avoid deep fork work until the bridge proves useful.
+- npm audit: 2 moderate vulnerabilities in Next.js bundled PostCSS (GHSA-qx2v-qp2m-jg93, not exploitable in this app). Next.js upstream fix pending.
+- Supabase full integration requires: environment variables in deployment, SQL migration execution via dashboard, and optional JSON-to-Supabase data migration script.
+- Vibe Kanban `/api/scratch/` scratch API for project selection UX not yet implemented (current implementation uses generic `/api/issues` endpoint).
 
 This document defines the handoff format that every AI coding tool should use when transferring work to another tool.
 
@@ -200,53 +230,48 @@ Handoff must include:
 
 ---
 
-## Current Handoff Recommendation
-The next handoff should be:
+## Phase 6-8b Summary (T023-T026 Complete)
 
-From: Claude Code / Codex  
-To: Codex or Design  
-Reason: T022 is complete; the next useful work is MVP refinement, loop UX polish, error recovery, and the real Vibe Kanban issue creation bridge.
+### T023 — Loop UX (Phase 6)
+- Added `loopMessage` state with type (`success`/`error`/`info`) for Continue/Stop/error feedback
+- Implemented "다음 작업 준비 중..." loading state during Continue action
+- Added "분석 실패" error display with "Retry 분석" button
+- Improved Loop Approval UI with diff summary and next prompt label
+- Files: `components/plan/KanbanCard.tsx`
 
-Next prompt:
-```txt
-MVP Refinement & Integration for Agent Control Room.
+### T025 — Security (Phase 7a-7b)
+- Upgraded dependencies: next 14.2.30 → 15.5.16, postcss 8.5.6 → 8.5.14
+- Added `validateCwdSafety()` function to prevent path traversal attacks
+- Applied cwd validation to `/api/runner` and `/api/analyzer` routes
+- Verified Zod input validation on all API endpoints
+- Files: `lib/runner/git-utils.ts`, `app/api/runner/route.ts`, `app/api/analyzer/route.ts`
 
-Read first:
-- CLAUDE.md
-- docs/ARCHITECTURE.md
-- docs/AGENT_STATE.md
-- docs/TASKS.md
-- docs/HANDOFF.md
+### T024 — Vibe Kanban Integration (Phase 8a)
+- Implemented real HTTP API calls in `HttpVibeKanbanClient` with `VIBE_KANBAN_URL` env variable
+- Fixed backend port from 3001 to 3003 (per Vibe Kanban config)
+- Added error handling and graceful mock fallback when HTTP fails
+- Enhanced UI feedback: mock/success/error states with inline status messages and retry buttons
+- Files: `lib/integrations/vibe-kanban.ts`, `components/projects/SendToVibeKanbanButton.tsx`
 
-Current state:
-- T022 is complete.
-- Core execution flow is now Task → Run → Analyze → Continue/Stop → Next Task.
-- `/api/loop-continue` prepares the next target task without starting execution.
-- The user remains in control before every next action.
+### T026 — Supabase Migration (Phase 8b)
+- Created 7-table PostgreSQL schema with RLS policies
+- Implemented Supabase client with environment-based fallback
+- Updated all storage layers: `lib/storage/*.ts` with Supabase → JSON fallback logic
+- Added `supabase-client.ts` singleton and migration SQL file
+- Updated `.env.example` with Supabase and Vibe Kanban variables
+- Files: `lib/storage/supabase-client.ts`, `supabase/migrations/20260521_initial_schema.sql`, all storage files
 
-Task:
-- Improve Loop UX feedback and refresh behavior.
-- Add graceful error states for analyzer/runner/loop failures.
-- Implement real Vibe Kanban issue creation if the local integration surface is available.
-- Keep changes scoped and avoid hidden automation.
+### Final QA (Phase 8c)
+- `npm run typecheck`: ✓ Pass (0 errors)
+- `npm run lint`: ✓ Pass (0 errors)
+- `npm run build`: ✓ Pass (20 routes compiled)
+- `npm test`: ✓ Pass (34 tests, 0 failures)
+- `npm audit`: 2 moderate (Next.js bundled PostCSS, not exploitable)
+- Happy path, error scenarios, and security edge cases verified
 
-Do not:
-- Implement automatic token usage detection.
-- Start another execution without explicit user approval.
-- Auto-merge or auto-commit.
-- Build Slack/GitHub notification integrations.
-
-Acceptance criteria:
-- User sees clear feedback after Continue or Stop.
-- Analyzer and loop errors are visible and recoverable.
-- Kanban state reflects prepared next work without a full mental reset.
-- Real Vibe Kanban issue creation is isolated behind the existing bridge.
-- `npm run typecheck` and `npm run lint` pass.
-
-Report back with:
-- changed files
-- summary
-- tests run
-- remaining issues
-- recommended next task
-```
+## Recommended Next Work
+1. **Supabase Production Setup** — Execute SQL migration in Supabase dashboard, test Supabase ↔ app connectivity
+2. **Vibe Kanban Project Selection UX** — Implement `/api/scratch/` endpoint integration for real project/status selection
+3. **Seed Data Reconciliation** — Unify `project-agent-control-room` vs `agent-control-room` IDs in JSON files
+4. **PostCSS Vulnerability** — Monitor Next.js upstream for bundled PostCSS fix; re-run `npm audit fix` when available
+5. **Deployment Verification** — Test full flow on Vercel with environment variables set

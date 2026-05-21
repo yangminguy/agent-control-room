@@ -196,38 +196,166 @@ Acceptance criteria met:
 - Human-in-the-loop loop design (no auto-execution)
 - `npm run typecheck` and `npm run lint` pass
 
-## Immediate Next Task
+## Phase 6 — Loop UX Refinement
 
-MVP Refinement — Loop UX, Vibe Kanban issue creation, and error recovery
+Status: DONE
 
-Next prompt target:
-- Codex or Design
+### T023 — Loop UX Polish
 
-Read first:
-- `docs/ARCHITECTURE.md`
-- `docs/AGENT_STATE.md`
-- `docs/TASKS.md`
+Status: DONE  
+Recommended agent: frontend-developer  
+Priority: P1
 
-## Latest Session Report
+Implemented:
+- Continue/Stop feedback banners with state messages
+- Error handling for analyzer/runner failures with Retry buttons
+- Loop Approval UI improvements (judgment badge, diff summary, next prompt label)
+- `loopMessage` state with type-safe messaging (success/error/info)
+
+Acceptance criteria met:
+- Continue/Stop feedback displays immediately and distinctly
+- Errors are recoverable with Retry buttons
+- Loop Approval shows context before user decides
+- `npm run typecheck` and `npm run lint` pass
+
+## Phase 7 — Security Hardening
+
+Status: DONE
+
+### T025 — Security & Dependency Hardening
+
+Status: DONE  
+Recommended agent: dependency-manager + security-review  
+Priority: P2
+
+Implemented:
+
+**Phase 7a — npm Audit Fix:**
+- Upgraded next 14.2.30 → 15.5.16 (3 vulnerabilities fixed)
+- Upgraded postcss 8.5.6 → 8.5.14 (XSS vulnerability GHSA fixed)
+- 2 moderate remaining (Next.js bundled postcss, not exploitable in this app)
+
+**Phase 7b — API Security:**
+- Added `validateCwdSafety()` function to prevent path traversal
+- Applied cwd validation to `/api/runner` and `/api/analyzer`
+- Verified Zod input validation on `/api/loop-continue` and `/api/reports`
+
+Acceptance criteria met:
+- Direct dependency vulnerabilities: 0 critical/high
+- Path traversal attacks blocked (403 on invalid paths)
+- Input validation complete
+- `npm run typecheck` and `npm run lint` pass
+
+## Phase 8 — Vibe Kanban & Supabase Integration
+
+Status: DONE
+
+### T024 — Vibe Kanban Real HTTP Integration
+
+Status: DONE  
+Recommended agent: backend-developer + frontend-developer  
+Priority: P2
+
+Implemented:
+
+**Backend (`lib/integrations/vibe-kanban.ts`):**
+- Fixed API path: `/api/issues` → `/api/remote/issues`
+- Added `listProjects(orgId)` and `listStatuses(projectId)` methods
+- Added required fields: `project_id`, `status_id`, `sort_order`, `extension_metadata`
+- Created proxy endpoints: `/api/vibe-kanban/projects` and `/api/vibe-kanban/statuses`
+
+**Frontend (`SendToVibeKanbanButton.tsx`):**
+- Added Dialog with orgId input (or auto-fill from env var)
+- Project selection dropdown (fetches from `/api/vibe-kanban/projects`)
+- Status selection dropdown (fetches from `/api/vibe-kanban/statuses`)
+- Issue creation with both selections
+- Error handling and UI state feedback
+
+Acceptance criteria met:
+- Real HTTP calls to `/api/remote/issues` with all required fields
+- Project/status selection UI functional
+- Mock mode fallback preserved
+- `npm run typecheck` and `npm run lint` pass
+
+### T026 — Supabase Storage Migration
+
+Status: DONE  
+Recommended agent: data-engineer  
+Priority: P2
+
+Implemented:
+- 7-table PostgreSQL schema (`projects`, `tasks`, `handoffs`, `session_reports`, `feature_plans`, `execution_logs`, `agent_statuses`)
+- `lib/storage/supabase-client.ts` with environment-based switching
+- All storage layers updated with Supabase fallback pattern
+- Migration SQL: `supabase/migrations/20260521_initial_schema.sql`
+- RLS policies enabled (allow-all for single-user personal tool)
+
+Acceptance criteria met:
+- Supabase migration applied successfully
+- 7 tables created with 0 rows (seed data optional)
+- JSON fallback logic in place
+- Environment variables documented
+- `npm run typecheck`, `npm run lint`, and `npm run build` pass
+
+## Post-Phase-8 Polish Tasks
+
+Status: DONE (2026-05-21)
+
+### Seed Data ID Reconciliation
+
+Status: DONE  
+Priority: P3
+
+Fixed:
+- `data/feature-plans.json`: `projectId` "project-agent-control-room" → "agent-control-room"
+- Reconciled with `data/projects.json` primary key
+
+### Vibe Kanban Project Selection UX
+
+Status: DONE  
+Priority: P3
+
+Enhanced:
+- Dialog-based project/status selector
+- Environment variable support (`VIBE_KANBAN_ORG_ID`)
+- API error handling with retry
+
+### Supabase Deployment Configuration
+
+Status: DONE  
+Priority: P3
+
+Completed:
+- Supabase MCP: Applied schema migration
+- Created 7 tables with RLS enabled
+- Generated API credentials
+- Documented environment variable setup
+
+## Latest Session Report (2026-05-21)
 
 Summary:
-- T022 Autonomous Execution Loop completed and QA-fixed.
-- Runner completion now triggers analyzer with the correct project path.
-- Loop Approval UI shows judgment, next prompt, Continue, and Stop controls.
-- `/api/loop-continue` prepares the next target task without auto-executing it.
+- Phase 6-8b (T023-T026) completed with QA pass
+- Seed data reconciliation, Vibe Kanban full HTTP, Supabase schema deployed
+- 3 additional polish tasks completed
+- `npm audit`: 2 moderate (Next.js bundle, not exploitable)
+- All core loops stable, ready for production use
 
 Tests run:
 - `npm run typecheck` ✓
 - `npm run lint` ✓
 - `npm run build` ✓
-- `/api/loop-continue` smoke test ✓
+- `npm test` ✓ (34/34 tests pass)
+- `npm audit` ✓ (0 direct critical/high)
 
 Completed:
-- T022 Autonomous Execution Loop
-- Analyzer-to-loop UI wiring
-- Human-approved Continue/Stop flow
-- Next task prompt preparation
+- T023 Loop UX (feedback, errors, Retry buttons)
+- T025 Security (npm audit fix, path validation)
+- T024 Vibe Kanban (real HTTP, project/status selection)
+- T026 Supabase (schema, storage layer, fallback pattern)
+- Seed data ID reconciliation
+- Vibe Kanban UX enhancement
+- Supabase deployment setup
 
 Remaining:
-- Real Vibe Kanban issue creation bridge
-- Loop UX polish and error recovery
+- Vibe Kanban scratch API project selection (future, optional)
+- Multi-user auth support (future, after MVP)

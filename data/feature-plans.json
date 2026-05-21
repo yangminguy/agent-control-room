@@ -1,7 +1,7 @@
 [
   {
     "id": "plan-phase2-structured-planning",
-    "projectId": "project-agent-control-room",
+    "projectId": "agent-control-room",
     "title": "Phase 2: Structured Planning",
     "userGoal": "실행 추적이 가능한 계획/태스크/칸반 구조를 만들고, 에이전트 실행 결과를 자동으로 캡처해 다음 프롬프트를 생성한다.",
     "status": "running",

@@ -8,8 +8,16 @@ import {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { projectName, projectContext, direction, task, assumptions, risks } =
-      body;
+    const {
+      projectName,
+      projectContext,
+      direction,
+      task,
+      assumptions,
+      risks,
+      projectId,
+      statusId,
+    } = body;
 
     if (
       !projectName ||
@@ -17,7 +25,9 @@ export async function POST(request: Request) {
       !direction ||
       !task ||
       !assumptions ||
-      !risks
+      !risks ||
+      !projectId ||
+      !statusId
     ) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
@@ -32,6 +42,8 @@ export async function POST(request: Request) {
       task,
       assumptions,
       risks,
+      projectId,
+      statusId,
     });
 
     const client = getVibeKanbanClient();

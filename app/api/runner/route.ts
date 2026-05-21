@@ -1,4 +1,4 @@
-import { checkUncommittedChanges, createBranch, generateBranchName } from "@/lib/runner/git-utils";
+import { checkUncommittedChanges, createBranch, generateBranchName, validateCwdSafety } from "@/lib/runner/git-utils";
 import { spawnAgent } from "@/lib/runner/spawn-runner";
 import { addExecutionLog, updateExecutionLog } from "@/lib/storage/execution-log-store";
 import { getFeaturePlanById, updatePlanTaskStatus } from "@/lib/storage/feature-plan-store";
@@ -24,6 +24,15 @@ export async function POST(request: Request) {
     };
 
     const { planId, taskId, prompt, cwd, agent } = body;
+
+    // Security: Validate cwd against path traversal
+    const projectRoot = process.cwd();
+    if (!validateCwdSafety(cwd, projectRoot)) {
+      return new Response(
+        textEncoder.encode(`data: ${JSON.stringify({ log: "[ERROR] Invalid working directory path. Path traversal detected or path is outside project scope.", type: "system" })}\n\n`),
+        { status: 403, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
 
     if (!SUPPORTED_RUNNER_AGENTS.has(agent)) {
       return new Response(

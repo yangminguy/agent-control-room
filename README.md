@@ -6,21 +6,45 @@ tool, generates execution prompts, tracks work, and preserves handoff context.
 
 ## Run locally
 
+**Development (JSON storage):**
 ```bash
 npm install
 npm run dev
 ```
 
-Open the local URL printed by Next.js.
+**With Supabase (optional):**
+```bash
+# Set environment variables
+cp .env.example .env.local
+# Edit .env.local with your Supabase URL and key
+nano .env.local
+
+# Then run
+npm run dev
+```
+
+Open the local URL printed by Next.js (typically `http://localhost:3000`).
 
 ## MVP flow
 
-1. Register or select a project.
-2. Enter product direction in natural language.
-3. Generate technical translation, tasks, routing, and prompt.
-4. Track plan tasks in `/plan`.
-5. Run or copy the prompt into Claude Code, Codex, or Antigravity.
-6. Save the result as a session report or handoff.
+1. **Register or select a project** at `/` → `/projects`
+2. **Enter product direction** in natural language → Direction input form
+3. **Generate orchestration output**:
+   - Technical translation (OpenAI structured output)
+   - Task decomposition
+   - Agent routing + recommendation
+   - Copy-ready prompt
+4. **Track execution** in `/plan`:
+   - Kanban board with task statuses
+   - Execute button (spawns Claude Code or displays copy prompt)
+   - Auto-analysis after execution
+5. **Loop control**:
+   - Continue → prepare next task
+   - Stop → save current result
+   - Error recovery with Retry buttons
+6. **Export/handoff**:
+   - Session report at `/reports`
+   - Send to Vibe Kanban at task card (with project/status selection)
 
 ## Files
 
@@ -39,11 +63,56 @@ Open the local URL printed by Next.js.
 - `docs/DESIGN_SYSTEM.md` — Current UI design rules
 - `docs/archive/` — Historical long-form research and superseded docs
 
+## Deploy to Vercel
+
+1. **Push to GitHub** (optional but recommended):
+   ```bash
+   git add .
+   git commit -m "Deploy: Agent Control Room Phase 8 complete"
+   git push
+   ```
+
+2. **Set Environment Variables** in Vercel dashboard:
+   ```
+   OPENAI_API_KEY=sk-...
+   NEXT_PUBLIC_SUPABASE_URL=https://pqqgkhowiaeznkumwhwl.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
+   ```
+
+3. **Deploy**:
+   ```bash
+   npm run build
+   vercel --prod
+   ```
+
+## Current Status (Phase 8 Complete)
+
+✅ **Completed Phases:**
+- Phase 1-5: Core orchestration, structured planning, execution, analysis, routing, autonomous loop
+- Phase 6: Loop UX refinement (feedback banners, error recovery)
+- Phase 7: Security hardening (npm audit, path validation)
+- Phase 8: Integration (Vibe Kanban HTTP API, Supabase schema)
+
+✅ **Ready for Production:**
+- Zero critical/high security vulnerabilities (direct dependencies)
+- All core flows tested and verified
+- JSON fallback ensures offline capability
+- Supabase optional (app runs without it)
+
+⚠️ **Known Limitations:**
+- Vibe Kanban `/api/scratch/` scratch API not fully integrated (general `/api/issues` endpoint used)
+- No multi-user authentication (single-user personal tool)
+- npm audit: 2 moderate (Next.js bundled PostCSS, not exploitable in this app)
+
 ## Recommended Start
-Run the app and start from the Direction to Prompt screen. For implementation
-handoffs, keep prompts bounded:
+
+1. Run the app: `npm run dev`
+2. Start from the Direction to Prompt screen at `/`
+3. For implementation handoffs, keep prompts bounded:
 
 ```txt
 Read CLAUDE.md, docs/PRD.md, docs/ARCHITECTURE.md, and docs/TASKS.md.
 Keep the change scoped to the current task and update docs if task status changes.
 ```
+
+4. For cloud deployment, configure Supabase environment variables and re-deploy

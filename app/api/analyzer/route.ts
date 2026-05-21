@@ -1,6 +1,7 @@
 import { analyzeDiff, mapJudgmentToTaskStatus } from "@/lib/analyzer/git-diff-analyzer";
 import { getFeaturePlanById, updateKanbanCardResult } from "@/lib/storage/feature-plan-store";
 import { getExecutionLogByTaskId } from "@/lib/storage/execution-log-store";
+import { validateCwdSafety } from "@/lib/runner/git-utils";
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +12,15 @@ export async function POST(request: Request) {
     };
 
     const { planId, taskId, cwd } = body;
+
+    // Security: Validate cwd against path traversal
+    const projectRoot = process.cwd();
+    if (!validateCwdSafety(cwd, projectRoot)) {
+      return Response.json(
+        { error: "Invalid working directory path. Path traversal detected or path is outside project scope." },
+        { status: 403 }
+      );
+    }
 
     // Get plan and task
     const plan = await getFeaturePlanById(planId);
