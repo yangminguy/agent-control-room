@@ -1,0 +1,253 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useOrchestration } from "@/lib/dispatch/orchestration-context";
+import type { HermesAnalysis } from "@/lib/types";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type PanelState = {
+  analysis: HermesAnalysis | null;
+  isAnalyzing: boolean;
+  isSaving: boolean;
+  savedPath: string | null;
+  error: string | null;
+};
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function InsightCards({ insights }: { insights: string[] }) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-3">
+      {insights.map((insight, i) => (
+        <div
+          key={i}
+          className="rounded-lg border border-border bg-surface-1 p-3 text-xs text-text-secondary leading-relaxed"
+        >
+          <span className="block text-[10px] font-semibold text-pink-primary mb-1 uppercase tracking-wide">
+            Insight {i + 1}
+          </span>
+          {insight}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RecommendationList({ items }: { items: string[] }) {
+  return (
+    <ul className="space-y-1.5">
+      {items.map((item, i) => (
+        <li key={i} className="flex gap-2 text-xs text-text-secondary">
+          <span className="text-emerald-400 font-bold shrink-0">{i + 1}.</span>
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function RiskFlagList({ flags }: { flags: string[] }) {
+  if (flags.length === 0) {
+    return (
+      <p className="text-xs text-emerald-400">No risk flags detected.</p>
+    );
+  }
+
+  return (
+    <ul className="space-y-1.5">
+      {flags.map((flag, i) => (
+        <li
+          key={i}
+          className="flex gap-2 text-xs text-red-300 bg-red-950 border border-red-800 rounded px-2 py-1.5"
+        >
+          <span className="font-bold shrink-0">!</span>
+          {flag}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+export function HermesLivePanel() {
+  const { jobs, results, approvals } = useOrchestration();
+
+  const [state, setState] = useState<PanelState>({
+    analysis: null,
+    isAnalyzing: false,
+    isSaving: false,
+    savedPath: null,
+    error: null,
+  });
+
+  // Build orchestration state from context
+  function buildOrchestrationState() {
+    return {
+      totalJobs: jobs.length,
+      activeJobs: jobs.filter((j) => j.status === "running").length,
+      failedJobs: jobs.filter((j) => j.status === "failed").length,
+      pendingApprovals: approvals.filter((a) => a.status === "pending").length,
+      recentEvents: results.slice(0, 5).map((r) => `${r.agentId}: ${r.resultStatus}`),
+    };
+  }
+
+  async function runAnalysis() {
+    setState((prev) => ({ ...prev, isAnalyzing: true, error: null, savedPath: null }));
+
+    try {
+      const res = await fetch("/api/hermes/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state: buildOrchestrationState() }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
+
+      const data = (await res.json()) as { analysis: HermesAnalysis };
+      setState((prev) => ({ ...prev, analysis: data.analysis, isAnalyzing: false }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Analysis failed";
+      setState((prev) => ({ ...prev, error: message, isAnalyzing: false }));
+    }
+  }
+
+  async function saveToObsidian() {
+    if (!state.analysis) return;
+
+    setState((prev) => ({ ...prev, isSaving: true, error: null }));
+
+    try {
+      const res = await fetch("/api/hermes/save-note", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysis: state.analysis,
+          title: `Hermes Analysis — ${new Date().toLocaleDateString()}`,
+          tags: ["hermes", "analysis", "orchestration"],
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Save failed: ${res.status}`);
+      }
+
+      const data = (await res.json()) as { savedPath: string };
+      setState((prev) => ({ ...prev, savedPath: data.savedPath, isSaving: false }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Save failed";
+      setState((prev) => ({ ...prev, error: message, isSaving: false }));
+    }
+  }
+
+  // Auto-analyze on mount
+  useEffect(() => {
+    void runAnalysis();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const { analysis, isAnalyzing, isSaving, savedPath, error } = state;
+
+  return (
+    <div className="space-y-5">
+      {/* Header + controls */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-text-primary">Hermes Live Analysis</h2>
+          <p className="text-xs text-text-secondary mt-0.5">
+            Powered by Gemma 4 via Ollama — observing only, not executing.
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => void runAnalysis()}
+            disabled={isAnalyzing}
+            className="px-3 py-1.5 text-xs font-medium rounded border border-border bg-surface-2 text-text-secondary hover:text-text-primary hover:bg-surface-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isAnalyzing ? "Analyzing..." : "Analyze Now"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => void saveToObsidian()}
+            disabled={!analysis || isSaving}
+            className="px-3 py-1.5 text-xs font-medium rounded border border-emerald-700 bg-emerald-950 text-emerald-300 hover:bg-emerald-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            {isSaving ? "Saving..." : "Save to Obsidian"}
+          </button>
+        </div>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="rounded border border-red-700 bg-red-950 px-3 py-2 text-xs text-red-300">
+          {error}
+        </div>
+      )}
+
+      {/* Save confirmation */}
+      {savedPath && (
+        <div className="rounded border border-emerald-700 bg-emerald-950 px-3 py-2 text-xs text-emerald-300">
+          Saved to: <span className="font-mono break-all">{savedPath}</span>
+        </div>
+      )}
+
+      {/* Loading skeleton */}
+      {isAnalyzing && !analysis && (
+        <div className="space-y-3 animate-pulse">
+          <div className="h-20 rounded-lg bg-surface-2" />
+          <div className="h-16 rounded-lg bg-surface-2" />
+          <div className="h-12 rounded-lg bg-surface-2" />
+        </div>
+      )}
+
+      {/* Analysis results */}
+      {analysis && (
+        <div className="space-y-4">
+          {/* Insights */}
+          <section>
+            <h3 className="text-xs font-semibold text-text-primary mb-2 uppercase tracking-wide">
+              Insights
+            </h3>
+            <InsightCards insights={analysis.insights} />
+          </section>
+
+          {/* Recommendations */}
+          <section className="rounded-lg border border-border bg-surface-1 p-4">
+            <h3 className="text-xs font-semibold text-text-primary mb-2 uppercase tracking-wide">
+              Recommendations
+            </h3>
+            <RecommendationList items={analysis.recommendations} />
+          </section>
+
+          {/* Risk Flags */}
+          <section className="rounded-lg border border-border bg-surface-1 p-4">
+            <h3 className="text-xs font-semibold text-text-primary mb-2 uppercase tracking-wide">
+              Risk Flags
+            </h3>
+            <RiskFlagList flags={analysis.riskFlags} />
+          </section>
+
+          {/* Timestamp */}
+          <p className="text-[10px] text-text-secondary text-right">
+            Analyzed at: {new Date(analysis.analyzedAt).toLocaleString()}
+          </p>
+        </div>
+      )}
+
+      {/* Empty state before first analysis */}
+      {!isAnalyzing && !analysis && !error && (
+        <div className="rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-sm text-text-secondary">
+            Click &quot;Analyze Now&quot; to run Gemma 4 orchestration analysis.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

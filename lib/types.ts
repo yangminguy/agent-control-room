@@ -516,6 +516,17 @@ export type FeedbackLoopOutput = {
 };
 
 // ─────────────────────────────────────────────────────────
+// Phase 26 — Hermes LLM Analysis (Gemma 4 via Ollama)
+// ─────────────────────────────────────────────────────────
+
+export type HermesAnalysis = {
+  insights: string[];
+  recommendations: string[];
+  riskFlags: string[];
+  analyzedAt: string;
+};
+
+// ─────────────────────────────────────────────────────────
 // Phase 23 — Orchestration Metrics
 // ─────────────────────────────────────────────────────────
 

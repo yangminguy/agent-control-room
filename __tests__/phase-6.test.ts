@@ -133,6 +133,7 @@ describe("Phase 6: Intelligent Routing & Agent Composition", () => {
     it("should map to external agents correctly", () => {
       expect(mapToExternalAgent("backend-developer")).toBe("codex");
       expect(mapToExternalAgent("react-specialist")).toBe("codex");
+      expect(mapToExternalAgent("qa-expert")).toBe("codex");
       expect(mapToExternalAgent("ui-designer")).toBe("antigravity");
       expect(mapToExternalAgent("data-analyst")).toBe("claude-code");
     });

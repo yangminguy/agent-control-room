@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { orchestrateDirection } from "@/lib/orchestration/openai-orchestrator";
-import { intelligentRoute } from "@/lib/routing/intelligent-router";
-import type { AgentType } from "@/lib/types";
+import { intelligentRoute, mapToExternalAgent } from "@/lib/routing/intelligent-router";
 
 const RequestSchema = z.object({
   projectName: z.string().min(1),
@@ -24,8 +23,9 @@ export async function POST(request: Request) {
     try {
       const primaryTask = result.tasks[0];
       const routing = intelligentRoute(primaryTask.technicalSummary);
-      result.recommendedAgent = routing.primary.agent_id as AgentType;
-      result.agentReason = `Intelligent Routing: ${routing.primary.reason}`;
+      const externalAgent = mapToExternalAgent(routing.primary.agent_id);
+      result.recommendedAgent = externalAgent;
+      result.agentReason = `Intelligent Routing: ${routing.primary.reason} Internal specialist: ${routing.primary.agent_id}. External handoff: ${externalAgent}.`;
     } catch (error) {
       console.error("Intelligent routing failed, using default recommendation", error);
     }

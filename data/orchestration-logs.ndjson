@@ -82,3 +82,13 @@
 {"event":"job_dispatched","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T13:08:25.850Z","detail":"real"}
 {"event":"job_started","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T13:08:25.850Z","detail":"Run a harmless mock dispatch."}
 {"event":"result_collected","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T13:08:25.850Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:44.625Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.144Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:01:45.151Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:01:45.653Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.655Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.655Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.656Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.657Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.657Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.657Z","detail":"blocked"}

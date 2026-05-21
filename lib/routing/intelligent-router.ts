@@ -254,7 +254,14 @@ function generateReason(agent: InternalAgent, keywords: string[]): string {
  * 내부 에이전트를 조합한 후 최종 외부 에이전트에 handoff
  */
 export function mapToExternalAgent(primaryAgent: string): "claude-code" | "codex" | "antigravity" {
-  const codeAgents = ["backend-developer", "nextjs-developer", "react-specialist", "fullstack-developer", "typescript-pro"];
+  const codeAgents = [
+    "backend-developer",
+    "nextjs-developer",
+    "react-specialist",
+    "fullstack-developer",
+    "typescript-pro",
+    "qa-expert",
+  ];
   const designAgents = ["ui-designer", "ux-researcher", "design-bridge", "ui-ux-tester"];
   const analysisAgents = ["data-analyst", "research-analyst", "knowledge-synthesizer"];
 
