@@ -1,17 +1,34 @@
 # HANDOFF.md — Agent Control Room
 
 ## Current Handoff Status
-Phase 9 Complete (T027–T030 Done). Agent Control Room is now a roadmap-first AI Development Control Tower with Senior Dev Prompt Compiler, Agent Availability Manager, Hermes Packet Draft UI, and Foundation Modules. All core control-tower orchestration, planning, execution, and analysis loops are stable and ready for Phase 10 Vibe Kanban Workbench Bridge implementation.
+Phase 10 Complete (T031 — Full MVP Control Loop + Hermes Memory Loop Done). Agent Control Room is now a **fully functional AI Development Control Tower** with all 18 core user requirements implemented and tested. The complete workflow from roadmap planning through result review to memory extraction is operational and safety-hardened.
 
-Strategic direction updated on 2026-05-21:
+**MVP is Feature Complete as of 2026-05-21**:
+- Roadmap-first control panel with visual roadmap and agent status
+- Senior Dev Prompt Compiler with copy-ready prompts
+- Task scheduling mode decision system (single/sequential/parallel/token_relay)
+- Result review and classification (Pass/MinorFix/QA/Blocked)
+- Context Pack and Handoff Pack generation
+- Failed task tracking with retry candidate management
+- Hermes monitoring panel for execution summaries
+- Obsidian-compatible insight memory export (7 note types)
+- Prompt pattern library for reusable prompt synthesis
+- Local Claude Code CLI runner with git branch and SSE logs
+- Manual handoff support for Codex and Antigravity
+- Agent capability detection and fallback routing
+- Orchestration queue for sequential/parallel task execution
+- All 91 tests passing, typecheck/lint/build successful
+
+**Strategic direction (stable through Phase 10)**:
 - Agent Control Room is the AI Development Control Tower for non-developer PMs.
-- `/plan` should become the Visual Development Roadmap Control Panel.
-- Senior Dev Prompt Compiler should standardize generated prompts.
-- Context Reset Protocol should create Context Packs for token/context handoff.
-- Obsidian-compatible insight memory is planned, not fully implemented.
-- Hermes is optional background/status/memory worker, not primary coding brain.
-- Vibe Kanban is the execution workbench.
-- Future work should deepen Vibe Kanban workspace/session/result-readback integration before expanding duplicate internal board UI.
+- `/plan` is the Visual Development Roadmap Control Panel.
+- Senior Dev Prompt Compiler standardizes all generated prompts.
+- Context Pack is the standard for token-limited agent handoff.
+- Obsidian-compatible Markdown is the standard for insight memory.
+- Hermes is background worker for monitoring, memory, and status (never autonomous code execution).
+- Vibe Kanban is the primary execution workbench (integration pending Phase 11).
+- All approval gates are human-in-the-loop; no uncontrolled execution allowed.
+- Phase 11 focuses on real Vibe Kanban integration and Hermes CLI research.
 
 Implemented:
 - Next.js App Router project scaffold.

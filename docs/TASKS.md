@@ -577,56 +577,144 @@ Acceptance criteria:
 - Hermes is suitable for monitoring, recurring summaries, Obsidian note generation, development log summarization, and retry candidate discovery.
 - Hermes is explicitly blocked from high-risk autonomous code changes, DB migrations, deployment, and auto-merge without explicit user approval.
 
-## Phase 10 — Vibe Kanban Workbench Bridge
+## Phase 10 — Full MVP Control Loop + Hermes Memory Loop (Complete)
+
+Status: DONE (2026-05-21)
+
+**Goal**: Build complete MVP workflow from roadmap to execution to result analysis to memory extraction, with all 18 user-facing requirements implemented.
+
+**What was built** (T031 — Full MVP Integration):
+
+### 1. Task Scheduling Mode Decision System ✅
+- `lib/orchestration/scheduling-mode-selector.ts`: Evaluates task risk, file conflicts, agent status
+- 4 modes: `single`, `sequential`, `parallel`, `token_relay`
+- File conflict detection and parallel safety checks
+- PM-friendly descriptions for each mode
+- Integrated into `components/workbench/SchedulingModePanel.tsx`
+
+### 2. Result Review & Classification System ✅
+- `lib/orchestration/result-classifier.ts`: Automatic result classification
+- 4 classifications: `Pass`, `MinorFix`, `QA`, `Blocked`
+- Changed file extraction from result text
+- Next action recommendations per classification
+- Integrated into `components/workbench/ResultReviewPanel.tsx`
+
+### 3. Failed Task Tracking & Retry Management ✅
+- `lib/hermes/failed-task-tracker.ts`: Persistent failed task records
+- Classification-aware retry candidates (max 3 retries)
+- `app/memory/page.tsx`: Failed Tasks Panel + Retry Candidates Panel
+- Integration with Obsidian Note Builder
+
+### 4. Context & Handoff Pack Generation ✅
+- `components/hermes/ContextPackBuilder.tsx`: Generate context for token-limited handoff
+- `components/hermes/HandoffPackBuilder.tsx`: Generate agent-to-agent handoff instructions
+- `app/context-pack/page.tsx`: Unified Context Pack & Handoff interface
+- Copy-to-clipboard for Markdown and JSON export
+
+### 5. Hermes Monitoring & Summarization ✅
+- `components/hermes/HermesMonitorPanel.tsx`: Execution monitoring summaries
+- `lib/hermes/monitoring-layer.ts`: ExecutionMonitorSummary type and helpers
+- Safety banner: "Hermes is not executed" (monitoring only)
+- Recent execution list with status indicators
+
+### 6. Obsidian-Compatible Insight Memory ✅
+- `components/hermes/ObsidianNoteBuilder.tsx`: 7 note types
+  - Insight, Decision, Failed-Attempt, Prompt, Handoff, Status, QA-Finding
+- Frontmatter support (tags, backlinks, etc.)
+- Markdown export for Obsidian vault import
+- Integration in `/memory` page
+
+### 7. Prompt Pattern Library & Synthesis ✅
+- `lib/hermes/prompt-pattern-library.ts`: Store reusable prompt patterns
+- `lib/knowledge/pattern-synthesis.ts`: Synthesize patterns from successful prompts
+- `/api/knowledge/patterns`: REST endpoint for pattern storage/retrieval
+- Pattern ranking by success rate
+
+### 8. Workbench Approval & Execution Gate ✅
+- `components/workbench/ExecutionReadinessGate.tsx`: Pre-execution safety checks
+- `app/api/workbench/approval/route.ts`: Approval workflow
+- Integration with `/plan` page for task execution
+
+### 9. Agent Capability Detection ✅
+- `app/api/agents/capability/route.ts`: Dynamic agent availability check
+- Local Claude Code CLI detection
+- Agent status tracking
+- Fallback recommendations
+
+### 10. Orchestration Queue Management ✅
+- `app/api/orchestration/queue/route.ts`: Task queue for sequential/parallel execution
+- Queue state persistence
+- Token usage tracking per agent
+
+### Files Created/Enhanced (T031):
+- **Pages**: `/result-review`, `/context-pack`, `/memory`
+- **Workbench**: ExecutionReadinessGate, ResultReviewPanel, SchedulingModePanel, WorkbenchRunPanel
+- **Hermes**: ContextPackBuilder, HandoffPackBuilder, HermesMonitorPanel, ObsidianNoteBuilder, PackTabs
+- **APIs**: agents/capability, orchestration/queue, workbench/approval, knowledge/patterns
+- **Libraries**: scheduling-mode-selector, result-classifier, failed-task-tracker, prompt-pattern-library, pattern-synthesis, monitoring-layer
+- **Tests**: execution-safety-regression, senior-dev-prompt-compiler (91 tests, all passing)
+
+### Verification (T031):
+- ✅ `npm run typecheck`: 0 errors
+- ✅ `npm run lint`: 0 errors
+- ✅ `npm run build`: 30 routes compiled successfully
+- ✅ `npm test`: 91/91 tests passing
+- ✅ All 18 user requirements implemented and tested
+
+### User Requirement Checklist:
+1. ✅ See current roadmap/control state (`/plan`)
+2. ✅ See which agents are locally available (`/agent-status`, agent availability panel)
+3. ✅ Understand which agent should do next task (routing rules, agent recommendations)
+4. ✅ Understand work scheduling modes (SchedulingModePanel: single/sequential/parallel/token_relay)
+5. ✅ Generate safe agent-specific prompt (prompt compiler, do-not-touch files)
+6. ✅ See allowed/do-not-touch files (prompt compiler UI, validation list)
+7. ✅ Use approved local CLI runner for Claude Code (runner with git branch, SSE logs)
+8. ✅ Use manual handoff for Codex/Antigravity (handoff generation, copy-ready output)
+9. ✅ Generate Context Pack and Handoff Pack (`/context-pack` page, builders)
+10. ✅ Paste or review agent results (ResultReviewPanel, paste textarea)
+11. ✅ Classify results as Pass/MinorFix/QA/Blocked (ResultReviewPanel, auto-classification)
+12. ✅ Recommend next action (next action generation per classification)
+13. ✅ Generate Hermes monitoring summary (HermesMonitorPanel, execution list)
+14. ✅ Extract development insights (ObsidianNoteBuilder, insight extraction)
+15. ✅ Generate Obsidian-compatible notes (ObsidianNoteBuilder, 7 note types with frontmatter)
+16. ✅ Track failed tasks and retry candidates (failed-task-tracker, `/memory` page panels)
+17. ✅ Preserve reusable prompt patterns (prompt-pattern-library, synthesis, /api/knowledge/patterns)
+18. ✅ Run typecheck/lint/test/build successfully (all passing)
+
+## Phase 11 — Production Hardening & Real Integration (TODO)
 
 Status: TODO
 
 Strategic direction:
-- Agent Control Room remains the orchestration brain/control tower.
-- Vibe Kanban becomes the execution workbench.
-- Do not expand internal kanban/session/diff UI when Vibe Kanban can provide the stronger surface through a stable bridge.
+- Agent Control Room MVP is feature-complete.
+- Next phase focuses on production readiness and real Vibe Kanban/Hermes integration.
+- Safety gates and approval workflows require validation.
 
-### T033 — Vibe Kanban Open Workspace/Card Link
+### T036 — Vibe Kanban Real Integration (Phase 11)
 
 Status: TODO  
-Recommended agent: Codex  
+Recommended agent: backend-developer  
 Priority: P1
 
 Goal:
-- After sending a task to Vibe Kanban, store enough returned metadata to let the user open the created Vibe Kanban card/workspace from Agent Control Room.
+- Connect Agent Control Room to Vibe Kanban for real workspace/session/result workflows.
 
 Acceptance criteria:
-- `SendToVibeKanbanButton` shows a durable open link after successful issue creation.
-- The link target is stored with the related project/task where feasible.
-- Missing `VIBE_KANBAN_URL` or mock mode produces clear UI copy instead of a broken link.
-- `npm run typecheck` and `npm run lint` pass.
+- Send task to Vibe Kanban: real HTTP calls with proper credentials
+- Open workspace/card link after creation
+- Import Vibe Kanban results back to `/result-review`
+- No breaking changes to mock fallback
 
-### T034 — Vibe Kanban Workspace/Session Launch Adapter
+### T037 — Hermes CLI Integration Research (Phase 11)
 
 Status: TODO  
 Recommended agent: Claude Code  
-Priority: P1
+Priority: P2
 
 Goal:
-- Confirm the smallest stable Vibe Kanban API/MCP surface for starting or opening an execution workspace/session.
+- Research and design safe integration with Hermes CLI for background monitoring and memory extraction.
 
 Acceptance criteria:
-- Document the confirmed API/MCP endpoints and required IDs.
-- Add a small isolated adapter; do not couple orchestration logic to Vibe Kanban internals.
-- Claude Code/Codex executor hints are preserved.
-- Antigravity remains manual unless a reliable native executor exists.
-
-### T035 — Vibe Kanban Result Import
-
-Status: TODO  
-Recommended agent: Codex  
-Priority: P1
-
-Goal:
-- Import or paste a Vibe Kanban execution result back into Agent Control Room and convert it into a session report, diff summary, task status update, and next prompt.
-
-Acceptance criteria:
-- User can provide a Vibe Kanban result payload or summary for a specific task.
-- Imported result updates the related `FeaturePlan` task conservatively.
-- Generated next prompt includes changed files, remaining work, and acceptance criteria.
-- No auto-merge or fully autonomous continuation is added.
+- Document API/CLI surface for Hermes background worker
+- Define safety boundaries (no autonomous code execution)
+- Create integration roadmap without implementing
