@@ -52,7 +52,7 @@ Excluded:
 - fully autonomous code execution without user approval
 
 ## Current Implementation Status
-As of 2026-05-21, the codebase implements:
+As of 2026-05-22, the codebase implements:
 
 **Phase 1-8 (Complete)**:
 - Direction to Prompt at `/`.
@@ -98,6 +98,43 @@ As of 2026-05-21, the codebase implements:
   - Core compiler in `lib/prompts/senior-dev-prompt-compiler.ts`
   - Type system in `lib/prompts/senior-dev-compiler.types.ts`
   - Enhancements: agent availability, token limit tracking, handoff recommendation, context pack recommendation
+
+**Phase 10 (Complete — Full MVP Control Loop)**:
+- T031 Control Tower UI Localization & Architecture Reframe ✅
+  - UI localization to Korean (한국어)
+  - 18 user requirements fully implemented and tested
+  - SchedulingModePanel for task scheduling (Single/Sequential/Parallel/Token Relay)
+  - ResultReviewPanel for result review and auto-classification
+  - ContextPackBuilder & HandoffPackBuilder for handoff generation
+  - HermesMonitorPanel for execution monitoring
+  - ObsidianNoteBuilder for insight memory extraction
+  - Failed task tracker with retry candidate management
+  - Prompt pattern library for prompt synthesis
+  - All 91 tests passing, 30 routes compiled
+  - Full MVP feature complete
+
+**Phase 11 (Complete — Workbench Integration & Deployment Readiness)**:
+- T036 Vibe Kanban Real Integration ✅
+  - `workspaceUrl` field added to CreateIssueResponse
+  - `/api/vibe-kanban/import` endpoint for result normalization
+  - ResultReviewPanel import form added (issueId + workspaceResult)
+  - 10 new integration tests, 101/101 tests passing
+  - 33 routes compiled, all checks green
+
+- T037 Hermes CLI Integration Roadmap ✅
+  - `docs/HERMES_INTEGRATION_ROADMAP.md` created (3,000 words)
+  - 12-section analysis: current state, integration points, 3 safe patterns, safety boundaries, 3-phase roadmap
+  - Risk assessment and decision gates defined
+  - Implementation guidance for Phase 1-3
+  - Hermes positioning confirmed: background worker only (no autonomous code execution)
+
+- T038 Deployment Checklist Update ✅
+  - `docs/DEPLOYMENT_CHECKLIST.md` updated with Phase 10-11 state
+  - npm audit status corrected (T025 reflection)
+  - All 33 routes and 18+ API endpoints documented
+  - Supabase migration guide and env vars documented
+  - Smoke test checklist expanded (8 pages + 6 APIs + data store)
+  - Vercel, Docker, Node.js deployment guides added
 
 - T029 Agent Availability Manager & Foundation Modules ✅
   - `lib/agents/agent-availability-manager.ts`: Centralized agent state (available, token_limited, cooling_down, background_worker, etc.)

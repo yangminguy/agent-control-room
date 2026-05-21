@@ -1,5 +1,169 @@
 [
   {
+    "id": "approval-1779397325378-3omo12",
+    "dispatchJobId": "job-push-456",
+    "status": "rejected",
+    "createdAt": "2026-05-21T21:02:05.378Z",
+    "destructivePatterns": [
+      "git push -f"
+    ],
+    "resolvedAt": "2026-05-21T21:02:05.379Z",
+    "approverNote": "Force push to main is too risky"
+  },
+  {
+    "id": "approval-1779397325377-s2un3n",
+    "dispatchJobId": "job-cleanup-123",
+    "status": "approved",
+    "createdAt": "2026-05-21T21:02:05.377Z",
+    "destructivePatterns": [
+      "rm -rf"
+    ],
+    "resolvedAt": "2026-05-21T21:02:05.378Z",
+    "approverNote": "Verified - safe to proceed"
+  },
+  {
+    "id": "approval-1779397325376-2pdb14",
+    "dispatchJobId": "job-timeout",
+    "status": "timed_out",
+    "createdAt": "2026-05-21T21:02:05.376Z",
+    "resolvedAt": "2026-05-21T21:02:05.377Z"
+  },
+  {
+    "id": "approval-1779397325375-cvhdpv",
+    "dispatchJobId": "job-specific",
+    "status": "pending",
+    "createdAt": "2026-05-21T21:02:05.375Z"
+  },
+  {
+    "id": "approval-1779397325375-spnrpi",
+    "dispatchJobId": "job-b",
+    "status": "pending",
+    "createdAt": "2026-05-21T21:02:05.375Z"
+  },
+  {
+    "id": "approval-1779397325375-qr4toj",
+    "dispatchJobId": "job-a",
+    "status": "pending",
+    "createdAt": "2026-05-21T21:02:05.375Z"
+  },
+  {
+    "id": "approval-1779397325374-l5o5lb",
+    "dispatchJobId": "job-999",
+    "status": "rejected",
+    "createdAt": "2026-05-21T21:02:05.374Z",
+    "resolvedAt": "2026-05-21T21:02:05.374Z",
+    "approverNote": "Too risky - canceling execution"
+  },
+  {
+    "id": "approval-1779397325372-40hleo",
+    "dispatchJobId": "job-789",
+    "status": "approved",
+    "createdAt": "2026-05-21T21:02:05.372Z",
+    "resolvedAt": "2026-05-21T21:02:05.373Z",
+    "approverNote": "Verified safety - approved for execution"
+  },
+  {
+    "id": "approval-1779397325371-ni1kwv",
+    "dispatchJobId": "job-456",
+    "status": "pending",
+    "createdAt": "2026-05-21T21:02:05.371Z",
+    "destructivePatterns": [
+      "DROP TABLE"
+    ]
+  },
+  {
+    "id": "approval-1779397325367-quwias",
+    "dispatchJobId": "job-123",
+    "status": "pending",
+    "createdAt": "2026-05-21T21:02:05.367Z",
+    "destructivePatterns": [
+      "rm -rf",
+      "git reset --hard"
+    ]
+  },
+  {
+    "id": "approval-1779375618342-jpn4dy",
+    "dispatchJobId": "job-push-456",
+    "status": "rejected",
+    "createdAt": "2026-05-21T15:00:18.342Z",
+    "destructivePatterns": [
+      "git push -f"
+    ],
+    "resolvedAt": "2026-05-21T15:00:18.343Z",
+    "approverNote": "Force push to main is too risky"
+  },
+  {
+    "id": "approval-1779375618338-j2vrau",
+    "dispatchJobId": "job-cleanup-123",
+    "status": "approved",
+    "createdAt": "2026-05-21T15:00:18.338Z",
+    "destructivePatterns": [
+      "rm -rf"
+    ],
+    "resolvedAt": "2026-05-21T15:00:18.340Z",
+    "approverNote": "Verified - safe to proceed"
+  },
+  {
+    "id": "approval-1779375618336-dog1m1",
+    "dispatchJobId": "job-timeout",
+    "status": "timed_out",
+    "createdAt": "2026-05-21T15:00:18.336Z",
+    "resolvedAt": "2026-05-21T15:00:18.338Z"
+  },
+  {
+    "id": "approval-1779375618333-p3l59b",
+    "dispatchJobId": "job-specific",
+    "status": "pending",
+    "createdAt": "2026-05-21T15:00:18.333Z"
+  },
+  {
+    "id": "approval-1779375618330-4m9eni",
+    "dispatchJobId": "job-b",
+    "status": "pending",
+    "createdAt": "2026-05-21T15:00:18.330Z"
+  },
+  {
+    "id": "approval-1779375618327-vctrxv",
+    "dispatchJobId": "job-a",
+    "status": "pending",
+    "createdAt": "2026-05-21T15:00:18.327Z"
+  },
+  {
+    "id": "approval-1779375618324-voi87p",
+    "dispatchJobId": "job-999",
+    "status": "rejected",
+    "createdAt": "2026-05-21T15:00:18.324Z",
+    "resolvedAt": "2026-05-21T15:00:18.326Z",
+    "approverNote": "Too risky - canceling execution"
+  },
+  {
+    "id": "approval-1779375618321-qilcxi",
+    "dispatchJobId": "job-789",
+    "status": "approved",
+    "createdAt": "2026-05-21T15:00:18.321Z",
+    "resolvedAt": "2026-05-21T15:00:18.322Z",
+    "approverNote": "Verified safety - approved for execution"
+  },
+  {
+    "id": "approval-1779375618319-ulv60w",
+    "dispatchJobId": "job-456",
+    "status": "pending",
+    "createdAt": "2026-05-21T15:00:18.319Z",
+    "destructivePatterns": [
+      "DROP TABLE"
+    ]
+  },
+  {
+    "id": "approval-1779375618315-q7lob4",
+    "dispatchJobId": "job-123",
+    "status": "pending",
+    "createdAt": "2026-05-21T15:00:18.313Z",
+    "destructivePatterns": [
+      "rm -rf",
+      "git reset --hard"
+    ]
+  },
+  {
     "id": "approval-1779375571524-8z0bgx",
     "dispatchJobId": "job-push-456",
     "status": "rejected",

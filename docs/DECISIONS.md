@@ -149,6 +149,48 @@ Map Claude Code and Codex to Vibe Kanban native executors. Treat Antigravity as 
 ### Reason
 Vibe Kanban supports Claude Code and Codex, but Antigravity is not currently a native executor in the inspected supported executor list.
 
+---
+
+## Decision 016 — Vibe Kanban result import remains review-only in Control Tower
+Status: New (2026-05-22, Phase 11)
+
+### Decision
+When a Vibe Kanban result is imported back into Agent Control Room's `/result-review`, it is classified and analyzed locally, but never automatically executed or applied to the roadmap. The user reviews the result and manually decides next steps (Continue/Stop/Retry).
+
+### Reason
+Maintaining human-in-the-loop control and preventing unintended automation of result handling. Vibe Kanban is the *execution* workbench; Agent Control Room remains the *decision* and *review* layer.
+
+### Consequence
+Result import is a local normalization endpoint (`/api/vibe-kanban/import`), not a remote sync. Vibe Kanban remains a workbench, not a primary data store.
+
+---
+
+## Decision 017 — Hermes is a background worker only; no autonomous code execution
+Status: New (2026-05-22, Phase 11)
+
+### Decision
+Hermes can generate monitoring summaries, Obsidian notes, insight extraction, and handoff packs, but must never execute code, modify databases, trigger deployments, or perform any action without explicit user approval. It is a *tool*, not an *agent*.
+
+### Reason
+Safety boundary: the product must remain controllable. Autonomous Hermes execution would violate the human-in-the-loop principle established in Decision 001.
+
+### Consequence
+Hermes integration follows 3 safe patterns (Static Generator ✅, Manual CLI, Subprocess with Approval Gate) documented in `docs/HERMES_INTEGRATION_ROADMAP.md`. Only Pattern A is complete; Patterns B and C require explicit Phase gates.
+
+---
+
+## Decision 018 — Phase 11 focuses on workbench integration and deployment readiness, not new features
+Status: New (2026-05-22, Phase 11)
+
+### Decision
+Phase 11 completes Vibe Kanban integration (workspace link + result import), documents Hermes roadmap, and hardens deployment readiness. Phase 11 does *not* add new core features; the MVP (18 user requirements) was feature-complete at Phase 10.
+
+### Reason
+MVP is validated. Phase 11 is about production readiness and bridging to Vibe Kanban. New features belong in Phase 12+.
+
+### Consequence
+Post-Phase-11 work is optional/scaling: Vercel deployment, enhanced Hermes generators, Hermes CLI integration, real Vibe Kanban workspace sync.
+
 ### Consequence
 Generated Vibe Kanban issue drafts for Antigravity tasks should include a manual executor note rather than pretending execution can be automated.
 

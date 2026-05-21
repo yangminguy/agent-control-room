@@ -68,12 +68,21 @@ Open the local URL printed by Next.js (typically `http://localhost:3000`).
 - `docs/DESIGN_SYSTEM.md` — Current UI design rules
 - `docs/archive/` — Historical long-form research and superseded docs
 
+## Current Status (2026-05-22)
+
+- **Phase**: 10/11+ complete (Full MVP + Workbench integration ready)
+- **Tests**: 101/101 passing (including Phase 11 integration tests)
+- **Build**: 33 routes, all checks green
+- **Deployment**: Ready for Vercel (checklist updated, env vars documented)
+
+See `docs/DEPLOYMENT_CHECKLIST.md` for production deployment guide.
+
 ## Deploy to Vercel
 
 1. **Push to GitHub** (optional but recommended):
    ```bash
    git add .
-   git commit -m "Deploy: Agent Control Room Phase 8 complete"
+   git commit -m "Deploy: Agent Control Room Phase 11 complete (MVP + workbench integration)"
    git push
    ```
 
