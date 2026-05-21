@@ -39,6 +39,7 @@ export class ApprovalRequestStore {
     options?: {
       discordMessageId?: string;
       discordMessagePreview?: string;
+      destructivePatterns?: string[];
     },
   ): Promise<ApprovalRequest> {
     const now = new Date().toISOString();
@@ -49,6 +50,7 @@ export class ApprovalRequestStore {
       createdAt: now,
       discordMessageId: options?.discordMessageId,
       discordMessagePreview: options?.discordMessagePreview,
+      destructivePatterns: options?.destructivePatterns,
     };
 
     const existing = await readAll();
@@ -73,6 +75,9 @@ export class ApprovalRequestStore {
   async updateApprovalStatus(
     id: string,
     status: ApprovalRequestStatus,
+    options?: {
+      approverNote?: string;
+    },
   ): Promise<ApprovalRequest | undefined> {
     const all = await readAll();
     const idx = all.findIndex((r) => r.id === id);
@@ -82,6 +87,7 @@ export class ApprovalRequestStore {
       ...all[idx],
       status,
       resolvedAt: new Date().toISOString(),
+      approverNote: options?.approverNote,
     };
     all[idx] = updated;
     await writeAll(all);

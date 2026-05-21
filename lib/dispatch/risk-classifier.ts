@@ -1,4 +1,5 @@
 import { RiskLevel, PlanTask } from "../types";
+import { detectDestructivePatterns } from "./destructive-pattern-detector";
 
 /**
  * T041: Risk Classifier
@@ -83,8 +84,9 @@ export function classifyRisk(input: {
   changedFiles?: string[];
   allowedFiles?: string[];
   doNotTouchFiles?: string[];
+  prompt?: string;
 }): RiskLevel {
-  const { title, description, changedFiles, allowedFiles, doNotTouchFiles } =
+  const { title, description, changedFiles, allowedFiles, doNotTouchFiles, prompt } =
     input;
 
   const combinedText = [
@@ -93,9 +95,16 @@ export function classifyRisk(input: {
     changedFiles?.join(" ") || "",
     allowedFiles?.join(" ") || "",
     doNotTouchFiles?.join(" ") || "",
+    prompt || "",
   ]
     .join(" ")
     .toLowerCase();
+
+  // T-AUTO-010: Check for destructive patterns first (auto-escalate to critical)
+  const destructive = detectDestructivePatterns(combinedText);
+  if (destructive.detected) {
+    return "critical";
+  }
 
   // Check for critical markers
   if (CRITICAL_KEYWORDS.some((k) => combinedText.includes(k))) {

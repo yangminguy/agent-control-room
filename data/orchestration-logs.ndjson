@@ -92,3 +92,43 @@
 {"event":"job_dispatched","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.657Z","detail":"real"}
 {"event":"job_started","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.657Z","detail":"Run a harmless mock dispatch."}
 {"event":"result_collected","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:01:45.657Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:53:57.037Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:53:57.549Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:53:57.559Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:53:58.069Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:53:58.078Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:53:58.079Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:53:58.080Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:53:58.081Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:53:58.081Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:53:58.081Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:16.325Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:16.842Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:54:16.851Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:54:17.356Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:17.362Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:17.363Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:17.364Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:17.366Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:17.366Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:17.366Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:30.611Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:31.121Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:54:31.130Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:54:31.635Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:31.640Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:31.640Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:31.641Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:31.643Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:31.643Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:31.643Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:57.112Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-test-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:57.620Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:54:57.626Z","detail":"mock"}
+{"event":"result_collected","jobId":"job-risky-approved-001","agentId":"codex","riskLevel":"high","timestamp":"2026-05-21T14:54:58.129Z","detail":"pass"}
+{"event":"job_dispatched","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:58.135Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:58.135Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-missing-cli-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:58.136Z","detail":"blocked"}
+{"event":"job_dispatched","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:58.138Z","detail":"real"}
+{"event":"job_started","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:58.139Z","detail":"Run a harmless mock dispatch."}
+{"event":"result_collected","jobId":"job-real-no-path-001","agentId":"codex","riskLevel":"low","timestamp":"2026-05-21T14:54:58.139Z","detail":"blocked"}

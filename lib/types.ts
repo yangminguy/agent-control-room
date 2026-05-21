@@ -488,6 +488,10 @@ export type ApprovalRequest = {
   // ── Discord 정보 ──
   discordMessageId?: string;         // Discord 메시지 ID (실제 전송 시)
   discordMessagePreview?: string;    // 메시지 미리보기 (로컬)
+
+  // ── T-AUTO-010: Destructive pattern detection ──
+  destructivePatterns?: string[];    // 감지된 destructive 패턴 목록
+  approverNote?: string;             // 승인/거부 사유
 };
 
 /** Phase 15: Safe vs risky task split result */
