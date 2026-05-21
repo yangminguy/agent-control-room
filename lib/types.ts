@@ -674,3 +674,95 @@ export type ValidationConfig = {
   requiresUserConfirmationForRejects: boolean;
   loggingLevel: "minimal" | "standard" | "verbose";
 };
+
+// ─────────────────────────────────────────────────────────
+// Phase 35 — Multi-Project Management
+// ─────────────────────────────────────────────────────────
+
+/** 프로젝트별 오케스트레이션 런 상태 */
+export type ProjectRunStatus =
+  | "idle"       // 실행 대기
+  | "active"     // 실행 중 (에이전트 할당됨)
+  | "paused"     // 승인 대기로 일시 정지
+  | "completed"  // 모든 작업 완료
+  | "blocked";   // 차단됨
+
+/** 에이전트 슬롯 할당 정보 */
+export type AgentSlotAllocation = {
+  projectId: string;
+  agentId: AgentType;
+  allocatedAt: string;
+  releaseAt?: string;     // 예상 해제 시간 (선택)
+};
+
+/** 프로젝트별 오케스트레이션 큐 */
+export type ProjectOrchestrationQueue = {
+  projectId: string;
+  projectName: string;
+  status: ProjectRunStatus;
+  activeJobs: DispatchJob[];       // 현재 실행 중인 작업
+  pendingJobs: DispatchJob[];      // 대기 중인 작업
+  completedJobIds: string[];       // 완료된 작업 ID 목록
+  blockedJobIds: string[];         // 차단된 작업 ID 목록
+  agentAllocations: AgentSlotAllocation[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+/** 멀티-프로젝트 오케스트레이터 상태 */
+export type MultiProjectOrchestratorState = {
+  activeProjectIds: string[];          // 현재 활성 프로젝트 (최대 2개)
+  maxConcurrentProjects: number;       // 동시 활성 프로젝트 제한 (기본: 2)
+  queues: Record<string, ProjectOrchestrationQueue>;
+  agentSlots: AgentSlotAllocation[];   // 전체 에이전트 슬롯 목록
+};
+
+// ─────────────────────────────────────────────────────────
+// Phase 36 — Dashboard & Monitoring
+// ─────────────────────────────────────────────────────────
+
+/** KPI 집계 데이터 */
+export type DashboardKPI = {
+  totalJobs: number;
+  completedJobs: number;
+  blockedJobs: number;
+  failedJobs: number;
+  pendingApprovals: number;
+  activeProjects: number;
+  safetyViolations: number;
+  avgRetryCount: number;         // 전체 작업 평균 재시도 횟수
+  completionRate: number;        // 0~100 (%)
+};
+
+/** 활동 타임라인 이벤트 (대시보드 표시용) */
+export type DashboardActivityEvent = {
+  id: string;
+  timestamp: string;
+  eventType: "job_completed" | "job_blocked" | "approval_required" | "safety_violation" | "project_activated" | "agent_switched";
+  projectId?: string;
+  projectName?: string;
+  agentId?: AgentType;
+  detail: string;               // 사람이 읽기 좋은 설명
+  riskLevel?: RiskLevel;
+};
+
+/** 에이전트 상태 요약 (대시보드 표시용) */
+export type DashboardAgentSummary = {
+  agentId: AgentType;
+  status: AgentStatusValue;
+  activeProjectIds: string[];   // 현재 이 에이전트가 할당된 프로젝트
+  completedJobsToday: number;
+  blockedJobsToday: number;
+};
+
+/** 대시보드 전체 응답 */
+export type DashboardSnapshot = {
+  kpi: DashboardKPI;
+  agentSummaries: DashboardAgentSummary[];
+  recentActivity: DashboardActivityEvent[];  // 최신 20개
+  blockedItems: {
+    jobs: DispatchJob[];
+    approvalRequests: ApprovalRequest[];
+  };
+  generatedAt: string;
+};

@@ -6,12 +6,19 @@ import type { HermesAnalysis } from "@/lib/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+type ApiStatus = {
+  isHealthy: boolean;
+  status: "healthy" | "degraded" | "critical" | "error";
+  error?: string;
+};
+
 type PanelState = {
   analysis: HermesAnalysis | null;
   isAnalyzing: boolean;
   isSaving: boolean;
   savedPath: string | null;
   error: string | null;
+  apiStatus: ApiStatus | null;
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -80,6 +87,7 @@ export function HermesLivePanel() {
     isSaving: false,
     savedPath: null,
     error: null,
+    apiStatus: null,
   });
 
   // Build orchestration state from context
@@ -103,12 +111,21 @@ export function HermesLivePanel() {
         body: JSON.stringify({ state: buildOrchestrationState() }),
       });
 
+      const data = (await res.json()) as {
+        analysis: HermesAnalysis;
+        apiStatus?: ApiStatus;
+      };
+
       if (!res.ok) {
-        throw new Error(`Server error: ${res.status}`);
+        throw new Error(data.apiStatus?.error || `Server error: ${res.status}`);
       }
 
-      const data = (await res.json()) as { analysis: HermesAnalysis };
-      setState((prev) => ({ ...prev, analysis: data.analysis, isAnalyzing: false }));
+      setState((prev) => ({
+        ...prev,
+        analysis: data.analysis,
+        apiStatus: data.apiStatus || null,
+        isAnalyzing: false,
+      }));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Analysis failed";
       setState((prev) => ({ ...prev, error: message, isAnalyzing: false }));
@@ -149,19 +166,55 @@ export function HermesLivePanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { analysis, isAnalyzing, isSaving, savedPath, error } = state;
+  const { analysis, isAnalyzing, isSaving, savedPath, error, apiStatus } = state;
+
+  const getStatusBadge = () => {
+    if (!apiStatus) return null;
+
+    const styles = {
+      healthy: "bg-emerald-950 border-emerald-700 text-emerald-300",
+      degraded: "bg-yellow-950 border-yellow-700 text-yellow-300",
+      critical: "bg-red-950 border-red-700 text-red-300",
+      error: "bg-red-950 border-red-700 text-red-300",
+    };
+
+    const icons = {
+      healthy: "✓",
+      degraded: "⚠",
+      critical: "✕",
+      error: "✕",
+    };
+
+    const labels = {
+      healthy: "API 정상",
+      degraded: "API 저하",
+      critical: "API 중단",
+      error: "API 오류",
+    };
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded border ${styles[apiStatus.status]}`}
+      >
+        <span className="font-bold">{icons[apiStatus.status]}</span>
+        {labels[apiStatus.status]}
+      </span>
+    );
+  };
 
   return (
     <div className="space-y-5">
-      {/* Header + controls */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-semibold text-text-primary">Hermes Live Analysis</h2>
-          <p className="text-xs text-text-secondary mt-0.5">
-            Powered by Gemma 4 via Ollama — observing only, not executing.
-          </p>
+      {/* Header + controls + API status */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h2 className="text-sm font-semibold text-text-primary">Hermes Live Analysis</h2>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Powered by Gemini 1.5 Flash (Primary/Secondary fallback) — observing only, not executing.
+            </p>
+          </div>
+          {getStatusBadge()}
         </div>
-
         <div className="flex gap-2">
           <button
             type="button"

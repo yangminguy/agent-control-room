@@ -1,15 +1,17 @@
 /**
  * POST /api/hermes/analyze
- * Collects orchestration context and runs Gemma 4 analysis via Ollama.
+ * Runs Hermes analysis via Gemini API (Primary/Secondary fallback).
+ * Hermes는 코드 작성자가 아니라 오케스트레이션 보조 워커입니다.
  */
 
 import { NextResponse } from "next/server";
-import { analyzeOrchestrationState, type OrchestrationState } from "@/lib/hermes/gemma4-client";
+import { getGeminiClient } from "@/lib/hermes/gemini-client";
+import { getHermesMonitor } from "@/lib/hermes/hermes-api-monitor";
 import type { HermesAnalysis } from "@/lib/types";
 
 type RequestBody = {
   jobId?: string;
-  state?: OrchestrationState;
+  state?: unknown;
 };
 
 export async function POST(req: Request): Promise<NextResponse> {
@@ -21,10 +23,52 @@ export async function POST(req: Request): Promise<NextResponse> {
     // body is optional — proceed with empty state
   }
 
-  // Build orchestration state from request (or use empty defaults)
-  const state: OrchestrationState = body.state ?? {};
+  const state = body.state ?? {};
 
-  const analysis: HermesAnalysis = await analyzeOrchestrationState(state);
+  try {
+    // Gemini API 호출 (Primary → Secondary fallback)
+    const client = getGeminiClient();
+    const analysis: HermesAnalysis = await client.analyzeOrchestrationState(state);
 
-  return NextResponse.json({ analysis });
+    // API 상태 확인 및 모니터링
+    const monitor = getHermesMonitor();
+    const health = monitor.checkHealth();
+
+    // Critical 상태면 응답에 경고 추가
+    if (health.alert?.severity === "critical") {
+      console.warn("[Hermes] API 건강도 저하:", health.alert.message);
+      // 알림은 클라이언트에서 처리
+    }
+
+    return NextResponse.json({
+      analysis,
+      apiStatus: {
+        isHealthy: health.isHealthy,
+        status: health.status,
+      },
+    });
+  } catch (err) {
+    const error = err instanceof Error ? err.message : String(err);
+    console.error("[Hermes] 분석 실패:", error);
+
+    // 완전 실패 시에도 기본값 반환 (graceful degradation)
+    const fallbackAnalysis: HermesAnalysis = {
+      insights: ["API 연결 문제"],
+      recommendations: ["나중에 다시 시도해주세요"],
+      riskFlags: ["⚠️ Hermes 분석 실패"],
+      analyzedAt: new Date().toISOString(),
+    };
+
+    return NextResponse.json(
+      {
+        analysis: fallbackAnalysis,
+        apiStatus: {
+          isHealthy: false,
+          status: "error",
+          error,
+        },
+      },
+      { status: 500 }
+    );
+  }
 }
