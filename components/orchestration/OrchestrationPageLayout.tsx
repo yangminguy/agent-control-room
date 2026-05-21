@@ -10,6 +10,8 @@ import {
   ConversationToJobPanel,
   HermesInsightPanel,
   OrchestrationLogViewer,
+  AutoDispatchControl,
+  OrchestrationMetricsPanel,
 } from "@/components/orchestration/index";
 import { ResultCollectionPanel } from "@/components/orchestration/ResultCollectionPanel";
 import type { DispatchJob } from "@/lib/types";
@@ -24,9 +26,10 @@ const TABS = [
   "Feedback",
   "Hermes Insights",
   "Logs",
+  "Metrics",
 ] as const;
 
-type TabIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+type TabIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -114,6 +117,7 @@ export function OrchestrationPageLayout() {
           {activeTab === 0 && (
             <div className="space-y-4">
               <ConversationToJobPanel />
+              <AutoDispatchControl />
               <DispatchStatusPanel
                 jobs={jobs}
                 selectedStatus={statusFilter}
@@ -220,6 +224,9 @@ export function OrchestrationPageLayout() {
 
           {/* Tab 6: Logs */}
           {activeTab === 6 && <OrchestrationLogViewer />}
+
+          {/* Tab 7: Metrics */}
+          {activeTab === 7 && <OrchestrationMetricsPanel />}
         </div>
       </div>
     </div>

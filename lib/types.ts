@@ -516,6 +516,30 @@ export type FeedbackLoopOutput = {
 };
 
 // ─────────────────────────────────────────────────────────
+// Phase 23 — Orchestration Metrics
+// ─────────────────────────────────────────────────────────
+
+export type AgentMetricBreakdown = {
+  agentId: string;
+  totalJobs: number;
+  successCount: number;
+  failedCount: number;
+  avgDurationMs: number | null;
+};
+
+export type OrchestrationMetrics = {
+  totalJobs: number;
+  successCount: number;
+  failedCount: number;
+  skippedCount: number;
+  retryCount: number;
+  timeoutCount: number;
+  avgDurationMs: number | null;
+  perAgent: AgentMetricBreakdown[];
+  computedAt: string;
+};
+
+// ─────────────────────────────────────────────────────────
 // Phase 22 — Orchestration Log Event
 // ─────────────────────────────────────────────────────────
 

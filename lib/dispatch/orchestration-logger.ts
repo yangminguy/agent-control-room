@@ -4,7 +4,9 @@ import type { OrchestrationLogEvent } from "../types";
 
 export type { OrchestrationLogEvent };
 
-const LOG_FILE = path.resolve(process.cwd(), "data/orchestration-logs.ndjson");
+const LOG_FILE = process.env.ORCHESTRATION_LOG_PATH
+  ? path.resolve(process.cwd(), process.env.ORCHESTRATION_LOG_PATH)
+  : path.resolve(process.cwd(), "data/orchestration-logs.ndjson");
 
 export function logOrchestrationEvent(event: OrchestrationLogEvent): void {
   try {

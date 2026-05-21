@@ -11,6 +11,8 @@ build/
 .claude/
 data/execution-logs.json
 data/agent-statuses.json
+data/orchestration-logs.ndjson
+data/agent-results.json
 .vercel
 external/vibe-kanban/node_modules/
 external/vibe-kanban/target/

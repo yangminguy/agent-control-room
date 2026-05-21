@@ -1,5 +1,6 @@
 import { getAdapter } from "@/lib/dispatch";
 import { logOrchestrationEvent } from "@/lib/dispatch/orchestration-logger";
+import { checkRateLimit } from "@/lib/dispatch/rate-limiter";
 import type { AgentType, DispatchJob, DispatchJobStatus, RiskLevel } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -78,6 +79,18 @@ function canDispatch(job: DispatchJob): { ok: true } | { ok: false; status: numb
 
 export async function POST(req: Request) {
   try {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      req.headers.get("x-real-ip") ??
+      "unknown";
+    const rl = checkRateLimit(ip);
+    if (!rl.allowed) {
+      return Response.json(
+        { success: false, error: "Rate limit exceeded. Please wait before retrying." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSecs) } },
+      );
+    }
+
     const body = await req.json();
     const job = parseDispatchJob(body);
 

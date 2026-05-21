@@ -127,7 +127,8 @@ type Action =
   | { type: "UPDATE_JOB_STATUS"; payload: { id: string; status: DispatchJobStatus } }
   | { type: "COLLECT_RESULT"; payload: AgentResult }
   | { type: "MOCK_APPROVE"; payload: string }
-  | { type: "MOCK_REJECT"; payload: string };
+  | { type: "MOCK_REJECT"; payload: string }
+  | { type: "ADD_FEEDBACK_OUTPUT"; payload: FeedbackLoopOutput };
 
 function reducer(state: OrchestrationState, action: Action): OrchestrationState {
   switch (action.type) {
@@ -191,6 +192,12 @@ function reducer(state: OrchestrationState, action: Action): OrchestrationState 
         ),
       };
 
+    case "ADD_FEEDBACK_OUTPUT":
+      return {
+        ...state,
+        feedbackOutputs: [action.payload, ...state.feedbackOutputs],
+      };
+
     default:
       return state;
   }
@@ -205,6 +212,7 @@ type OrchestrationContextValue = OrchestrationState & {
   collectResult: (result: AgentResult) => void;
   mockApprove: (approvalId: string) => void;
   mockReject: (approvalId: string) => void;
+  addFeedbackOutput: (output: FeedbackLoopOutput) => void;
 };
 
 const OrchestrationContext = createContext<OrchestrationContextValue | null>(null);
@@ -259,6 +267,10 @@ export function OrchestrationProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "MOCK_REJECT", payload: approvalId });
   };
 
+  const addFeedbackOutput = (output: FeedbackLoopOutput) => {
+    dispatch({ type: "ADD_FEEDBACK_OUTPUT", payload: output });
+  };
+
   const value: OrchestrationContextValue = {
     ...state,
     setStatusFilter,
@@ -267,6 +279,7 @@ export function OrchestrationProvider({ children }: { children: ReactNode }) {
     collectResult,
     mockApprove,
     mockReject,
+    addFeedbackOutput,
   };
 
   return (
