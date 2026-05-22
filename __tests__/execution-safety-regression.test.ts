@@ -171,8 +171,8 @@ describe("Execution safety regression guardrails", () => {
     const planPage = read("app/plan/page.tsx");
     const planSurface = planPage;
 
-    expect(planPage).toContain("Phase Roadmap");
-    expect(planPage).toContain("실제 실행 시작 버튼을 누르기 전까지");
+    expect(planPage).toContain("Control Tower");
+    expect(planPage).toContain("모든 에이전트는 승인된 범위 내에서만 작동합니다.");
     expect(planSurface).not.toContain("RunnerLogView");
     expect(planSurface).not.toContain('fetch("/api/runner"');
 
@@ -182,7 +182,7 @@ describe("Execution safety regression guardrails", () => {
 
     expect(planSurface).toContain("Vibe Kanban");
     expect(planSurface).toContain("Hermes");
-    expect(planSurface).toContain("완료 기준");
+    expect(read("components/roadmap/RoadmapStageCard.tsx")).toContain("완료 기준");
   });
 
   it("keeps the controlled runner backend available behind approval tokens", () => {

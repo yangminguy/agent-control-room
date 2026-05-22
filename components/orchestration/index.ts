@@ -11,3 +11,11 @@ export { OrchestrationMetricsPanel } from "./OrchestrationMetricsPanel";
 export { AutoDispatchControl } from "./AutoDispatchControl";
 export { HermesLivePanel } from "./HermesLivePanel";
 export { ContextBudgetPanel } from "./ContextBudgetPanel";
+
+// Phase 40 — Full Orchestration Layer components
+export { OrchestrationDecisionCard } from "./OrchestrationDecisionCard";
+export { ApprovalGateCard } from "./ApprovalGateCard";
+export { ContextPackPreview } from "./ContextPackPreview";
+export { AgentRoutingSummary } from "./AgentRoutingSummary";
+export { ExecutionBoundaryCard } from "./ExecutionBoundaryCard";
+export { HermesMemoryPreview } from "./HermesMemoryPreview";

@@ -14,3 +14,35 @@ export {
   extractChangedFilesFromResult,
   type ResultClassification,
 } from "./result-classifier";
+
+// Phase 40 — Full Orchestration Layer
+export type {
+  ExtendedAgentType,
+  ExecutionMode,
+  FileBoundary,
+  ApprovalGate,
+  OrchestrationDecision,
+  OrchestrationDecisionInput,
+  ContextPack,
+  ContextPackBuilderInput,
+  HermesMemoryNote,
+  HermesMemoryNoteInput,
+  AgentRoutingResult,
+  ExecutionModeResult,
+} from "./types";
+
+export { makeOrchestrationDecision } from "./decision-engine";
+export { routeAgent, getAgentRole, isHermesAllowedAsPrimary } from "./agent-router";
+export { buildApprovalGate } from "./approval-gate-builder";
+export {
+  buildContextPack,
+  renderContextPackMarkdown as renderContextPackMarkdownV2,
+  buildRelayPrompt,
+} from "./context-pack-builder";
+export { buildPromptWithBoundary } from "./prompt-boundary-builder";
+export {
+  buildHermesMemoryNote,
+  renderHermesMemoryMarkdown,
+  suggestHermesMemoryType,
+  getObsidianPath,
+} from "./hermes-memory-builder";

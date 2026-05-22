@@ -4,7 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Settings, Menu, X, ShieldAlert } from "lucide-react";
-import { NAV_ITEMS } from "./Sidebar";
+import { CORE_ITEMS, ADVANCED_ITEMS } from "./Sidebar";
+
+const NAV_ITEMS = [...CORE_ITEMS, ...ADVANCED_ITEMS];
 
 export function TopHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
