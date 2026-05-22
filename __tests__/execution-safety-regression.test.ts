@@ -280,13 +280,13 @@ describe("Execution safety regression guardrails", () => {
   it("keeps Hermes packets renderable as draft-only artifacts", () => {
     const hermesPage = read("app/hermes-packets/page.tsx");
     const packetCard = read("components/hermes/PacketDraftCard.tsx");
-    const packetGenerator = read("lib/hermes/task-packets.ts");
+    const packetGenerator = read("lib/monitor/task-packets.ts");
 
     expect(hermesPage).toContain("Hermes is not executed");
     expect(hermesPage).toContain("packet drafts");
     expect(packetCard).toContain("마크다운 복사");
     expect(packetCard).toContain("JSON 복사");
-    expect(packetGenerator).toContain("renderHermesPacketMarkdown");
+    expect(packetGenerator).toContain("renderMonitorPacketMarkdown");
 
     const hermesSurface = `${hermesPage}\n${packetCard}\n${packetGenerator}`;
     expect(hermesSurface).not.toContain('fetch("/api/runner"');

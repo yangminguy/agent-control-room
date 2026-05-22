@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from "@jest/globals";
 import { DEFAULT_RETRY_POLICY, calculateRetryDelay, classifyError } from "@/lib/dispatch/retry-policy";
 import { DefaultErrorRecoveryManager } from "@/lib/dispatch/error-recovery-manager";
-import { DefaultHermesValidator } from "@/lib/hermes/hermes-llm-validator";
-import { DefaultAutoDecisionEngine } from "@/lib/hermes/auto-decision-engine";
-import { HermesValidationRequest, DispatchJob } from "@/lib/types";
+import { DefaultMonitorValidator } from "@/lib/monitor/monitor-llm-validator";
+import { DefaultAutoDecisionEngine } from "@/lib/monitor/auto-decision-engine";
+import { MonitorValidationRequest, DispatchJob } from "@/lib/types";
 import { POST as validateStage } from "@/app/api/orchestration/validation/route";
 import { POST as decideStage } from "@/app/api/orchestration/auto-decision/route";
 
@@ -112,14 +112,14 @@ describe("Phase 33: Production Hardening", () => {
 // Phase 34 Tests: Hermes LLM Validation & Auto-Decision
 describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
   describe("Hermes Validator", () => {
-    let validator: DefaultHermesValidator;
+    let validator: DefaultMonitorValidator;
 
     beforeEach(() => {
-      validator = new DefaultHermesValidator();
+      validator = new DefaultMonitorValidator();
     });
 
     it("should validate stage with high completion", async () => {
-      const request: HermesValidationRequest = {
+      const request: MonitorValidationRequest = {
         id: "req-123",
         planId: "plan-123",
         stageIndex: 0,
@@ -138,7 +138,7 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
     });
 
     it("should validate stage with partial completion", async () => {
-      const request: HermesValidationRequest = {
+      const request: MonitorValidationRequest = {
         id: "req-124",
         planId: "plan-123",
         stageIndex: 1,
@@ -162,7 +162,7 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
     });
 
     it("should validate stage with low completion", async () => {
-      const request: HermesValidationRequest = {
+      const request: MonitorValidationRequest = {
         id: "req-125",
         planId: "plan-123",
         stageIndex: 2,
@@ -181,7 +181,7 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
     });
 
     it("should generate recommendations", async () => {
-      const request: HermesValidationRequest = {
+      const request: MonitorValidationRequest = {
         id: "req-126",
         planId: "plan-123",
         stageIndex: 3,
@@ -211,7 +211,7 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
     });
 
     it("should cache validation results", async () => {
-      const request: HermesValidationRequest = {
+      const request: MonitorValidationRequest = {
         id: "req-127",
         planId: "plan-123",
         stageIndex: 4,
@@ -229,7 +229,7 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
     });
 
     it("should not approve unrelated completed work just because counts match", async () => {
-      const request: HermesValidationRequest = {
+      const request: MonitorValidationRequest = {
         id: "req-unrelated",
         planId: "plan-123",
         stageIndex: 5,
@@ -247,7 +247,7 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
     });
 
     it("should invalidate cache when completed work changes", async () => {
-      const baseRequest: HermesValidationRequest = {
+      const baseRequest: MonitorValidationRequest = {
         id: "req-cache",
         planId: "plan-cache",
         stageIndex: 0,

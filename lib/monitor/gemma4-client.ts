@@ -3,7 +3,7 @@
  * Calls the local Ollama server and parses structured JSON from the model.
  */
 
-import type { HermesAnalysis } from "@/lib/types";
+import type { MonitorAnalysis } from "@/lib/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ type OllamaGenerateResponse = {
 const OLLAMA_URL = process.env.GEMMA_OLLAMA_URL ?? "http://localhost:11434";
 const GEMMA_MODEL = process.env.GEMMA_MODEL ?? "gemma4:9b";
 
-const FALLBACK_ANALYSIS: Omit<HermesAnalysis, "analyzedAt"> = {
+const FALLBACK_ANALYSIS: Omit<MonitorAnalysis, "analyzedAt"> = {
   insights: [
     "Ollama server unavailable — using static fallback.",
     "Connect Ollama with Gemma 4 running for live analysis.",
@@ -65,7 +65,7 @@ Rules:
 
 // ── Parser ────────────────────────────────────────────────────────────────────
 
-function parseAnalysis(raw: string): Omit<HermesAnalysis, "analyzedAt"> {
+function parseAnalysis(raw: string): Omit<MonitorAnalysis, "analyzedAt"> {
   // Strip possible markdown code fences
   const cleaned = raw.replace(/```json|```/g, "").trim();
 
@@ -88,7 +88,7 @@ function parseAnalysis(raw: string): Omit<HermesAnalysis, "analyzedAt"> {
 
 export async function analyzeOrchestrationState(
   state: OrchestrationState
-): Promise<HermesAnalysis> {
+): Promise<MonitorAnalysis> {
   const analyzedAt = new Date().toISOString();
 
   try {

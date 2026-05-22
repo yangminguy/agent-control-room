@@ -8,7 +8,7 @@ type ApiAlert = {
   failureCount: number;
 };
 
-class HermesApiMonitor {
+class MonitorApiMonitor {
   private alerts: ApiAlert[] = [];
   private lastAlertTime: number = 0;
   private alertThrottleMs = 5000; // 5초마다 최대 1회 알림
@@ -82,11 +82,11 @@ class HermesApiMonitor {
   }
 }
 
-let monitor: HermesApiMonitor | null = null;
+let monitor: MonitorApiMonitor | null = null;
 
-export function getHermesMonitor(): HermesApiMonitor {
+export function getMonitorMonitor(): MonitorApiMonitor {
   if (!monitor) {
-    monitor = new HermesApiMonitor();
+    monitor = new MonitorApiMonitor();
   }
   return monitor;
 }

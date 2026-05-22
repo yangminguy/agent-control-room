@@ -1,6 +1,6 @@
 import { ShieldAlert, Info } from "lucide-react";
 import packetData from "../../data/hermes-task-packets.json";
-import { HermesPacket } from "../../lib/hermes/types";
+import { MonitorPacket } from "../../lib/monitor/types";
 import { PacketDraftCard } from "../../components/hermes/PacketDraftCard";
 
 export const metadata = {
@@ -8,8 +8,8 @@ export const metadata = {
   description: "Prepare background-worker task packets without executing Hermes",
 };
 
-export default function HermesPacketsPage() {
-  const packets = packetData.examples as HermesPacket[];
+export default function MonitorPacketsPage() {
+  const packets = packetData.examples as MonitorPacket[];
 
   return (
     <div className="min-h-screen bg-background pb-24">

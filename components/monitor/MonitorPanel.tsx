@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { Copy, Check, AlertTriangle, ShieldAlert, Info } from "lucide-react";
-import type { ExecutionMonitorSummary } from "@/lib/hermes/monitoring-layer";
+import type { ExecutionMonitorSummary } from "@/lib/monitor/monitoring-layer";
 
-interface HermesMonitorPanelProps {
+interface MonitorPanelProps {
   summary: ExecutionMonitorSummary;
 }
 
@@ -14,7 +14,7 @@ function StatusIcon({ status }: { status: "done" | "failed" | "partial" }) {
   return <span className="text-red-500">❌</span>;
 }
 
-export function HermesMonitorPanel({ summary }: HermesMonitorPanelProps) {
+export function MonitorPanel({ summary }: MonitorPanelProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const handleCopyAction = async (text: string, index: number) => {

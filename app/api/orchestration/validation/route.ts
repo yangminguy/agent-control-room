@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { HermesValidationRequest } from "@/lib/types";
-import { getHermesValidator } from "@/lib/hermes/hermes-llm-validator";
+import { MonitorValidationRequest } from "@/lib/types";
+import { getMonitorValidator } from "@/lib/monitor/monitor-llm-validator";
 import { getValidationStore } from "@/lib/storage/validation-store";
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
-function parseValidationRequest(value: unknown): HermesValidationRequest | null {
+function parseValidationRequest(value: unknown): MonitorValidationRequest | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
 
   const body = value as Record<string, unknown>;
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     await store.saveValidationRequest(validationRequest);
 
     // Perform validation
-    const validator = getHermesValidator();
+    const validator = getMonitorValidator();
     const result = await validator.validateStage(validationRequest);
 
     // Save result

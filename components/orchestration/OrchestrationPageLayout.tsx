@@ -8,11 +8,12 @@ import {
   ProgressManagerStatusView,
   FeedbackLoopSummaryCard,
   ConversationToJobPanel,
-  HermesInsightPanel,
-  HermesLivePanel,
+  MonitorInsightPanel,
+  MonitorLivePanel,
   OrchestrationLogViewer,
   AutoDispatchControl,
   OrchestrationMetricsPanel,
+  OrchestrationDecisionPanel,
 } from "@/components/orchestration/index";
 import { ResultCollectionPanel } from "@/components/orchestration/ResultCollectionPanel";
 import type { DispatchJob } from "@/lib/types";
@@ -20,6 +21,7 @@ import type { DispatchJob } from "@/lib/types";
 // ── Tab config ────────────────────────────────────────────────────────────────
 
 const TABS = [
+  "OrchestrationDecision",
   "Dispatch Queue",
   "Results",
   "Approvals",
@@ -31,7 +33,7 @@ const TABS = [
   "Hermes Live",
 ] as const;
 
-type TabIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+type TabIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -115,8 +117,11 @@ export function OrchestrationPageLayout() {
 
         {/* Tab content */}
         <div className="pt-2">
-          {/* Tab 0: Dispatch Queue */}
-          {activeTab === 0 && (
+          {/* Tab 0: OrchestrationDecision */}
+          {activeTab === 0 && <OrchestrationDecisionPanel />}
+
+          {/* Tab 1: Dispatch Queue */}
+          {activeTab === 1 && (
             <div className="space-y-4">
               <ConversationToJobPanel />
               <AutoDispatchControl />
@@ -128,8 +133,8 @@ export function OrchestrationPageLayout() {
             </div>
           )}
 
-          {/* Tab 1: Results */}
-          {activeTab === 1 && (
+          {/* Tab 2: Results */}
+          {activeTab === 2 && (
             <ResultCollectionPanel
               onCollect={collectResult}
               jobs={jobs}
@@ -138,8 +143,8 @@ export function OrchestrationPageLayout() {
             />
           )}
 
-          {/* Tab 2: Approvals */}
-          {activeTab === 2 && (
+          {/* Tab 3: Approvals */}
+          {activeTab === 3 && (
             <div className="space-y-4">
               {approvals.length === 0 || !firstApproval ? (
                 <div className="rounded-lg border border-dashed border-border p-6 text-center">
@@ -193,8 +198,8 @@ export function OrchestrationPageLayout() {
             </div>
           )}
 
-          {/* Tab 3: Progress */}
-          {activeTab === 3 && (
+          {/* Tab 4: Progress */}
+          {activeTab === 4 && (
             <ProgressManagerStatusView
               safeJobs={safeJobs}
               riskyJobs={riskyJobs}
@@ -202,8 +207,8 @@ export function OrchestrationPageLayout() {
             />
           )}
 
-          {/* Tab 4: Feedback */}
-          {activeTab === 4 && (
+          {/* Tab 5: Feedback */}
+          {activeTab === 5 && (
             <div className="space-y-4">
               {feedbackOutputs.length === 0 || !firstFeedback ? (
                 <div className="rounded-lg border border-dashed border-border p-6 text-center">
@@ -221,17 +226,17 @@ export function OrchestrationPageLayout() {
             </div>
           )}
 
-          {/* Tab 5: Hermes Insights */}
-          {activeTab === 5 && <HermesInsightPanel />}
+          {/* Tab 6: Hermes Insights */}
+          {activeTab === 6 && <MonitorInsightPanel />}
 
-          {/* Tab 6: Logs */}
-          {activeTab === 6 && <OrchestrationLogViewer />}
+          {/* Tab 7: Logs */}
+          {activeTab === 7 && <OrchestrationLogViewer />}
 
-          {/* Tab 7: Metrics */}
-          {activeTab === 7 && <OrchestrationMetricsPanel />}
+          {/* Tab 8: Metrics */}
+          {activeTab === 8 && <OrchestrationMetricsPanel />}
 
-          {/* Tab 8: Hermes Live */}
-          {activeTab === 8 && <HermesLivePanel />}
+          {/* Tab 9: Hermes Live */}
+          {activeTab === 9 && <MonitorLivePanel />}
         </div>
       </div>
     </div>

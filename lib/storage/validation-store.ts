@@ -1,19 +1,19 @@
 import {
-  HermesValidationRequest,
-  HermesValidationResult,
+  MonitorValidationRequest,
+  MonitorValidationResult,
   AutoDecisionLog,
 } from "@/lib/types";
 
 export interface ValidationStore {
   // Requests
-  saveValidationRequest(request: HermesValidationRequest): Promise<void>;
-  getValidationRequest(requestId: string): Promise<HermesValidationRequest | null>;
-  getAllValidationRequests(): Promise<HermesValidationRequest[]>;
+  saveValidationRequest(request: MonitorValidationRequest): Promise<void>;
+  getValidationRequest(requestId: string): Promise<MonitorValidationRequest | null>;
+  getAllValidationRequests(): Promise<MonitorValidationRequest[]>;
 
   // Results
-  saveValidationResult(result: HermesValidationResult): Promise<void>;
-  getValidationResult(validationId: string): Promise<HermesValidationResult | null>;
-  getValidationResultsByRequest(requestId: string): Promise<HermesValidationResult[]>;
+  saveValidationResult(result: MonitorValidationResult): Promise<void>;
+  getValidationResult(validationId: string): Promise<MonitorValidationResult | null>;
+  getValidationResultsByRequest(requestId: string): Promise<MonitorValidationResult[]>;
 
   // Decisions
   saveAutoDecisionLog(log: AutoDecisionLog): Promise<void>;
@@ -22,12 +22,12 @@ export interface ValidationStore {
 }
 
 export class InMemoryValidationStore implements ValidationStore {
-  private requests: HermesValidationRequest[] = [];
-  private results: HermesValidationResult[] = [];
+  private requests: MonitorValidationRequest[] = [];
+  private results: MonitorValidationResult[] = [];
   private decisions: AutoDecisionLog[] = [];
 
   // Requests
-  async saveValidationRequest(request: HermesValidationRequest): Promise<void> {
+  async saveValidationRequest(request: MonitorValidationRequest): Promise<void> {
     const index = this.requests.findIndex((r) => r.id === request.id);
     if (index >= 0) {
       this.requests[index] = request;
@@ -36,16 +36,16 @@ export class InMemoryValidationStore implements ValidationStore {
     }
   }
 
-  async getValidationRequest(requestId: string): Promise<HermesValidationRequest | null> {
+  async getValidationRequest(requestId: string): Promise<MonitorValidationRequest | null> {
     return this.requests.find((r) => r.id === requestId) || null;
   }
 
-  async getAllValidationRequests(): Promise<HermesValidationRequest[]> {
+  async getAllValidationRequests(): Promise<MonitorValidationRequest[]> {
     return [...this.requests];
   }
 
   // Results
-  async saveValidationResult(result: HermesValidationResult): Promise<void> {
+  async saveValidationResult(result: MonitorValidationResult): Promise<void> {
     const index = this.results.findIndex((r) => r.validationId === result.validationId);
     if (index >= 0) {
       this.results[index] = result;
@@ -54,11 +54,11 @@ export class InMemoryValidationStore implements ValidationStore {
     }
   }
 
-  async getValidationResult(validationId: string): Promise<HermesValidationResult | null> {
+  async getValidationResult(validationId: string): Promise<MonitorValidationResult | null> {
     return this.results.find((r) => r.validationId === validationId) || null;
   }
 
-  async getValidationResultsByRequest(requestId: string): Promise<HermesValidationResult[]> {
+  async getValidationResultsByRequest(requestId: string): Promise<MonitorValidationResult[]> {
     return this.results.filter((r) => r.requestId === requestId);
   }
 

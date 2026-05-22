@@ -6,8 +6,8 @@ import type { RoadmapStage } from "@/lib/types";
 
 // ─── Enriched execution log view for Hermes monitoring ────────────────────────
 // The base ExecutionLog in lib/types.ts tracks raw runner state.
-// HermesExecutionLog is a higher-level view produced after result analysis.
-export interface HermesExecutionLog {
+// MonitorExecutionLog is a higher-level view produced after result analysis.
+export interface MonitorExecutionLog {
   taskId: string;
   taskTitle: string;
   agentType: string;
@@ -44,14 +44,14 @@ export interface ExecutionMonitorSummary {
 // ─── Internal helpers ──────────────────────────────────────────────────────────
 
 function toStatus(
-  judgment: HermesExecutionLog["completionJudgment"],
+  judgment: MonitorExecutionLog["completionJudgment"],
 ): "done" | "failed" | "partial" {
   if (judgment === "completed") return "done";
   if (judgment === "partial") return "partial";
   return "failed";
 }
 
-function detectRiskSignals(logs: HermesExecutionLog[]): string[] {
+function detectRiskSignals(logs: MonitorExecutionLog[]): string[] {
   const signals: string[] = [];
 
   // Consecutive failure detection — look at last 5 entries
@@ -113,7 +113,7 @@ function generateRecommendedActions(
 // ─── Public exports ────────────────────────────────────────────────────────────
 
 export function generateMonitorSummary(params: {
-  executionLogs: HermesExecutionLog[];
+  executionLogs: MonitorExecutionLog[];
   roadmapStages: RoadmapStage[];
   currentPhase: number;
 }): ExecutionMonitorSummary {

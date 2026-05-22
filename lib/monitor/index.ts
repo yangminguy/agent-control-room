@@ -31,10 +31,10 @@ export {
 } from "./timeout-fallback-summary";
 
 // Existing exports (from prior phases)
-export { renderHermesPacketMarkdown, exportHermesPacketJSON } from "./task-packets";
+export { renderMonitorPacketMarkdown, exportMonitorPacketJSON } from "./task-packets";
 export {
-  type HermesPacket,
-  type HermesSection,
-  type HermesPacketDraft,
-  type HermesPacketKind,
+  type MonitorPacket,
+  type MonitorSection,
+  type MonitorPacketDraft,
+  type MonitorPacketKind,
 } from "./types";

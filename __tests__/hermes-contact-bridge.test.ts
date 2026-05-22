@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { POST as contactHermes } from "@/app/api/hermes/contact/route";
+import { POST as contactHermes } from "@/app/api/monitor/contact/route";
 import { POST as classifyRisk } from "@/app/api/orchestration/classify/route";
-import { contactUserViaHermes, formatHermesContactMessage } from "@/lib/hermes/hermes-contact-bridge";
-import { resetTelegramClient } from "@/lib/hermes/telegram-client";
+import { contactUserViaHermes, formatHermesContactMessage } from "@/lib/monitor/monitor-contact-bridge";
+import { resetTelegramClient } from "@/lib/monitor/telegram-client";
 import type { DispatchJob } from "@/lib/types";
 
 const originalEnv = process.env;
@@ -89,7 +89,7 @@ describe("Hermes contact bridge", () => {
 
 describe("Hermes contact API", () => {
   it("rejects missing messages", async () => {
-    const response = await contactHermes(makeRequest("http://localhost/api/hermes/contact", {
+    const response = await contactHermes(makeRequest("http://localhost/api/monitor/contact", {
       kind: "status",
     }));
 
@@ -99,7 +99,7 @@ describe("Hermes contact API", () => {
   it("accepts approval contact requests", async () => {
     fetchMock.mockResolvedValueOnce({ ok: true });
 
-    const response = await contactHermes(makeRequest("http://localhost/api/hermes/contact", {
+    const response = await contactHermes(makeRequest("http://localhost/api/monitor/contact", {
       kind: "approval",
       message: "Approval required",
       taskId: "job-approval-002",

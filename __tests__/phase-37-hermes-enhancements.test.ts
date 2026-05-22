@@ -12,7 +12,7 @@ import {
   getTelegramClient,
   resetTelegramClient,
   type ApprovalRequest,
-} from "@/lib/hermes/telegram-client";
+} from "@/lib/monitor/telegram-client";
 import { RiskClassifier } from "@/lib/orchestration/risk-classifier";
 import {
   generateOrchestrationPacket,

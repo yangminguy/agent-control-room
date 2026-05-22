@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
-import { getTelegramClient, resetTelegramClient, type ApprovalRequest } from "@/lib/hermes/telegram-client";
+import { getTelegramClient, resetTelegramClient, type ApprovalRequest } from "@/lib/monitor/telegram-client";
 import { getRiskClassifier } from "@/lib/orchestration/risk-classifier";
 import { generateOrchestrationPacket, generatePhaseCompletePacket } from "@/lib/orchestration/orchestration-packet-generator";
 import type { DispatchJob, AgentResult } from "@/lib/types";

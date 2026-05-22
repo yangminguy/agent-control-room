@@ -1,17 +1,17 @@
 "use client";
 
 /**
- * HermesMemoryPreview
+ * MonitorMemoryPreview
  * Phase 40: Full Orchestration Layer
  *
  * Hermes Memory Note를 미리보기 형식으로 표시하고 Obsidian markdown 복사 기능을 제공한다.
  */
 
 import { useState } from "react";
-import type { HermesMemoryNote } from "@/lib/orchestration/types";
-import { renderHermesMemoryMarkdown } from "@/lib/orchestration/hermes-memory-builder";
+import type { MonitorMemoryNote } from "@/lib/orchestration/types";
+import { renderHermesMemoryMarkdown } from "@/lib/orchestration/monitor-memory-builder";
 
-const TYPE_LABELS: Record<HermesMemoryNote["type"], string> = {
+const TYPE_LABELS: Record<MonitorMemoryNote["type"], string> = {
   session_summary: "세션 요약",
   decision: "주요 결정",
   failure: "실패 기록",
@@ -21,7 +21,7 @@ const TYPE_LABELS: Record<HermesMemoryNote["type"], string> = {
   blocker: "차단 요소",
 };
 
-const TYPE_COLORS: Record<HermesMemoryNote["type"], string> = {
+const TYPE_COLORS: Record<MonitorMemoryNote["type"], string> = {
   session_summary: "bg-blue-50 border-blue-200 text-blue-800",
   decision: "bg-purple-50 border-purple-200 text-purple-800",
   failure: "bg-red-50 border-red-200 text-red-800",
@@ -31,7 +31,7 @@ const TYPE_COLORS: Record<HermesMemoryNote["type"], string> = {
   blocker: "bg-orange-50 border-orange-200 text-orange-800",
 };
 
-const TYPE_BADGE: Record<HermesMemoryNote["type"], string> = {
+const TYPE_BADGE: Record<MonitorMemoryNote["type"], string> = {
   session_summary: "bg-blue-100 text-blue-700",
   decision: "bg-purple-100 text-purple-700",
   failure: "bg-red-100 text-red-700",
@@ -41,11 +41,11 @@ const TYPE_BADGE: Record<HermesMemoryNote["type"], string> = {
   blocker: "bg-orange-100 text-orange-700",
 };
 
-interface HermesMemoryPreviewProps {
-  note: HermesMemoryNote;
+interface MonitorMemoryPreviewProps {
+  note: MonitorMemoryNote;
 }
 
-export function HermesMemoryPreview({ note }: HermesMemoryPreviewProps) {
+export function MonitorMemoryPreview({ note }: MonitorMemoryPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
 

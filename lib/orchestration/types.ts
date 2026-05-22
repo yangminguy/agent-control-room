@@ -130,7 +130,7 @@ export type ContextPackBuilderInput = {
 };
 
 /** Hermes Memory Note - Obsidian-compatible 장기 기억 노트 */
-export type HermesMemoryNote = {
+export type MonitorMemoryNote = {
   id: string;
   type:
     | "session_summary"
@@ -150,8 +150,8 @@ export type HermesMemoryNote = {
 };
 
 /** Hermes Memory Note 빌더 입력 */
-export type HermesMemoryNoteInput = {
-  type?: HermesMemoryNote["type"];
+export type MonitorMemoryNoteInput = {
+  type?: MonitorMemoryNote["type"];
   title: string;
   content: string;
   tags?: string[];

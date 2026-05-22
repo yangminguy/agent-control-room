@@ -220,7 +220,7 @@ function buildFileBoundary(
   const filesAllowedToEdit = isReadOnly ? [] : (filePaths ?? []);
 
   const additionalBlocked = riskLevel === "critical"
-    ? ["app/api/orchestration/dispatch/route.ts", "lib/hermes/"]
+    ? ["app/api/orchestration/dispatch/route.ts", "lib/monitor/"]
     : [];
 
   return {

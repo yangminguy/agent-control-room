@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useOrchestration } from "@/lib/dispatch/orchestration-context";
-import type { HermesAnalysis } from "@/lib/types";
+import type { MonitorAnalysis } from "@/lib/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -13,7 +13,7 @@ type ApiStatus = {
 };
 
 type PanelState = {
-  analysis: HermesAnalysis | null;
+  analysis: MonitorAnalysis | null;
   isAnalyzing: boolean;
   isSaving: boolean;
   savedPath: string | null;
@@ -78,7 +78,7 @@ function RiskFlagList({ flags }: { flags: string[] }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function HermesLivePanel() {
+export function MonitorLivePanel() {
   const { jobs, results, approvals } = useOrchestration();
 
   const [state, setState] = useState<PanelState>({
@@ -105,14 +105,14 @@ export function HermesLivePanel() {
     setState((prev) => ({ ...prev, isAnalyzing: true, error: null, savedPath: null }));
 
     try {
-      const res = await fetch("/api/hermes/analyze", {
+      const res = await fetch("/api/monitor/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ state: buildOrchestrationState() }),
       });
 
       const data = (await res.json()) as {
-        analysis: HermesAnalysis;
+        analysis: MonitorAnalysis;
         apiStatus?: ApiStatus;
       };
 
@@ -138,7 +138,7 @@ export function HermesLivePanel() {
     setState((prev) => ({ ...prev, isSaving: true, error: null }));
 
     try {
-      const res = await fetch("/api/hermes/save-note", {
+      const res = await fetch("/api/monitor/save-note", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

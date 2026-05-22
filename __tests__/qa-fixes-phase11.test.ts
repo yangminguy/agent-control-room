@@ -180,10 +180,10 @@ describe("Phase 11 QA guardrails", () => {
 
   it("Hermes has no execution wiring in production code", () => {
     const hermesSurface = [
-      read("lib/hermes/monitoring-layer.ts"),
-      read("lib/hermes/insight-extractor.ts"),
-      read("lib/hermes/task-packets.ts"),
-      read("components/hermes/HermesMonitorPanel.tsx"),
+      read("lib/monitor/monitoring-layer.ts"),
+      read("lib/monitor/insight-extractor.ts"),
+      read("lib/monitor/task-packets.ts"),
+      read("components/hermes/MonitorPanel.tsx"),
       read("app/hermes-packets/page.tsx"),
     ].join("\n");
 

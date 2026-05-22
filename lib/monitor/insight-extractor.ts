@@ -3,7 +3,7 @@
 // Hermes does not execute code; it extracts and classifies insights.
 
 import type { DiffAnalysisOutput, CompletionJudgment } from "@/lib/types";
-import type { HermesExecutionLog } from "./monitoring-layer";
+import type { MonitorExecutionLog } from "./monitoring-layer";
 
 // ─── Public types ──────────────────────────────────────────────────────────────
 
@@ -22,7 +22,7 @@ export type ResultOutcome = "Pass" | "MinorFix" | "QA" | "Blocked";
 // ─── Public exports ────────────────────────────────────────────────────────────
 
 export function extractInsightsFromExecutionLog(
-  log: HermesExecutionLog,
+  log: MonitorExecutionLog,
 ): ExtractedInsight[] {
   const insights: ExtractedInsight[] = [];
   const now = log.completedAt;

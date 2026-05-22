@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getRiskClassifier } from "@/lib/orchestration/risk-classifier";
-import { contactUserViaHermes } from "@/lib/hermes/hermes-contact-bridge";
+import { contactUserViaHermes } from "@/lib/monitor/monitor-contact-bridge";
 import type { DispatchJob, RiskClassificationResult } from "@/lib/types";
 
 interface ClassificationRequest {

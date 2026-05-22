@@ -1,6 +1,6 @@
 import {
-  HermesValidationRequest,
-  HermesValidationResult,
+  MonitorValidationRequest,
+  MonitorValidationResult,
   ValidationConfig,
 } from "@/lib/types";
 
@@ -12,19 +12,19 @@ const DEFAULT_VALIDATION_CONFIG: ValidationConfig = {
   loggingLevel: "standard",
 };
 
-export interface HermesLLMValidator {
-  validateStage(request: HermesValidationRequest): Promise<HermesValidationResult>;
+export interface MonitorLLMValidator {
+  validateStage(request: MonitorValidationRequest): Promise<MonitorValidationResult>;
   getConfig(): ValidationConfig;
   setConfig(config: Partial<ValidationConfig>): void;
 }
 
-export class DefaultHermesValidator implements HermesLLMValidator {
+export class DefaultMonitorValidator implements MonitorLLMValidator {
   private config: ValidationConfig = { ...DEFAULT_VALIDATION_CONFIG };
-  private validationCache: Map<string, HermesValidationResult> = new Map();
+  private validationCache: Map<string, MonitorValidationResult> = new Map();
 
   async validateStage(
-    request: HermesValidationRequest
-  ): Promise<HermesValidationResult> {
+    request: MonitorValidationRequest
+  ): Promise<MonitorValidationResult> {
     const cacheKey = this.getCacheKey(request);
     if (this.validationCache.has(cacheKey)) {
       return this.validationCache.get(cacheKey)!;
@@ -40,8 +40,8 @@ export class DefaultHermesValidator implements HermesLLMValidator {
   }
 
   private async performValidation(
-    request: HermesValidationRequest
-  ): Promise<HermesValidationResult> {
+    request: MonitorValidationRequest
+  ): Promise<MonitorValidationResult> {
     // Simulate LLM validation (in production, call OpenAI/Claude API)
     // For MVP, use deterministic heuristics based on completion metrics
 
@@ -102,7 +102,7 @@ export class DefaultHermesValidator implements HermesLLMValidator {
   }
 
   private generateRecommendations(
-    request: HermesValidationRequest,
+    request: MonitorValidationRequest,
     isValid: boolean
   ): string[] {
     const recommendations: string[] = [];
@@ -133,9 +133,9 @@ export class DefaultHermesValidator implements HermesLLMValidator {
   }
 
   private createFallbackValidation(
-    request: HermesValidationRequest,
+    request: MonitorValidationRequest,
     error: unknown
-  ): HermesValidationResult {
+  ): MonitorValidationResult {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
     return {
@@ -150,7 +150,7 @@ export class DefaultHermesValidator implements HermesLLMValidator {
     };
   }
 
-  private getCacheKey(request: HermesValidationRequest): string {
+  private getCacheKey(request: MonitorValidationRequest): string {
     return JSON.stringify({
       planId: request.planId,
       stageIndex: request.stageIndex,
@@ -194,15 +194,15 @@ export class DefaultHermesValidator implements HermesLLMValidator {
   }
 }
 
-let globalValidator: HermesLLMValidator | null = null;
+let globalValidator: MonitorLLMValidator | null = null;
 
-export function getHermesValidator(): HermesLLMValidator {
+export function getMonitorValidator(): MonitorLLMValidator {
   if (!globalValidator) {
-    globalValidator = new DefaultHermesValidator();
+    globalValidator = new DefaultMonitorValidator();
   }
   return globalValidator;
 }
 
-export function setHermesValidator(validator: HermesLLMValidator): void {
+export function setMonitorValidator(validator: MonitorLLMValidator): void {
   globalValidator = validator;
 }

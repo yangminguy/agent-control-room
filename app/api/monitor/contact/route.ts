@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { contactUserViaHermes, type HermesContactRequest } from "@/lib/hermes/hermes-contact-bridge";
+import { contactUserViaHermes, type MonitorContactRequest } from "@/lib/monitor/monitor-contact-bridge";
 
 const VALID_KINDS = new Set(["status", "approval", "warning", "failure"]);
 const VALID_RISK_LEVELS = new Set(["safe", "low", "medium", "high", "critical"]);
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as HermesContactRequest;
+    const body = (await request.json()) as MonitorContactRequest;
 
     if (!body.message || typeof body.message !== "string") {
       return NextResponse.json(

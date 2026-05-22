@@ -5,7 +5,7 @@ import {
   getFailedTasks,
   getRetryCandidates,
   type FailedTaskRecord,
-} from "@/lib/hermes/failed-task-tracker";
+} from "@/lib/monitor/failed-task-tracker";
 
 export const metadata: Metadata = {
   title: "Memory — Agent Control Room",

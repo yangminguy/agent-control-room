@@ -1,6 +1,6 @@
 /**
- * POST /api/hermes/save-note
- * Generates an Obsidian-compatible Markdown note from a HermesAnalysis
+ * POST /api/monitor/save-note
+ * Generates an Obsidian-compatible Markdown note from a MonitorAnalysis
  * and saves it to data/ (or OBSIDIAN_VAULT_PATH if configured).
  */
 
@@ -8,10 +8,10 @@ import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 import { generateObsidianNote } from "@/lib/memory/obsidian-note-generator";
-import type { HermesAnalysis } from "@/lib/types";
+import type { MonitorAnalysis } from "@/lib/types";
 
 type RequestBody = {
-  analysis: HermesAnalysis;
+  analysis: MonitorAnalysis;
   title?: string;
   tags?: string[];
 };

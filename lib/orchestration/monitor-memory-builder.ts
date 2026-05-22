@@ -7,9 +7,9 @@
  */
 
 import { nanoid } from "nanoid";
-import type { HermesMemoryNote, HermesMemoryNoteInput } from "./types";
+import type { MonitorMemoryNote, MonitorMemoryNoteInput } from "./types";
 
-const OBSIDIAN_PATHS: Record<HermesMemoryNote["type"], string> = {
+const OBSIDIAN_PATHS: Record<MonitorMemoryNote["type"], string> = {
   session_summary: "output/obsidian/session-summaries",
   decision: "output/obsidian/decisions",
   failure: "output/obsidian/failures",
@@ -19,7 +19,7 @@ const OBSIDIAN_PATHS: Record<HermesMemoryNote["type"], string> = {
   blocker: "output/obsidian/blockers",
 };
 
-const TYPE_LABELS: Record<HermesMemoryNote["type"], string> = {
+const TYPE_LABELS: Record<MonitorMemoryNote["type"], string> = {
   session_summary: "세션 요약",
   decision: "주요 결정",
   failure: "실패 기록",
@@ -29,7 +29,7 @@ const TYPE_LABELS: Record<HermesMemoryNote["type"], string> = {
   blocker: "차단 요소",
 };
 
-export function suggestHermesMemoryType(input: HermesMemoryNoteInput): HermesMemoryNote["type"] {
+export function suggestHermesMemoryType(input: MonitorMemoryNoteInput): MonitorMemoryNote["type"] {
   const text = `${input.title} ${input.content}`.toLowerCase();
 
   if (text.includes("실패") || text.includes("fail") || text.includes("error") || text.includes("에러")) {
@@ -53,11 +53,11 @@ export function suggestHermesMemoryType(input: HermesMemoryNoteInput): HermesMem
   return "session_summary";
 }
 
-export function getObsidianPath(type: HermesMemoryNote["type"], id: string): string {
+export function getObsidianPath(type: MonitorMemoryNote["type"], id: string): string {
   return `${OBSIDIAN_PATHS[type]}/${id}.md`;
 }
 
-export function buildHermesMemoryNote(input: HermesMemoryNoteInput): HermesMemoryNote {
+export function buildMonitorMemoryNote(input: MonitorMemoryNoteInput): MonitorMemoryNote {
   const id = nanoid();
   const type = input.type ?? suggestHermesMemoryType(input);
   return {
@@ -76,7 +76,7 @@ export function buildHermesMemoryNote(input: HermesMemoryNoteInput): HermesMemor
   };
 }
 
-export function renderHermesMemoryMarkdown(note: HermesMemoryNote): string {
+export function renderHermesMemoryMarkdown(note: MonitorMemoryNote): string {
   const lines: string[] = [
     `---`,
     `id: ${note.id}`,

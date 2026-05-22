@@ -1,4 +1,4 @@
-import type { HermesAnalysis } from "@/lib/types";
+import type { MonitorAnalysis } from "@/lib/types";
 
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 const TIMEOUT_MS = 8000; // 8초
@@ -32,7 +32,7 @@ class GeminiClient {
     this.secondaryKey = secondaryKey;
   }
 
-  async analyzeOrchestrationState(state: unknown): Promise<HermesAnalysis> {
+  async analyzeOrchestrationState(state: unknown): Promise<MonitorAnalysis> {
     const prompt = this.buildPrompt(state);
 
     try {
@@ -81,7 +81,7 @@ class GeminiClient {
     apiKey: string,
     prompt: string,
     keyType: "primary" | "secondary"
-  ): Promise<HermesAnalysis | null> {
+  ): Promise<MonitorAnalysis | null> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -153,7 +153,7 @@ JSON 형식으로 응답해주세요:
 }`;
   }
 
-  private parseAnalysis(text: string): HermesAnalysis {
+  private parseAnalysis(text: string): MonitorAnalysis {
     try {
       // JSON 블록 추출
       const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -174,7 +174,7 @@ JSON 형식으로 응답해주세요:
     }
   }
 
-  private getFallbackAnalysis(): HermesAnalysis {
+  private getFallbackAnalysis(): MonitorAnalysis {
     return {
       insights: [
         "API 연결 문제로 기본 분석을 제공합니다",

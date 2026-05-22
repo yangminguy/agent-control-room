@@ -1,8 +1,8 @@
-import { AutoDecisionLog, HermesValidationResult } from "@/lib/types";
+import { AutoDecisionLog, MonitorValidationResult } from "@/lib/types";
 
 export type AutoDecisionInput = {
   validationId: string;
-  validationResult: HermesValidationResult;
+  validationResult: MonitorValidationResult;
   autoApproveThreshold?: number;
   requireUserConfirmation?: boolean;
 };

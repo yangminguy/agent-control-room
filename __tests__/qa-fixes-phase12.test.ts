@@ -24,7 +24,7 @@ import {
   getApprovalTimeoutRemaining,
 } from "../lib/approval/timeout-policy";
 import { FeedbackLoopEngine } from "../lib/orchestration/feedback-loop-engine";
-import { generateAgentPerformanceSummary } from "../lib/hermes/agent-performance-summary";
+import { generateAgentPerformanceSummary } from "../lib/monitor/agent-performance-summary";
 import type { DispatchJob, AgentResult, ApprovalRequest } from "../lib/types";
 
 describe("Phase 12-16 Integration Tests", () => {

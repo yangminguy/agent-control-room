@@ -610,7 +610,7 @@ export type ControlRoomExecutionRun = {
 // Phase 26 — Hermes LLM Analysis (Gemma 4 via Ollama)
 // ─────────────────────────────────────────────────────────
 
-export type HermesAnalysis = {
+export type MonitorAnalysis = {
   insights: string[];
   recommendations: string[];
   riskFlags: string[];
@@ -716,7 +716,7 @@ export type DataIntegrityCheckpoint = {
 // ─────────────────────────────────────────────────────────
 
 /** Hermes LLM validation request */
-export type HermesValidationRequest = {
+export type MonitorValidationRequest = {
   id: string;
   planId: string;
   stageIndex: number;
@@ -729,7 +729,7 @@ export type HermesValidationRequest = {
 };
 
 /** Hermes LLM validation result */
-export type HermesValidationResult = {
+export type MonitorValidationResult = {
   validationId: string;
   requestId: string;
   isValid: boolean;

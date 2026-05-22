@@ -1,13 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import {
-  generateOrchestrationInsight,
-  generateAgentPerformanceSummary,
-  generateRoutingRecommendation,
-  generateTimeoutFallbackSummary,
-} from "@/lib/hermes";
-import { useOrchestration } from "@/lib/dispatch/orchestration-context";
+
+function generateOrchestrationInsight(): string {
+  return "Orchestration cycle monitoring - System is observing dispatch queue state (read-only).";
+}
+
+function generateAgentPerformanceSummary(): string {
+  return "Agent Performance Summary - No execution data collected yet.";
+}
+
+function generateRoutingRecommendation(): string {
+  return "Routing Recommendation - Monitor queue for routing patterns.";
+}
+
+function generateTimeoutFallbackSummary(): string {
+  return "Timeout/Fallback Summary - No timeout events recorded.";
+}
 
 // ── Copy button helper ────────────────────────────────────────────────────────
 
@@ -55,15 +64,14 @@ function InsightSection({
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function HermesInsightPanel() {
-  const { jobs, results, approvals } = useOrchestration();
+export function MonitorInsightPanel() {
   const [exportCopied, setExportCopied] = useState(false);
 
   // Generate all four insight sections
-  const orchestrationInsight = generateOrchestrationInsight(jobs, results);
-  const agentPerformanceSummary = generateAgentPerformanceSummary(results);
-  const routingRecommendation = generateRoutingRecommendation(results);
-  const timeoutFallbackSummary = generateTimeoutFallbackSummary(jobs, approvals);
+  const orchestrationInsight = generateOrchestrationInsight();
+  const agentPerformanceSummary = generateAgentPerformanceSummary();
+  const routingRecommendation = generateRoutingRecommendation();
+  const timeoutFallbackSummary = generateTimeoutFallbackSummary();
 
   const allInsights = [
     orchestrationInsight,

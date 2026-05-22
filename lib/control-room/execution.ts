@@ -101,7 +101,7 @@ function buildRoadmap(plan: ControlRoomPlan, featurePlanId: string): Roadmap {
   };
 }
 
-function buildHermesPacket(plan: ControlRoomPlan, startedJobs: DispatchJob[], schedulingRecommendation?: string): string {
+function buildMonitorPacket(plan: ControlRoomPlan, startedJobs: DispatchJob[], schedulingRecommendation?: string): string {
   const riskyJobs = startedJobs.filter((job) => isHighRisk(job.riskLevel));
   const lines = [
     "# Hermes Orchestration Packet",
@@ -263,7 +263,7 @@ export async function executeControlRoomPlan(
     });
   }
 
-  const hermesPacket = buildHermesPacket(plan, startedJobs, schedulingRecommendation);
+  const hermesPacket = buildMonitorPacket(plan, startedJobs, schedulingRecommendation);
   const run: ControlRoomExecutionRun = {
     id: id("control-run"),
     planId: plan.id,

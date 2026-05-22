@@ -1,22 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { HermesValidationRequest, HermesValidationResult } from "@/lib/types";
+import { MonitorValidationRequest, MonitorValidationResult } from "@/lib/types";
 import { AlertCircle, CheckCircle, XCircle, Clock } from "lucide-react";
 
 type ValidationState = "idle" | "validating" | "completed" | "error";
 
-export interface HermesValidationPanelProps {
-  request?: HermesValidationRequest;
-  onValidation?: (result: HermesValidationResult) => void;
+export interface MonitorValidationPanelProps {
+  request?: MonitorValidationRequest;
+  onValidation?: (result: MonitorValidationResult) => void;
 }
 
-export function HermesValidationPanel({ request, onValidation }: HermesValidationPanelProps) {
+export function MonitorValidationPanel({ request, onValidation }: MonitorValidationPanelProps) {
   const [state, setstate] = useState<ValidationState>("idle");
-  const [validationResult, setValidationResult] = useState<HermesValidationResult | null>(null);
+  const [validationResult, setValidationResult] = useState<MonitorValidationResult | null>(null);
   const [error, setError] = useState<string>("");
 
-  const handleValidate = async (request: HermesValidationRequest) => {
+  const handleValidate = async (request: MonitorValidationRequest) => {
     setstate("validating");
     setError("");
 

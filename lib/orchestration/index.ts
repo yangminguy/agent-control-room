@@ -25,8 +25,8 @@ export type {
   OrchestrationDecisionInput,
   ContextPack,
   ContextPackBuilderInput,
-  HermesMemoryNote,
-  HermesMemoryNoteInput,
+  MonitorMemoryNote,
+  MonitorMemoryNoteInput,
   AgentRoutingResult,
   ExecutionModeResult,
 } from "./types";
@@ -41,8 +41,8 @@ export {
 } from "./context-pack-builder";
 export { buildPromptWithBoundary } from "./prompt-boundary-builder";
 export {
-  buildHermesMemoryNote,
+  buildMonitorMemoryNote,
   renderHermesMemoryMarkdown,
   suggestHermesMemoryType,
   getObsidianPath,
-} from "./hermes-memory-builder";
+} from "./monitor-memory-builder";

@@ -1,8 +1,8 @@
 import {
-  HermesPacket,
-  HermesPacketKind,
-  HermesSection,
-  HermesPacketDraft,
+  MonitorPacket,
+  MonitorPacketKind,
+  MonitorSection,
+  MonitorPacketDraft,
 } from "./types";
 
 // Generator: Create example Hermes packets for each kind
@@ -11,8 +11,8 @@ export function generateSessionSummaryPacket(
   sessionName: string,
   workDone: string[],
   nextSteps: string[]
-): HermesPacket {
-  const sections: HermesSection[] = [
+): MonitorPacket {
+  const sections: MonitorSection[] = [
     {
       id: "summary",
       title: "Session Summary",
@@ -54,8 +54,8 @@ export function generateContextPackPacket(
   completedPhases: string[],
   remainingWork: string[],
   importantDecisions: string[]
-): HermesPacket {
-  const sections: HermesSection[] = [
+): MonitorPacket {
+  const sections: MonitorSection[] = [
     {
       id: "project",
       title: "Project Context",
@@ -104,8 +104,8 @@ export function generateHandoffPackPacket(
   toAgent: string,
   changedFiles: string[],
   nextPrompt: string
-): HermesPacket {
-  const sections: HermesSection[] = [
+): MonitorPacket {
+  const sections: MonitorSection[] = [
     {
       id: "handoff",
       title: "Handoff Instructions",
@@ -147,8 +147,8 @@ export function generateFailedTaskReviewPacket(
   errorSummary: string,
   rootCause: string,
   recommendations: string[]
-): HermesPacket {
-  const sections: HermesSection[] = [
+): MonitorPacket {
+  const sections: MonitorSection[] = [
     {
       id: "task",
       title: "Task",
@@ -196,8 +196,8 @@ export function generateBackgroundResearchPacket(
   topic: string,
   findings: string[],
   sources: string[]
-): HermesPacket {
-  const sections: HermesSection[] = [
+): MonitorPacket {
+  const sections: MonitorSection[] = [
     {
       id: "research",
       title: `Research: ${topic}`,
@@ -238,8 +238,8 @@ export function generateObsidianNotePacket(
   insightTitle: string,
   insightBody: string,
   tags: string[]
-): HermesPacket {
-  const sections: HermesSection[] = [
+): MonitorPacket {
+  const sections: MonitorSection[] = [
     {
       id: "insight",
       title: insightTitle,
@@ -271,7 +271,7 @@ export function generateObsidianNotePacket(
 
 // Renderer: Convert Hermes packet to Markdown
 
-export function renderHermesPacketMarkdown(packet: HermesPacket): string {
+export function renderMonitorPacketMarkdown(packet: MonitorPacket): string {
   let markdown = `# ${packet.title}\n\n`;
   markdown += `*${packet.description}*\n\n`;
   markdown += `**Created:** ${new Date(packet.createdAt).toLocaleString()}\n\n`;
@@ -295,20 +295,20 @@ export function renderHermesPacketMarkdown(packet: HermesPacket): string {
 
 // Export as Markdown (copy-friendly)
 
-export function exportHermesPacketMarkdown(packet: HermesPacket): string {
-  return renderHermesPacketMarkdown(packet);
+export function exportMonitorPacketMarkdown(packet: MonitorPacket): string {
+  return renderMonitorPacketMarkdown(packet);
 }
 
 // Export as JSON (for structured handling)
 
-export function exportHermesPacketJSON(packet: HermesPacket): string {
+export function exportMonitorPacketJSON(packet: MonitorPacket): string {
   return JSON.stringify(packet, null, 2);
 }
 
 // List all supported kinds with descriptions
 
 export const HERMES_PACKET_KINDS: Record<
-  HermesPacketKind,
+  MonitorPacketKind,
   { label: string; description: string }
 > = {
   "session-summary": {

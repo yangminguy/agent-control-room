@@ -5,11 +5,11 @@ export { FeedbackLoopSummaryCard } from "./FeedbackLoopSummaryCard";
 export { ResultCollectionPanel } from "./ResultCollectionPanel";
 export { OrchestrationPageLayout } from "./OrchestrationPageLayout";
 export { ConversationToJobPanel } from "./ConversationToJobPanel";
-export { HermesInsightPanel } from "./HermesInsightPanel";
+export { MonitorInsightPanel } from "./MonitorInsightPanel";
 export { OrchestrationLogViewer } from "./OrchestrationLogViewer";
 export { OrchestrationMetricsPanel } from "./OrchestrationMetricsPanel";
 export { AutoDispatchControl } from "./AutoDispatchControl";
-export { HermesLivePanel } from "./HermesLivePanel";
+export { MonitorLivePanel } from "./MonitorLivePanel";
 export { ContextBudgetPanel } from "./ContextBudgetPanel";
 
 // Phase 40 — Full Orchestration Layer components
@@ -18,4 +18,5 @@ export { ApprovalGateCard } from "./ApprovalGateCard";
 export { ContextPackPreview } from "./ContextPackPreview";
 export { AgentRoutingSummary } from "./AgentRoutingSummary";
 export { ExecutionBoundaryCard } from "./ExecutionBoundaryCard";
-export { HermesMemoryPreview } from "./HermesMemoryPreview";
+export { MonitorMemoryPreview as HermesMemoryPreview } from "./MonitorMemoryPreview";
+export { OrchestrationDecisionPanel } from "./OrchestrationDecisionPanel";

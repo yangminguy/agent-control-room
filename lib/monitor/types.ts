@@ -1,7 +1,7 @@
 // Hermes: Background worker for summaries, memory, monitoring, and context packing
 // Hermes packet types and interfaces
 
-export type HermesPacketKind =
+export type MonitorPacketKind =
   | "session-summary"
   | "context-pack"
   | "handoff-pack"
@@ -9,9 +9,9 @@ export type HermesPacketKind =
   | "background-research"
   | "obsidian-note";
 
-export interface HermesPacket {
+export interface MonitorPacket {
   id: string;
-  kind: HermesPacketKind;
+  kind: MonitorPacketKind;
   title: string;
   description: string;
   createdAt: string;
@@ -19,12 +19,12 @@ export interface HermesPacket {
 
   // Packet content
   content: {
-    sections: HermesSection[];
+    sections: MonitorSection[];
     metadata?: Record<string, unknown>;
   };
 }
 
-export interface HermesSection {
+export interface MonitorSection {
   id: string;
   title: string;
   level: 1 | 2 | 3;
@@ -32,10 +32,10 @@ export interface HermesSection {
   format: "markdown" | "code" | "checklist";
 }
 
-export interface HermesPacketDraft {
-  kind: HermesPacketKind;
+export interface MonitorPacketDraft {
+  kind: MonitorPacketKind;
   title: string;
   description: string;
-  sections: HermesSection[];
+  sections: MonitorSection[];
   markdown: string;
 }

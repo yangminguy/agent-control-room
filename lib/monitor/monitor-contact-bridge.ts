@@ -1,10 +1,10 @@
 import type { RiskLevel } from "@/lib/types";
 import { getTelegramClient } from "./telegram-client";
 
-export type HermesContactKind = "status" | "approval" | "warning" | "failure";
+export type MonitorContactKind = "status" | "approval" | "warning" | "failure";
 
-export type HermesContactRequest = {
-  kind?: HermesContactKind;
+export type MonitorContactRequest = {
+  kind?: MonitorContactKind;
   message: string;
   taskId?: string;
   taskName?: string;
@@ -14,7 +14,7 @@ export type HermesContactRequest = {
   recommendation?: string;
 };
 
-export type HermesContactResult = {
+export type MonitorContactResult = {
   success: boolean;
   channel: "telegram" | "telegram-mock" | "none";
   fallbackUsed: boolean;
@@ -26,7 +26,7 @@ function hasTelegramConfig(): boolean {
   return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
 }
 
-export function formatHermesContactMessage(request: HermesContactRequest): string {
+export function formatHermesContactMessage(request: MonitorContactRequest): string {
   const kind = request.kind ?? "status";
   const title = {
     approval: "[Hermes Approval Required]",
@@ -68,8 +68,8 @@ export function formatHermesContactMessage(request: HermesContactRequest): strin
 }
 
 export async function contactUserViaHermes(
-  request: HermesContactRequest
-): Promise<HermesContactResult> {
+  request: MonitorContactRequest
+): Promise<MonitorContactResult> {
   const message = formatHermesContactMessage(request);
 
   try {

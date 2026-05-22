@@ -1,13 +1,13 @@
 /**
- * POST /api/hermes/analyze
+ * POST /api/monitor/analyze
  * Runs Hermes analysis via Gemini API (Primary/Secondary fallback).
  * Hermes는 코드 작성자가 아니라 오케스트레이션 보조 워커입니다.
  */
 
 import { NextResponse } from "next/server";
-import { getGeminiClient } from "@/lib/hermes/gemini-client";
-import { getHermesMonitor } from "@/lib/hermes/hermes-api-monitor";
-import type { HermesAnalysis } from "@/lib/types";
+import { getGeminiClient } from "@/lib/monitor/gemini-client";
+import { getMonitorMonitor } from "@/lib/monitor/monitor-api-monitor";
+import type { MonitorAnalysis } from "@/lib/types";
 
 type RequestBody = {
   jobId?: string;
@@ -28,10 +28,10 @@ export async function POST(req: Request): Promise<NextResponse> {
   try {
     // Gemini API 호출 (Primary → Secondary fallback)
     const client = getGeminiClient();
-    const analysis: HermesAnalysis = await client.analyzeOrchestrationState(state);
+    const analysis: MonitorAnalysis = await client.analyzeOrchestrationState(state);
 
     // API 상태 확인 및 모니터링
-    const monitor = getHermesMonitor();
+    const monitor = getMonitorMonitor();
     const health = monitor.checkHealth();
 
     // Critical 상태면 응답에 경고 추가
@@ -52,7 +52,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     console.error("[Hermes] 분석 실패:", error);
 
     // 완전 실패 시에도 기본값 반환 (graceful degradation)
-    const fallbackAnalysis: HermesAnalysis = {
+    const fallbackAnalysis: MonitorAnalysis = {
       insights: ["API 연결 문제"],
       recommendations: ["나중에 다시 시도해주세요"],
       riskFlags: ["⚠️ Hermes 분석 실패"],

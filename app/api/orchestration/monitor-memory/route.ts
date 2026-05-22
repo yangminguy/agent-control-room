@@ -1,5 +1,5 @@
 /**
- * POST /api/orchestration/hermes-memory
+ * POST /api/orchestration/monitor-memory
  * Phase 40: Full Orchestration Layer
  *
  * Hermes Memory Note를 생성하고 Obsidian-compatible markdown을 반환한다.
@@ -8,15 +8,15 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import {
-  buildHermesMemoryNote,
+  buildMonitorMemoryNote,
   renderHermesMemoryMarkdown,
   suggestHermesMemoryType,
-} from "@/lib/orchestration/hermes-memory-builder";
-import type { HermesMemoryNoteInput } from "@/lib/orchestration/types";
+} from "@/lib/orchestration/monitor-memory-builder";
+import type { MonitorMemoryNoteInput } from "@/lib/orchestration/types";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as Partial<HermesMemoryNoteInput>;
+    const body = await request.json() as Partial<MonitorMemoryNoteInput>;
 
     if (!body.title || !body.content) {
       return NextResponse.json(
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const input: HermesMemoryNoteInput = {
+    const input: MonitorMemoryNoteInput = {
       type: body.type,
       title: String(body.title),
       content: String(body.content),
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       taskId: body.taskId ? String(body.taskId) : undefined,
     };
 
-    const note = buildHermesMemoryNote(input);
+    const note = buildMonitorMemoryNote(input);
     const markdown = renderHermesMemoryMarkdown(note);
     const suggestedType = suggestHermesMemoryType(input);
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    description: "POST /api/orchestration/hermes-memory — HermesMemoryNote 생성",
+    description: "POST /api/orchestration/monitor-memory — MonitorMemoryNote 생성",
     required: ["title", "content"],
     optional: ["type", "tags", "relatedTaskIds", "relatedFiles", "taskId"],
     noteTypes: [

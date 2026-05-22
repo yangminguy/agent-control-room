@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AutoDecisionLog } from "@/lib/types";
-import { getAutoDecisionEngine } from "@/lib/hermes/auto-decision-engine";
+import { getAutoDecisionEngine } from "@/lib/monitor/auto-decision-engine";
 import { getValidationStore } from "@/lib/storage/validation-store";
 
 export type AutoDecisionRequest = {
