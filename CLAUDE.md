@@ -194,11 +194,22 @@ As of 2026-05-22, the codebase implements:
 
 **Phase 37-39 (Complete — Hermes Enhancements: Telegram, OrchestrationPacket, Risk Classification)** ✅:
 - **Telegram Integration**: `TelegramClient` for approval requests, status reports, phase complete alerts, failure reports, high-risk operation warnings.
+  - Fixed Markdown formatting for Telegram API compatibility
+  - Supports 6 message types with mock mode fallback
+  - Tests: 7 passing (approval, status, phase complete, failure, warning, singleton)
 - **OrchestrationPacket & PhaseCompletePacket**: Formalized packet types in `lib/types.ts` for Hermes→Agent Control Room communication.
+  - Automatic status inference (completed/failed/partial/blocked)
+  - Risk assessment and next-step recommendations
+  - Markdown rendering support
+  - Tests: 7 passing (generation, rendering, markdown)
 - **Risk Classification Engine**: `RiskClassifier` auto-classifies tasks by risk level (Low/Medium/High) and detects file conflicts.
+  - Pattern-based classification for git, terminal, deployment operations
+  - File ownership tracking and conflict detection
+  - Auto-recommendation generation
+  - Tests: 7 passing (high-risk, medium-risk, critical files, conflict detection)
 - **API Routes**: `/api/orchestration/telegram/approve` for approval handling, `/api/orchestration/classify` for risk classification.
 - **Packet Generation**: Functions to generate and render OrchestrationPacket and PhaseCompletePacket (Markdown + JSON).
-- **21 new tests passing (272 total passing)**.
+- **Integration Tests**: 1 Telegram workflow integration test covering 6 complete scenarios (273 total tests passing, 7 skipped).
 
 **Next Phase**:
 - Supabase Syncing and Live Database Hookup
