@@ -1,7 +1,8 @@
 # Hermes 문서 vs 구현 상태 감시 보고서
 
 **작성일**: 2026-05-22
-**테스트 상태**: ✅ 251개 테스트 통과, 13개 테스트 스위트 통과
+**원본 테스트 상태**: ✅ 251개 테스트 통과, 13개 테스트 스위트 통과
+**현재 상태 메모**: 이 문서는 Phase 37-39 이전 갭 분석 스냅샷입니다. 현재 코드는 Phase 39까지 진행되었고 Telegram client/message formatting, OrchestrationPacket, RiskClassifier가 구현되었습니다. `/api/orchestration/telegram/approve`는 approval response를 로컬 JSON approval store에 저장하고 같은 서버 프로세스의 dispatch job이 있으면 approve/reject 상태를 반영합니다. 실행 trigger는 하지 않으며, 실제 Telegram credential이 없으면 e2e 테스트는 skip됩니다.
 
 ---
 
@@ -406,4 +407,3 @@ Control Room Chat
 [ ] "미구현 기능" 섹션 명확화
 [ ] 두 문서 병합 검토 (길이 1,886줄)
 ```
-

@@ -1,9 +1,11 @@
 # Phase 37-39: Hermes Enhancements Completion Report
 
 **Date**: 2026-05-22  
-**Status**: ✅ **COMPLETE**  
-**Tests**: 272/272 Passing  
+**Status**: ✅ **COMPLETE, QA-CORRECTED**  
+**Current Tests**: 273 passing out of 280 total; 7 Telegram e2e tests skipped unless credentials are configured  
 **Commits**: Ready for merge  
+
+> QA correction: The Telegram approval route now persists approval responses and updates a matching in-memory dispatch job to `approved` or `skipped_due_to_risk` for approve/reject responses. It still does not trigger execution. Real local CLI execution remains gated through `/api/runner` with a server-issued workbench approval token.
 
 ---
 
@@ -55,8 +57,8 @@ All features fully tested, documented, and integrated with existing orchestratio
 
 **Risk Levels**:
 ```
-Low Risk:        git status, lint, typecheck, test, build (auto-execute)
-Medium Risk:     git add/commit, local deploy, preview (execute + report)
+Low Risk:        git status, lint, typecheck, test, build (eligible for mock dispatch or approved runner execution)
+Medium Risk:     git add/commit, local deploy, preview (review/report before real execution)
 High Risk:       git push/merge, db migration, prod deploy (approval required)
 Conflict Risk:   package.json, auth/, security/, runner/ (sequential only)
 ```
@@ -127,7 +129,7 @@ export type StatusReport
 - Accepts user response to approval requests
 - Validates response type (approve/reject/preview_first/control_room)
 - Logs approval with timestamp
-- Returns success confirmation
+- Returns `mode: "recorded"` with persistence and dispatch-job update flags; execution is never triggered by this route
 
 **Route 2**: `POST /api/orchestration/classify`
 - Accepts DispatchJob for risk classification
@@ -232,7 +234,9 @@ Files Created/Modified: 12
 
 Test Results:
 ├─ New Tests:          21
-├─ Total Tests:        272
+├─ Current Passing:    273
+├─ Total Tests:        280
+├─ Skipped:            7 (Telegram e2e without credentials)
 ├─ Pass Rate:          100%
 └─ Execution Time:     ~2.2s
 ```
@@ -253,13 +257,14 @@ Test Results:
 ## Integration Status
 
 ### ✅ Complete Integration
-- Telegram client fully integrated with orchestration
+- Telegram client integrated for message formatting/sending; approval response route persists responses and updates matching same-process dispatch jobs
 - Risk classifier plugged into dispatch flow
 - Packet generation tested with real AgentResult types
 - All API routes hooked up and tested
 
 ### ⏳ Pending Integration
 - Real Telegram bot token + chat ID connection
+- Durable multi-process approval synchronization
 - Obsidian filesystem syncing
 - Advanced monitoring dashboard integration
 
@@ -273,9 +278,9 @@ Test Results:
 ## Known Limitations & Mitigation
 
 ### 1. Telegram Not Actually Sending
-**Limitation**: Requires real bot token to actually send messages  
-**Mitigation**: Currently logs to console in mock mode, ready for token insertion  
-**Solution**: Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in .env, test with real Telegram
+**Limitation**: Requires real bot token to actually send messages; approval responses are persisted locally and applied only to the current server process queue when the job is present  
+**Mitigation**: Keeps real execution behind `/api/runner` approval tokens  
+**Solution**: Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, then move approval state to Supabase/shared queue before treating Telegram approval as authoritative across processes
 
 ### 2. Risk Classification Could Be Customized
 **Limitation**: Patterns are hardcoded for general use  
@@ -293,7 +298,7 @@ Test Results:
 
 ```
 Test Suites: 14 passed, 14 total
-Tests:       272 passed, 272 total
+Tests:       273 passed, 7 skipped, 280 total
 Snapshots:   0 total
 Time:        2.177s
 
@@ -301,7 +306,7 @@ Phase-Specific (Phase 37-39):
 ├─ TelegramClient:        7/7 ✅
 ├─ RiskClassifier:        7/7 ✅
 ├─ PacketGeneration:      7/7 ✅
-└─ All Other Phases:    251/251 ✅
+└─ All Other Phases:    252 passing tests outside skipped Telegram e2e coverage ✅
 
 New Tests Added: 21
 Regression Tests: 0 failures
@@ -312,7 +317,7 @@ Regression Tests: 0 failures
 ## Deployment Checklist
 
 - [x] All code follows project TypeScript standards
-- [x] All tests passing (272/272)
+- [x] Current automated suite passing (273 passed, 7 skipped)
 - [x] No linting errors
 - [x] No TypeScript errors
 - [x] Documentation complete
@@ -369,13 +374,12 @@ Regression Tests: 0 failures
 - OrchestrationPacket: Formalized and in use
 - Risk classification: Fully operational
 - Documentation: Comprehensive and up-to-date
-- Tests: 272/272 passing
+- Tests: 273 passing, 7 skipped
 
-**Ready for Production** (pending Telegram bot token configuration)
+**Ready for deployment trials** (pending Telegram bot token/webhook configuration plus durable approval synchronization)
 
 ---
 
 **Prepared by**: Claude Code  
 **Date**: 2026-05-22  
 **Status**: ✅ READY TO COMMIT
-

@@ -1,26 +1,28 @@
 # Hermes Implementation Guide
 
 **Status**: ✅ Phase 37-39 Complete  
-**Test Coverage**: 272/272 tests passing  
+**Test Coverage**: 273 passing tests out of 280 total; 7 Telegram e2e tests skip unless credentials are configured  
 **Last Updated**: 2026-05-22
 
 ---
 
 ## 1. Overview
 
-Hermes is Agent Control Room's **approval-based execution worker** and **operational intelligence layer**. This guide consolidates:
+Hermes is Agent Control Room's **approval-support operations worker** and **operational intelligence layer**. This guide consolidates:
 - **hermes_agent_control_room_plan.md** — Role definition, policies, skill design
 - **hermes_orchestration_layer_architecture.md** — Architecture, Hermes positioning, monitoring
 
 ### What's Implemented ✅
-- Telegram client for approval requests & notifications
+- Telegram client for approval request/notification messages, with mock fallback
 - OrchestrationPacket & PhaseCompletePacket type system
 - Risk classification engine (Low/Medium/High)
-- API endpoints for approval, risk classification
+- API endpoints for approval response intake and risk classification
 - Comprehensive test suite (21 new tests)
 
 ### What Needs Implementation ⏳
 - Actual Telegram bot token integration
+- Real Telegram bot webhook/e2e wiring
+- Durable multi-process approval synchronization
 - Obsidian file system syncing
 - Advanced Skills framework
 - Full monitoring & logging
@@ -30,7 +32,7 @@ Hermes is Agent Control Room's **approval-based execution worker** and **operati
 ## 2. Hermes Role Definition
 
 ### 2.1 What Hermes Is
-- ✅ Approval-based execution worker
+- ✅ Approval-support operations worker
 - ✅ Background operations manager
 - ✅ Progress monitor & risk classifier
 - ✅ Log analyzer & insight extractor
@@ -44,8 +46,8 @@ Hermes is Agent Control Room's **approval-based execution worker** and **operati
 
 ### 2.3 Core Responsibility Loop
 ```
-Agent execution → Hermes monitors → Risk classification → 
-Approval request (if needed) → User approval → Task execution → 
+Agent execution or workbench result → Hermes monitors → Risk classification → 
+Approval request draft/notification (if needed) → User approval → approved runner/workbench action → 
 Result collection → Packet generation → Return to Agent Control Room
 ```
 
@@ -199,14 +201,14 @@ const hasConflict = classifier.detectFileConflict(
 ```
 
 **Risk Levels**:
-- **Low Risk**: git status, lint, typecheck, test, build (auto-execute)
-- **Medium Risk**: git add/commit, local changes, preview deploy (execute + report)
+- **Low Risk**: git status, lint, typecheck, test, build (eligible for mock dispatch handling or approved runner execution)
+- **Medium Risk**: git add/commit, local changes, preview deploy (requires explicit review/reporting before real execution)
 - **High Risk**: git push, merge, reset, db migration, prod deploy (requires approval)
 
 ---
 
 ### 3.4 API Endpoints
-**Status**: ✅ Implemented
+**Status**: ✅ Implemented with MVP limits
 
 #### POST `/api/orchestration/telegram/approve`
 ```json
@@ -216,6 +218,8 @@ const hasConflict = classifier.detectFileConflict(
   "notes": "optional approval notes"
 }
 ```
+
+Current behavior: validates the response shape, persists the response to the approval request store, and updates a matching in-memory dispatch job to `approved` or `skipped_due_to_risk` for approve/reject responses. It does not trigger execution.
 
 #### POST `/api/orchestration/classify`
 ```json
@@ -240,9 +244,9 @@ Response:
 ### From `hermes_agent_control_room_plan.md`
 
 #### Permitted Operations (Sections 4-5)
-- ✅ Terminal: Low-risk read/verify commands auto-execute
-- ✅ Git: Status/diff auto-execute; push/merge/reset require approval
-- ✅ Deployment: Preview auto-execute; production requires approval
+- ✅ Terminal: Low-risk read/verify commands are eligible for approved runner or mock dispatch handling
+- ✅ Git: Status/diff are low-risk; push/merge/reset require approval
+- ✅ Deployment: Preview requires review; production requires approval
 - ✅ Automation: Log collection, task recap, obsidian notes
 
 #### Prohibited Operations
@@ -290,7 +294,7 @@ Phase 37-39 Tests: 21 passed
 - Risk Classifier: 7 tests ✅
 - Packet Generation: 7 tests ✅
 
-Total Suite: 272/272 passing
+Total Suite: 273/280 passing, 7 skipped without real Telegram credentials
 ```
 
 ### Key Test Scenarios
@@ -424,10 +428,11 @@ Control Room Plan
 | OrchestrationPacket types | ✅ | — | lib/types.ts |
 | RiskClassifier | ✅ | 7 | lib/orchestration/risk-classifier.ts |
 | Packet generation | ✅ | 7 | lib/orchestration/orchestration-packet-generator.ts |
-| API routes | ✅ | — | app/api/orchestration/telegram/*, classify |
-| Telegram bot integration | ⏳ | — | NEEDS: actual bot token |
+| API routes | ✅ | 4 intake tests | `telegram/approve` persists responses and updates matching in-memory jobs; `classify` returns risk results |
+| Telegram bot integration | ⏳ | 7 skipped e2e | NEEDS: actual bot token and chat ID |
+| Telegram approval persistence | ✅/local | 4 | Local JSON approval store + same-process queue mutation |
+| Durable approval synchronization | ⏳ | — | NEEDS: Supabase or shared queue/store |
 | Obsidian syncing | ⏳ | — | NEEDS: filesystem writer |
 | Skills framework | ⏳ | — | NEEDS: CLI integration |
 
-**Overall Status**: ✅ **Ready for production use with mock Telegram. Real Telegram integration pending.**
-
+**Overall Status**: ✅ **Ready for deployment trials with mock Telegram and approval-gated runner execution. Real Telegram bot/webhook e2e wiring and durable approval synchronization are pending.**

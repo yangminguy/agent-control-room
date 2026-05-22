@@ -32,18 +32,18 @@ export function PacketDraftCard({ packet }: PacketDraftCardProps) {
     HERMES_PACKET_KINDS[packet.kind]?.label || packet.kind;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full">
+    <div className="rounded-xl border border-border/60 bg-surface-2 hover:border-pink-primary/30 transition-all overflow-hidden flex flex-col h-full group">
       {/* Header */}
-      <div className="border-b border-slate-100 px-6 py-5">
+      <div className="border-b border-border/50 px-6 py-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="inline-block px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold mb-2">
+            <div className="inline-block px-3 py-1 rounded-full bg-pink-primary/10 border border-pink-primary/30 text-pink-primary text-[10px] uppercase font-bold tracking-wider mb-3">
               {kindLabel}
             </div>
-            <h3 className="text-lg font-bold text-slate-900 truncate">
+            <h3 className="text-lg font-bold text-text-primary truncate">
               {packet.title}
             </h3>
-            <p className="text-sm text-slate-600 mt-1 line-clamp-2">
+            <p className="text-sm text-text-secondary mt-1.5 line-clamp-2 leading-relaxed">
               {packet.description}
             </p>
           </div>
@@ -51,13 +51,13 @@ export function PacketDraftCard({ packet }: PacketDraftCardProps) {
       </div>
 
       {/* View Mode Toggle */}
-      <div className="border-b border-slate-100 px-6 flex gap-0">
+      <div className="border-b border-border/50 px-6 flex gap-0">
         <button
           onClick={() => setViewMode("markdown")}
-          className={`flex-1 py-3 px-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-4 text-sm font-bold transition-colors flex items-center justify-center gap-2 outline-none ${
             viewMode === "markdown"
-              ? "text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30"
-              : "text-slate-600 hover:text-slate-900"
+              ? "text-pink-primary border-b-2 border-pink-primary bg-pink-primary/5"
+              : "text-text-secondary hover:text-text-primary hover:bg-surface-2/80"
           }`}
         >
           <Eye className="w-4 h-4" />
@@ -65,10 +65,10 @@ export function PacketDraftCard({ packet }: PacketDraftCardProps) {
         </button>
         <button
           onClick={() => setViewMode("json")}
-          className={`flex-1 py-3 px-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-4 text-sm font-bold transition-colors flex items-center justify-center gap-2 outline-none ${
             viewMode === "json"
-              ? "text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30"
-              : "text-slate-600 hover:text-slate-900"
+              ? "text-pink-primary border-b-2 border-pink-primary bg-pink-primary/5"
+              : "text-text-secondary hover:text-text-primary hover:bg-surface-2/80"
           }`}
         >
           <Code className="w-4 h-4" />
@@ -78,16 +78,16 @@ export function PacketDraftCard({ packet }: PacketDraftCardProps) {
 
       {/* Content Preview */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        <pre className="flex-1 overflow-auto px-6 py-4 text-xs text-slate-700 bg-slate-50 font-mono leading-relaxed whitespace-pre-wrap break-words">
+        <pre className="flex-1 overflow-auto px-6 py-5 text-xs text-text-secondary bg-surface font-mono leading-relaxed whitespace-pre-wrap break-words">
           {content}
         </pre>
       </div>
 
       {/* Footer Actions */}
-      <div className="border-t border-slate-100 px-6 py-4 bg-slate-50">
+      <div className="border-t border-border/50 px-6 py-4 bg-surface-2">
         <button
           onClick={() => handleCopy(content)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-pink-primary hover:bg-pink-soft text-white font-bold transition-colors shadow-lg shadow-pink-primary/20"
         >
           {copied ? (
             <>

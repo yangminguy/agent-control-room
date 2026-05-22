@@ -26,24 +26,23 @@ const CLASSIFICATION_CONFIG: Record<
 > = {
   Pass: {
     label: "Pass",
-    badgeCls: "bg-emerald-100 text-emerald-700 border-emerald-300",
-    btnCls:
-      "border-emerald-400 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+    badgeCls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    btnCls: "border-emerald-500/30 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10",
   },
   MinorFix: {
     label: "MinorFix",
-    badgeCls: "bg-amber-100 text-amber-700 border-amber-300",
-    btnCls: "border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100",
+    badgeCls: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    btnCls: "border-amber-500/30 bg-amber-500/5 text-amber-400 hover:bg-amber-500/10",
   },
   QA: {
     label: "QA",
-    badgeCls: "bg-blue-100 text-blue-700 border-blue-300",
-    btnCls: "border-blue-400 bg-blue-50 text-blue-700 hover:bg-blue-100",
+    badgeCls: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    btnCls: "border-blue-500/30 bg-blue-500/5 text-blue-400 hover:bg-blue-500/10",
   },
   Blocked: {
     label: "Blocked",
-    badgeCls: "bg-red-100 text-red-700 border-red-300",
-    btnCls: "border-red-400 bg-red-50 text-red-700 hover:bg-red-100",
+    badgeCls: "bg-red-500/10 text-red-400 border-red-500/20",
+    btnCls: "border-red-500/30 bg-red-500/5 text-red-400 hover:bg-red-500/10",
   },
 };
 
@@ -250,7 +249,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
               />
             </div>
             {importError && (
-              <p className="text-xs text-red-600 font-medium">{importError}</p>
+              <p className="text-xs text-red-400 font-medium">{importError}</p>
             )}
             <button
               type="button"
@@ -265,7 +264,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
       </div>
 
       {importSuccess && (
-        <p className="text-xs text-emerald-600 font-medium px-1">
+        <p className="text-xs text-emerald-400 font-medium px-1">
           Vibe Kanban 결과가 아래 영역에 자동으로 채워졌습니다.
         </p>
       )}
@@ -414,7 +413,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
                 <button
                   onClick={handleAutoExportToKanban}
                   disabled={autoExportLoading}
-                  className="inline-flex items-center gap-1.5 rounded bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 rounded bg-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Upload className="h-3.5 w-3.5" />
                   {autoExportLoading ? "업로드 중..." : "Kanban 자동 업로드"}
@@ -431,14 +430,14 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
 
             {/* Copied confirmation */}
             {copied && (
-              <p className="text-xs text-emerald-600 font-medium">
+              <p className="text-xs text-emerald-400 font-medium">
                 복사됨! ✓
               </p>
             )}
 
             {/* Auto-export message */}
             {autoExportMessage && (
-              <p className={`text-xs font-medium ${autoExportMessage.includes("✓") ? "text-emerald-600" : "text-amber-600"}`}>
+              <p className={`text-xs font-medium ${autoExportMessage.includes("✓") ? "text-emerald-400" : "text-amber-400"}`}>
                 {autoExportMessage}
               </p>
             )}

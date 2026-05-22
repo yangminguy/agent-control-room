@@ -155,20 +155,24 @@ Implemented:
 - T022 human-approved Autonomous Execution Loop
 - T024 Vibe Kanban HTTP issue integration
 - T026 Supabase storage migration readiness
+- Roadmap-first `/plan` Control Tower UX
+- Senior Dev Prompt Compiler structure
+- Context Pack and Handoff Pack generators
+- Obsidian-compatible note generation helpers
+- Vibe Kanban result import/workbench bridge
+- Multi-project queues and `/dashboard`
+- Hermes validation, auto-decision suggestions, packet generation, Telegram client/message formatting, and risk classification
 
 Current focus:
-- Roadmap-First Control Tower UX: reframe `/plan` around the product journey, completion checks, current task, next action, blocked decisions, and senior-dev prompt generation.
-- Then deepen Vibe Kanban workbench integration: workspace/session launch, open workspace links, result import, and diff/review handoff.
+- Production truthfulness and safety hardening: keep real local CLI execution behind `/api/runner` approval tokens.
+- Wire Telegram approval responses into durable approval storage and dispatch/job state before treating Telegram approval as authoritative.
 
 Known remaining work:
-- roadmap-first `/plan` UI refinement
-- explicit Senior Dev Prompt Compiler structure in generated prompts
-- Context Reset Protocol and Context Pack generator
-- Obsidian-compatible insight memory export
-- Hermes background worker positioning only; no high-risk autonomous coding
-- deeper Vibe Kanban issue/workspace bridge beyond issue creation
-- result readback from Vibe Kanban into Agent Control Room
-- production hardening before deployment
+- Real Telegram bot token/webhook e2e setup and durable approval synchronization
+- Obsidian filesystem syncing for durable insight memory
+- Supabase live storage hookup beyond migration readiness
+- Production deployment verification
+- Continue preserving human approval gates; no uncontrolled autonomous coding, deployment, or DB migration
 
 ## 9. Acceptance Standard
 

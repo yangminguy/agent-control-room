@@ -78,7 +78,7 @@ describe("Hermes Telegram Workflow Integration", () => {
       const client = getTelegramClient();
       const classifier = getRiskClassifier();
 
-      // Task 1: Low-risk (auto-execute)
+      // Task 1: Low-risk (eligible for approved runner or mock dispatch handling)
       const lowRiskJob: DispatchJob = {
         id: "job-1",
         taskId: "task-1",

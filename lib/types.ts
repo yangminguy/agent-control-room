@@ -492,6 +492,11 @@ export type ApprovalRequest = {
   // ── T-AUTO-010: Destructive pattern detection ──
   destructivePatterns?: string[];    // 감지된 destructive 패턴 목록
   approverNote?: string;             // 승인/거부 사유
+
+  // ── Telegram approval intake ──
+  approvalSource?: "discord" | "telegram" | "manual";
+  telegramResponse?: "approve" | "reject" | "preview_first" | "control_room";
+  telegramResponseAt?: string;
 };
 
 /** Phase 15: Safe vs risky task split result */

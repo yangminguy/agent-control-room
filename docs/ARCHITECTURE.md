@@ -138,18 +138,18 @@ When context is too long, token-limited, blocked, or ready for a new agent/sessi
 Future module for exporting development insights, decisions, failed attempts, successful prompt patterns, agent performance notes, handoffs, and checklists as Obsidian-compatible Markdown.
 
 ### 3.11 Hermes Approval-Based Execution Worker
-Hermes is the **operational execution and approval worker**. It is NOT a secondary coding agent.
+Hermes is the **operational monitoring, packet, and approval-support worker**. It is NOT a secondary coding agent.
 
 **Hermes responsibilities**:
-- Terminal execution (status checks, build/test runs, git operations)
+- Terminal/status checks and operational summaries where explicitly approved
 - Operational automation (log summaries, failure analysis, monitoring)
-- Approval workflows (Telegram requests for high-risk operations)
+- Approval workflows (Telegram request formatting/client support for high-risk operations)
 - Result collection (analyzing Phase completion, summarizing agent outcomes)
 - Memory and reporting (Obsidian notes, Orchestration Packets, Session summaries)
 
 **Hermes constraints**:
 - Cannot modify code files during agent execution
-- Requires Telegram approval for git push, production deployment, dependency changes, DB migrations
+- High-risk work such as git push, production deployment, dependency changes, and DB migrations requires explicit approval; Telegram response intake can persist responses and update matching in-memory dispatch jobs, but durable multi-process approval synchronization is still pending
 - Always returns major results to Agent Control Room (not autonomous endpoint)
 - Uses Gemini API initially, with OpenAI API fallback
 

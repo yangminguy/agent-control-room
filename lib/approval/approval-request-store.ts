@@ -2,6 +2,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import type { ApprovalRequest, ApprovalRequestStatus } from "@/lib/types";
 
+type TelegramApprovalResponse = "approve" | "reject" | "preview_first" | "control_room";
+
 // ─── Storage helpers ──────────────────────────────────────────────────────────
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -92,6 +94,57 @@ export class ApprovalRequestStore {
       status,
       resolvedAt: new Date().toISOString(),
       approverNote: options?.approverNote,
+    };
+    all[idx] = updated;
+    await writeAll(all);
+    return updated;
+  }
+
+  /**
+   * Record a Telegram approval response for a dispatch job.
+   *
+   * approve/reject resolve the approval. preview_first/control_room keep the
+   * approval pending because they are user routing choices, not execution
+   * authorization.
+   */
+  async recordTelegramResponse(
+    dispatchJobId: string,
+    response: TelegramApprovalResponse,
+    options?: {
+      approverNote?: string;
+    },
+  ): Promise<ApprovalRequest> {
+    const all = await readAll();
+    const idx = all.findIndex((r) => r.dispatchJobId === dispatchJobId);
+    const now = new Date().toISOString();
+    const resolvedStatus: ApprovalRequestStatus | null =
+      response === "approve" ? "approved" : response === "reject" ? "rejected" : null;
+
+    if (idx === -1) {
+      const record: ApprovalRequest = {
+        id: generateId(),
+        dispatchJobId,
+        status: resolvedStatus ?? "pending",
+        createdAt: now,
+        resolvedAt: resolvedStatus ? now : undefined,
+        approverNote: options?.approverNote,
+        approvalSource: "telegram",
+        telegramResponse: response,
+        telegramResponseAt: now,
+      };
+      all.unshift(record);
+      await writeAll(all);
+      return record;
+    }
+
+    const updated: ApprovalRequest = {
+      ...all[idx],
+      status: resolvedStatus ?? all[idx].status,
+      resolvedAt: resolvedStatus ? now : all[idx].resolvedAt,
+      approverNote: options?.approverNote,
+      approvalSource: "telegram",
+      telegramResponse: response,
+      telegramResponseAt: now,
     };
     all[idx] = updated;
     await writeAll(all);

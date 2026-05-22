@@ -55,18 +55,18 @@ Excluded:
 - deep Vibe Kanban fork or replacement of Agent Control Room's orchestration layer
 
 ## Current Implementation Status
-As of 2026-05-22, the codebase implements the full AI Development Control Tower features (Phases 1-36 Complete):
+As of 2026-05-22, the codebase implements the full AI Development Control Tower features through Phase 39:
 
 - **Core Planning & Roadmap**: `/plan` Visual Development Roadmap Control Panel with 10-phase sample data, stage progress indicators, active stage agent tracking, and blockers detection.
 - **Prompt & Handoff Orchestration**: Senior Dev Prompt Compiler (`/prompt-compiler`) compiling copy-ready prompts with safety guidelines, forbidden files, and agent routing recommendations.
-- **Autonomous Dispatch & Scheduling**: State machine queue (`lib/dispatch/safe-dispatch-queue.ts`) routing jobs based on risk levels (`safe`, `low`, `medium`, `high`, `critical`) and file conflict matrices. Four scheduling modes: Single, Sequential, Parallel Safe, and Token Relay.
-- **Local adapters**: Local adapters for `claude-code`, `codex`, and `antigravity` handling shell subprocess spawns, stdout/stderr parsing, log streams, and copy-paste fallback.
+- **Dispatch & Scheduling**: State machine queue (`lib/dispatch/safe-dispatch-queue.ts`) routing jobs based on risk levels (`safe`, `low`, `medium`, `high`, `critical`) and file conflict matrices. Four scheduling modes: Single, Sequential, Parallel Safe, and Token Relay. `/api/orchestration/dispatch` is mock/result-processing only; real local CLI execution must go through `/api/runner` with a server-issued workbench approval token.
+- **Local adapters**: Local adapters for `claude-code`, `codex`, and `antigravity` handling shell subprocess spawns, stdout/stderr parsing, and log streams behind explicit approval gates.
 - **Result & Error Recovery**: Heuristic result classifier (`Pass`, `MinorFix`, `QA`, `Blocked`, `SafetyViolation`), automated retry queues (max 3 retries), and exponential backoff retry policy for transient errors.
-- **Hermes Worker Layer**: Mock Discord approval interface with 5-minute timeout window. LLM-based validation layer checking completion confidence (75% threshold for auto-approval) and safety violations.
+- **Hermes Worker Layer**: LLM-based validation layer checking completion confidence (75% threshold for auto-decision suggestions) and safety violations. Telegram message formatting/client support exists; `/api/orchestration/telegram/approve` now persists approval responses and updates a matching in-memory dispatch job to `approved` or `skipped_due_to_risk` when present, but never triggers execution directly.
 - **Memory & Obsidian Insights**: Obsidian note generator creating 7 distinct note formats with frontmatter. Prompt pattern synthesizer extracting successful patterns into a shared knowledge base.
 - **Vibe Kanban Bridge**: Bidirectional real HTTP bridge handling issue creation, status querying, workspace link launches, and result imports.
 - **Multi-Project & Dashboard**: `MultiProjectOrchestrator` limiting concurrent projects (max 2 active), isolated queues per project, and a unified `/dashboard` with KPI card stats, activity feeds, and project filters.
-- **Production Hardening**: Production-ready Supabase schema, RLS integration, dependency security hardening, and safe path traversal checks. All 251 tests passing.
+- **Production Hardening**: Production-ready Supabase schema, RLS integration, dependency security hardening, and safe path traversal checks. Current verification: 273 tests passing out of 280 total, with 7 Telegram e2e tests skipped unless real Telegram credentials are configured.
 
 ## Recommended Tech Stack
 Use this unless the user explicitly changes direction.
@@ -137,9 +137,9 @@ If preferred agent status is `cooling_down`, `token_limited`, `context_overloade
 - **Token profile**: Medium token usage, iteration-friendly
 
 ### Hermes
-- **Strong at**: Operational monitoring, logging, Git/deployment status, Telegram approval, packet generation
+- **Strong at**: Operational monitoring, logging, Git/deployment status, Telegram approval packet/notification drafting, packet generation
 - **Not responsible for**: Coding (← Claude/Codex/Antigravity)
-- **Role**: Approval-based execution worker, not primary coding agent
+- **Role**: Approval-based operations worker, not primary coding agent. Telegram approval intake persistence and same-process job-state mutation exist; real Telegram bot/webhook e2e wiring remains pending.
 - **Model**: Gemini API (initial), OpenAI API (fallback)
 - **Returns to**: Agent Control Room (always)
 

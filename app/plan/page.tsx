@@ -1,57 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
-  Circle,
-  Clock,
-  ExternalLink,
-  RadioTower,
-} from "lucide-react";
+import { ArrowRight, Eye, ChevronDown } from "lucide-react";
+
 import { getLatestControlRoomPlan, getControlRoomRuns } from "@/lib/control-room/store";
 import { getAllRoadmaps } from "@/lib/storage/roadmap-store";
+import { getAgentStatuses } from "@/lib/storage/agent-status-store";
 import type { RoadmapStatus } from "@/lib/types";
 
+// New Components
+import { CommandCenterHero } from "@/components/control-room/CommandCenterHero";
+import { KpiStrip } from "@/components/control-room/KpiStrip";
+import { YourNextMove } from "@/components/control-room/YourNextMove";
+import { RiskRadar } from "@/components/control-room/RiskRadar";
+import { AgentStatusPanel } from "@/components/agents/AgentStatusPanel";
+import { RoadmapTimeline } from "@/components/roadmap/RoadmapTimeline";
+
+import type { AgentStatus as UIAgentStatus, AgentAvailability } from "@/components/agents/types";
+import type { RoadmapStage as UIRoadmapStage } from "@/components/roadmap/RoadmapStageCard";
+
 export const metadata: Metadata = {
-  title: "Phase Roadmap — Agent Control Room",
-  description: "채팅에서 확정한 계획의 Phase 진행 상황을 추적합니다.",
+  title: "AI Development Control Tower — Agent Control Room",
+  description: "AI Development Control Tower for non-developer PMs.",
 };
 
 export const dynamic = "force-dynamic";
 
-const STATUS_LABEL: Record<RoadmapStatus, string> = {
-  completed: "완료",
-  active: "진행 중",
-  waiting: "대기",
-  blocked: "차단",
-  user_input_required: "확인 필요",
-  failed: "실패",
-  handoff_needed: "핸드오프 필요",
-};
-
-function agentLabel(agent?: string): string {
-  if (!agent) return "미정";
-  if (agent === "claude-code") return "Claude Code";
-  if (agent === "codex") return "Codex";
-  if (agent === "antigravity") return "Antigravity";
-  return agent;
-}
-
-function statusClass(status: RoadmapStatus): string {
-  if (status === "completed") return "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
-  if (status === "active") return "border-blue-500/30 bg-blue-500/10 text-blue-200";
-  if (status === "blocked" || status === "failed") return "border-red-500/30 bg-red-500/10 text-red-200";
-  if (status === "user_input_required" || status === "handoff_needed") return "border-amber-500/30 bg-amber-500/10 text-amber-200";
-  return "border-border bg-surface text-text-secondary";
-}
-
 export default async function PlanPage() {
-  const [latestPlan, runs, roadmaps] = await Promise.all([
+  const [latestPlan, runs, roadmaps, agentStatusesRaw] = await Promise.all([
     getLatestControlRoomPlan(),
     getControlRoomRuns(),
     getAllRoadmaps(),
+    getAgentStatuses(),
   ]);
+
   const latestRun = runs[0] ?? null;
   const roadmap = roadmaps[0] ?? null;
   const phases = roadmap?.stages ?? latestPlan?.phases ?? [];
@@ -64,159 +45,242 @@ export default async function PlanPage() {
         )
       : 0);
 
+  // 1. Prepare Active Phase Info
+  const activePhase = phases.find(p => p.status === "active" || p.status === "user_input_required" || p.status === "blocked") 
+                      || phases.find(p => p.status === "waiting");
+
+  // 2. Map Agents for AgentStatusPanel
+  const getAvail = (id: string): AgentAvailability => {
+    return (agentStatusesRaw.find(a => a.agent === id)?.status || "available") as AgentAvailability;
+  };
+
+  const agentsList: UIAgentStatus[] = [
+    {
+      id: "agent-claude",
+      type: "claude_code",
+      name: "Claude Code",
+      role: "Architecture & Reasoning",
+      availability: getAvail("claude-code"),
+      bestFor: ["Complex reasoning", "Architecture", "Multi-file changes"],
+      currentTask: phases.find(p => p.status === "active" && p.responsibleAgent === "claude-code")?.currentTaskId || undefined,
+    },
+    {
+      id: "agent-codex",
+      type: "codex",
+      name: "Codex",
+      role: "Implementation & QA",
+      availability: getAvail("codex"),
+      bestFor: ["Bug fixes", "Type checking", "Isolated implementation"],
+      currentTask: phases.find(p => p.status === "active" && p.responsibleAgent === "codex")?.currentTaskId || undefined,
+    },
+    {
+      id: "agent-antigravity",
+      type: "antigravity",
+      name: "Antigravity",
+      role: "UI/UX & Frontend",
+      availability: getAvail("antigravity"),
+      bestFor: ["UI prototyping", "Visual iteration", "Tailwind styling"],
+      currentTask: phases.find(p => p.status === "active" && p.responsibleAgent === "antigravity")?.currentTaskId || undefined,
+    },
+    {
+      id: "agent-hermes",
+      type: "hermes",
+      name: "Hermes",
+      role: "Background Validator",
+      availability: "background_worker",
+      bestFor: ["Validation", "Quality checks", "Handoff preparation"],
+    }
+  ];
+
+  // 3. Prepare Decisions and Blockers for YourNextMove
+  const userDecisions = phases.flatMap(p => 
+    (p.userDecisions || []).map(d => ({
+      id: d.id,
+      question: d.question,
+      options: d.options,
+      stageId: p.id,
+      stageTitle: p.title
+    }))
+  );
+  
+  const blockers = phases.flatMap(p => 
+    (p.blockers || []).map(b => ({
+      id: b.id,
+      title: b.title,
+      description: b.description,
+      stageId: p.id,
+      stageTitle: p.title
+    }))
+  );
+
+  phases.forEach(p => {
+    if (p.status === "user_input_required" && (!p.userDecisions || p.userDecisions.length === 0)) {
+      userDecisions.push({
+        id: `implicit-decision-${p.id}`,
+        question: `사용자 결정 대기 중 (${p.title})`,
+        options: ["Review Phase", "Approve", "Hold"],
+        stageId: p.id,
+        stageTitle: p.title
+      });
+    }
+    if ((p.status === "blocked" || p.status === "failed") && (!p.blockers || p.blockers.length === 0)) {
+      blockers.push({
+        id: `implicit-blocker-${p.id}`,
+        title: "Phase Blocked",
+        description: "이 단계의 실행이 차단되었습니다.",
+        stageId: p.id,
+        stageTitle: p.title
+      });
+    }
+  });
+
+  const approvalRequired = latestRun?.approvalRequired || agentsList.some(a => a.availability === "approval_required");
+
+  // 4. Map Stages for RoadmapTimeline
+  const mappedStages: UIRoadmapStage[] = phases.map(p => ({
+    id: p.id,
+    title: p.title,
+    description: p.description,
+    status: p.status as RoadmapStatus,
+    assignedAgent: p.responsibleAgent,
+    currentTask: p.currentTaskId || undefined,
+    nextAction: p.nextAction,
+    blockerReason: p.blockers?.[0]?.description,
+    blockerUnlockAction: p.blockers?.[0]?.requiredAction,
+    blockerResponsible: p.blockers?.[0]?.blockedAgent,
+    userQuestion: p.userDecisions?.[0]?.question,
+    userDecisionOptions: p.userDecisions?.[0]?.options,
+    acceptanceCriteria: p.acceptanceCriteria,
+    phaseNumber: p.number
+  }));
+
+  // 5. Compute KPI Strip values
+  const activeAgentsCount = agentsList.filter(a => a.availability === "working" || a.availability === "available" || a.availability === "background_worker").length;
+  const blockersCount = blockers.length;
+  const decisionsCount = userDecisions.length + (approvalRequired ? 1 : 0);
+
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 lg:px-8">
-      <header className="flex flex-col gap-4 border-b border-border pb-6 lg:flex-row lg:items-end lg:justify-between">
+    <main className="mx-auto max-w-7xl px-4 py-8 lg:px-8 space-y-8 animate-fade-in pb-24">
+      {/* HEADER */}
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between border-b border-border/50 pb-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-pink-primary">
-            Phase Roadmap
+          <p className="text-[10px] font-bold uppercase tracking-widest text-pink-primary mb-1">
+            Control Tower
           </p>
-          <h1 className="mt-1 text-3xl font-bold text-text-primary">
-            프로젝트 진행 상황
+          <h1 className="text-2xl font-extrabold text-text-primary tracking-tight">
+            AI Development Command Center
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">
-            채팅에서 확정한 계획이 Phase 단위로 어디까지 진행됐는지만 보여줍니다. 세부 실행과 결과는 Vibe Kanban과 Hermes 패킷으로 추적합니다.
+          <p className="mt-1 max-w-2xl text-sm text-text-secondary">
+            프로젝트 전체 상황을 모니터링하고 지휘합니다. 모든 에이전트는 승인된 범위 내에서만 작동합니다.
           </p>
         </div>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 rounded-lg border border-pink-primary px-4 py-2 text-sm font-semibold text-pink-primary hover:bg-pink-primary/10"
-        >
-          채팅으로 돌아가기
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/result-review"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors"
+          >
+            <Eye className="h-4 w-4" />
+            리뷰 모드
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-lg bg-pink-primary px-4 py-2 text-xs font-semibold text-white hover:bg-pink-soft transition-colors shadow-lg shadow-pink-primary/20"
+          >
+            기획 채팅
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </header>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-surface-2 p-5">
-          <p className="text-sm text-text-secondary">전체 진행률</p>
-          <p className="mt-2 text-4xl font-bold text-text-primary">{overallProgress}%</p>
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface">
-            <div
-              className="h-full rounded-full bg-emerald-500"
-              style={{ width: `${overallProgress}%` }}
-            />
-          </div>
+      {/* HERO & KPIs */}
+      <div className="space-y-4">
+        <CommandCenterHero 
+          planTitle={latestPlan?.title ?? roadmap?.title ?? "No Active Plan"}
+          projectName={roadmap?.projectId ?? "Project"}
+          productVision={roadmap?.productVision}
+          overallProgress={overallProgress}
+          activePhaseNumber={activePhase?.number}
+          activePhaseTitle={activePhase?.title}
+          latestRunStatus={latestRun?.status}
+          latestRunMessage={latestRun?.message}
+        />
+        <KpiStrip 
+          overallProgress={overallProgress}
+          activeAgentsCount={activeAgentsCount}
+          blockersCount={blockersCount}
+          decisionsCount={decisionsCount}
+        />
+      </div>
+
+      {/* MAIN TWO-COLUMN LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px] gap-8">
+        
+        {/* LEFT COLUMN: Operations & Timeline */}
+        <div className="space-y-8 min-w-0">
+          
+          {/* Your Next Move (Promoted Decisions) */}
+          {hasItemsForNextMove(userDecisions, blockers, approvalRequired) && (
+            <section className="scroll-mt-6" id="your-next-move">
+              <YourNextMove 
+                userDecisions={userDecisions}
+                blockers={blockers}
+                approvalRequired={approvalRequired}
+              />
+            </section>
+          )}
+
+          {/* Mission Timeline */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-text-primary">Mission Timeline</h2>
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-surface-2 border border-border/60 text-text-secondary">
+                {phases.length} Phases
+              </span>
+            </div>
+            <div className="bg-surface rounded-xl border border-border p-4 sm:p-6 lg:p-8">
+              <RoadmapTimeline stages={mappedStages} />
+            </div>
+          </section>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface-2 p-5">
-          <p className="text-sm text-text-secondary">현재 계획</p>
-          <p className="mt-2 text-lg font-semibold text-text-primary">
-            {latestPlan?.title ?? roadmap?.title ?? "아직 확정된 계획 없음"}
-          </p>
-          <p className="mt-2 text-xs leading-5 text-text-tertiary">
-            {latestPlan?.finalPlanReady
-              ? "실행 버튼으로 시작 가능한 상태입니다."
-              : "채팅에서 계획을 더 확정해야 합니다."}
-          </p>
+        {/* RIGHT COLUMN: Live Board & Radar */}
+        <div className="space-y-8 min-w-0 flex flex-col order-first lg:order-none">
+          
+          <section className="space-y-4">
+            <h2 className="text-lg font-bold text-text-primary">Risk & Security Radar</h2>
+            <RiskRadar stages={phases} agents={agentsList} />
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-lg font-bold text-text-primary">Agent Live Board</h2>
+            <div className="bg-surface rounded-xl border border-border p-4">
+              <AgentStatusPanel agents={agentsList} />
+            </div>
+          </section>
+
         </div>
+      </div>
 
-        <div className="rounded-xl border border-border bg-surface-2 p-5">
-          <div className="flex items-center gap-2">
-            <RadioTower className="h-4 w-4 text-pink-primary" />
-            <p className="text-sm text-text-secondary">Hermes / 실행 상태</p>
+      {/* DETAILED KANBAN (COLLAPSIBLE) */}
+      <section className="mt-16 pt-8 border-t border-border/40">
+        <details className="group">
+          <summary className="flex cursor-pointer items-center justify-between rounded-lg bg-surface-2 p-4 border border-border/60 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-2/80">
+            <span>Detailed Task Kanban (Legacy View)</span>
+            <ChevronDown className="h-5 w-5 text-text-secondary transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-surface-2/40 px-6 py-12 text-center text-sm text-text-secondary">
+            Vibe Kanban 워크벤치와의 통합으로 인해 상세 태스크 보기는 이곳에서 제공되지 않습니다. 
+            <br className="mb-4" />
+            <a href="#" className="inline-flex mt-4 items-center gap-1.5 text-pink-primary hover:text-pink-soft font-semibold">
+              Open Vibe Kanban <ArrowRight className="w-4 h-4" />
+            </a>
           </div>
-          <p className="mt-2 text-lg font-semibold text-text-primary">
-            {latestRun ? latestRun.status : "대기 중"}
-          </p>
-          <p className="mt-2 text-xs leading-5 text-text-tertiary">
-            {latestRun
-              ? latestRun.message
-              : "실제 실행 시작 버튼을 누르기 전까지 Hermes와 agent runner는 시작되지 않습니다."}
-          </p>
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        {phases.map((phase) => {
-          const status = phase.status as RoadmapStatus;
-          const phaseWithVibe = phase as {
-            vibeIssueId?: string;
-            vibeWorkspaceUrl?: string;
-          };
-          const vibeIssue = phaseWithVibe.vibeIssueId;
-          const vibeWorkspace = phaseWithVibe.vibeWorkspaceUrl;
-          return (
-            <article
-              key={phase.id}
-              className="rounded-xl border border-border bg-surface-2 p-5"
-            >
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="flex gap-4">
-                  <div className="pt-1">
-                    {status === "completed" ? (
-                      <CheckCircle2 className="h-6 w-6 text-emerald-400" />
-                    ) : status === "active" ? (
-                      <Clock className="h-6 w-6 text-blue-300" />
-                    ) : status === "blocked" || status === "failed" ? (
-                      <AlertTriangle className="h-6 w-6 text-red-300" />
-                    ) : (
-                      <Circle className="h-6 w-6 text-text-tertiary" />
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-lg font-bold text-text-primary">
-                        {phase.number}. {phase.title}
-                      </h2>
-                      <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClass(status)}`}>
-                        {STATUS_LABEL[status]}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-text-secondary">
-                      {phase.goal}
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-text-tertiary">
-                      <span>담당: {agentLabel(phase.responsibleAgent)}</span>
-                      <span>작업: {phase.tasks.length}개</span>
-                      <span>진행률: {phase.completionPercentage}%</span>
-                    </div>
-                  </div>
-                </div>
-
-                {(vibeWorkspace || vibeIssue) && (
-                  <a
-                    href={vibeWorkspace ?? "#"}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary"
-                  >
-                    Vibe Kanban
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                )}
-              </div>
-
-              <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr]">
-                <div className="rounded-lg border border-border bg-surface p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">
-                    다음 액션
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-text-primary">
-                    {phase.nextAction || "다음 액션 대기 중"}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border bg-surface p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">
-                    완료 기준
-                  </p>
-                  <ul className="mt-2 space-y-1 text-sm leading-6 text-text-primary">
-                    {phase.acceptanceCriteria.slice(0, 3).map((criterion) => (
-                      <li key={criterion}>- {criterion}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </article>
-          );
-        })}
-
-        {phases.length === 0 && (
-          <div className="rounded-xl border border-dashed border-border bg-surface-2 px-6 py-16 text-center">
-            <p className="text-text-secondary">
-              아직 표시할 Phase가 없습니다. 홈 채팅에서 계획을 먼저 만들어 주세요.
-            </p>
-          </div>
-        )}
+        </details>
       </section>
     </main>
   );
+}
+
+function hasItemsForNextMove(decisions: any[], blockers: any[], approvalRequired: boolean) {
+  return decisions.length > 0 || blockers.length > 0 || approvalRequired;
 }

@@ -43,70 +43,92 @@ export function RoadmapStageCard({
 }: RoadmapStageCardProps) {
   const isActive = stage.status === "active";
   const isCompleted = stage.status === "completed";
-  const isBlocked = stage.status === "blocked";
-  const needsUserInput = stage.status === "user_input_required";
+  const isBlocked = stage.status === "blocked" || stage.status === "failed";
+  const needsUserInput = stage.status === "user_input_required" || stage.status === "handoff_needed";
   const isWaiting = stage.status === "waiting";
+
+  // Hierarchy styling matching:
+  // Active: full border and breathing glow
+  // Blocked: red border with breathing red glow
+  // User Input Needed: amber border with breathing amber glow
+  // Completed: compact, slightly faded, opacity 70% dark surface
+  // Waiting: muted, opacity 40% dark surface
+  let cardStyle = "border-border bg-surface";
+  if (isActive && !isBlocked && !needsUserInput) {
+    cardStyle = "border-pink-primary/40 bg-surface animate-breathing-pink shadow-lg shadow-pink-primary/5";
+  } else if (isBlocked) {
+    cardStyle = "border-red-500/20 bg-surface animate-breathing-red shadow-sm";
+  } else if (needsUserInput) {
+    cardStyle = "border-amber-500/20 bg-surface animate-breathing-amber shadow-sm";
+  } else if (isWaiting) {
+    cardStyle = "border-border/40 bg-surface/30 opacity-40 shadow-sm cursor-not-allowed";
+  } else if (isCompleted) {
+    cardStyle = "border-emerald-500/10 bg-surface/50 opacity-70 shadow-sm";
+  }
+
+  // Left accent bar
+  const renderAccentBar = () => {
+    if (isActive && !isBlocked && !needsUserInput) {
+      return <div className="absolute top-0 left-0 w-1 h-full bg-pink-primary" />;
+    }
+    if (isBlocked) {
+      return <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />;
+    }
+    if (needsUserInput) {
+      return <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />;
+    }
+    if (isCompleted) {
+      return <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />;
+    }
+    return null;
+  };
 
   return (
     <div
+      id={`phase-${stage.id}`}
       className={`
-        relative overflow-hidden rounded-xl border transition-all duration-200
-        ${isActive && !isBlocked && !needsUserInput ? "bg-white dark:bg-gray-900 border-blue-400 dark:border-blue-500 shadow-lg ring-2 ring-blue-400/25 shadow-blue-500/10" : ""}
-        ${isBlocked ? "bg-red-50/40 dark:bg-red-950/20 border-red-300 dark:border-red-800 shadow-sm ring-1 ring-red-400/20" : ""}
-        ${needsUserInput ? "bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800 shadow-sm ring-1 ring-amber-400/20" : ""}
-        ${isWaiting ? "bg-gray-50/60 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 shadow-sm opacity-80" : ""}
-        ${isCompleted ? "bg-green-50/20 dark:bg-green-950/10 border-green-200 dark:border-green-900 opacity-70" : ""}
-        ${!isActive && !isBlocked && !needsUserInput && !isWaiting && !isCompleted ? "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm" : ""}
+        relative overflow-hidden rounded-xl border transition-all duration-300
+        ${cardStyle}
         ${className}
       `}
     >
-      {/* Left accent bar */}
-      {isActive && !isBlocked && !needsUserInput && (
-        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
-      )}
-      {isBlocked && (
-        <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
-      )}
-      {needsUserInput && (
-        <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
-      )}
-      {isCompleted && (
-        <div className="absolute top-0 left-0 w-1 h-full bg-green-400" />
-      )}
+      {renderAccentBar()}
 
-      <div className="p-5 flex flex-col gap-4">
+      {/* Adjust padding based on status compactness */}
+      <div className={`flex flex-col gap-3 ${isCompleted ? "p-3.5 sm:p-4" : "p-5"}`}>
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             {/* Phase label + title */}
             <div className="flex items-center gap-2 flex-wrap">
               {stage.phaseNumber != null && (
-                <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400 dark:text-gray-500 shrink-0">
+                <span className="text-[9px] font-bold tracking-widest uppercase text-text-secondary/50 shrink-0">
                   PHASE {stage.phaseNumber}
                 </span>
               )}
             </div>
             <h3
-              className={`text-base font-semibold tracking-tight mt-0.5 ${
+              className={`text-base font-bold tracking-tight mt-0.5 ${
                 isActive && !isBlocked && !needsUserInput
-                  ? "text-blue-700 dark:text-blue-400"
+                  ? "text-pink-primary"
                   : isCompleted
-                    ? "text-green-700 dark:text-green-500"
+                    ? "text-emerald-400"
                     : isBlocked
-                      ? "text-red-700 dark:text-red-400"
+                      ? "text-red-400"
                       : needsUserInput
-                        ? "text-amber-700 dark:text-amber-400"
-                        : "text-gray-900 dark:text-gray-100"
+                        ? "text-amber-400"
+                        : "text-text-primary"
               }`}
             >
-              {/* Completed checkmark inline with title */}
               {isCompleted && (
-                <CheckCircle2 className="inline w-4 h-4 mr-1.5 text-green-500 dark:text-green-400 align-[-2px]" />
+                <CheckCircle2 className="inline w-4 h-4 mr-1.5 text-emerald-400 align-[-2px]" />
               )}
               {stage.title}
             </h3>
-            {stage.description && (
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            
+            {/* Render description if not completed (completed is compact) */}
+            {stage.description && !isCompleted && (
+              <p className="mt-1 text-xs sm:text-sm text-text-secondary leading-relaxed">
                 {stage.description}
               </p>
             )}
@@ -123,16 +145,16 @@ export function RoadmapStageCard({
 
         {/* ── Blocked alert ── */}
         {isBlocked && stage.blockerReason && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg p-3.5 flex gap-3 text-sm">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-500" />
-            <div className="space-y-2 text-red-800 dark:text-red-400">
+          <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-3 flex gap-3 text-xs">
+            <AlertCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-red-400" />
+            <div className="space-y-1 text-red-200">
               <p className="font-semibold">차단 이유</p>
-              <p className="opacity-90">{stage.blockerReason}</p>
+              <p className="opacity-90 leading-relaxed">{stage.blockerReason}</p>
               {stage.blockerUnlockAction && (
-                <div className="flex items-start gap-1.5 mt-2 pt-2 border-t border-red-200 dark:border-red-800/30">
-                  <Unlock className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                <div className="flex items-start gap-1.5 mt-2 pt-2 border-t border-red-500/10">
+                  <Unlock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" />
                   <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-red-500 dark:text-red-500 block mb-0.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-red-400/80 block mb-0.5">
                       해제 방법
                     </span>
                     <span>{stage.blockerUnlockAction}</span>
@@ -140,11 +162,8 @@ export function RoadmapStageCard({
                 </div>
               )}
               {stage.blockerResponsible && (
-                <p className="text-xs mt-1 opacity-70">
-                  담당:{" "}
-                  <span className="font-semibold">
-                    {stage.blockerResponsible}
-                  </span>
+                <p className="text-[10px] mt-1 opacity-70">
+                  담당: <span className="font-semibold">{stage.blockerResponsible}</span>
                 </p>
               )}
             </div>
@@ -153,22 +172,22 @@ export function RoadmapStageCard({
 
         {/* ── User input needed ── */}
         {needsUserInput && stage.userQuestion && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-3.5 flex gap-3 text-sm">
-            <HelpCircle className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" />
-            <div className="space-y-2 text-amber-800 dark:text-amber-400 w-full">
+          <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 flex gap-3 text-xs">
+            <HelpCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-amber-400" />
+            <div className="space-y-1.5 text-amber-200 w-full">
               <p className="font-semibold">사용자 확인 필요</p>
               <p className="opacity-90 leading-relaxed">{stage.userQuestion}</p>
               {stage.userDecisionOptions &&
                 stage.userDecisionOptions.length > 0 && (
-                  <div className="mt-2 pt-2 border-t border-amber-200 dark:border-amber-800/30">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-500 mb-1.5">
-                      선택 가능한 옵션
+                  <div className="mt-2 pt-2 border-t border-amber-500/10">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/80 mb-1">
+                      선택 가능한 옵션 (상단 Your Next Move에서 입력 가능)
                     </p>
-                    <ol className="space-y-1">
+                    <ol className="space-y-0.5">
                       {stage.userDecisionOptions.map((opt, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-400"
+                          className="flex items-start gap-2 text-xs text-amber-300"
                         >
                           <span className="font-bold shrink-0">{i + 1}.</span>
                           <span>{opt}</span>
@@ -182,18 +201,18 @@ export function RoadmapStageCard({
         )}
 
         {/* ── Current task & next action (active/waiting/etc.) ── */}
-        {(stage.currentTask || stage.nextAction) && (
-          <div className="bg-gray-50 dark:bg-gray-950/50 rounded-lg p-3.5 space-y-3 border border-gray-100 dark:border-gray-800">
+        {(stage.currentTask || stage.nextAction) && !isCompleted && (
+          <div className="bg-surface-2/60 rounded-lg p-3 space-y-2 border border-border/60">
             {stage.currentTask && (
               <div className="flex gap-2.5">
-                <div className="mt-0.5 shrink-0 w-5 flex justify-center text-gray-400">
-                  <CheckSquare className="w-4 h-4" />
+                <div className="mt-0.5 shrink-0 w-4 flex justify-center text-text-secondary">
+                  <CheckSquare className="w-3.5 h-3.5" />
                 </div>
-                <div className="text-sm">
-                  <span className="text-gray-500 dark:text-gray-400 block text-xs font-semibold mb-0.5 uppercase tracking-wider">
+                <div className="text-xs">
+                  <span className="text-text-secondary block text-[10px] font-semibold mb-0.5 uppercase tracking-wider">
                     현재 작업
                   </span>
-                  <span className="text-gray-800 dark:text-gray-200">
+                  <span className="text-text-primary">
                     {stage.currentTask}
                   </span>
                 </div>
@@ -202,14 +221,14 @@ export function RoadmapStageCard({
 
             {stage.nextAction && (
               <div className="flex gap-2.5">
-                <div className="mt-0.5 shrink-0 w-5 flex justify-center text-blue-500">
-                  <ArrowRight className="w-4 h-4" />
+                <div className="mt-0.5 shrink-0 w-4 flex justify-center text-pink-primary">
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </div>
-                <div className="text-sm">
-                  <span className="text-gray-500 dark:text-gray-400 block text-xs font-semibold mb-0.5 uppercase tracking-wider">
+                <div className="text-xs">
+                  <span className="text-text-secondary block text-[10px] font-semibold mb-0.5 uppercase tracking-wider">
                     다음 행동
                   </span>
-                  <span className="text-gray-800 dark:text-gray-200 font-medium">
+                  <span className="text-pink-soft font-semibold">
                     {stage.nextAction}
                   </span>
                 </div>
@@ -219,30 +238,24 @@ export function RoadmapStageCard({
         )}
 
         {/* ── Acceptance criteria ── */}
-        {stage.acceptanceCriteria && stage.acceptanceCriteria.length > 0 && (
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <ListChecks className="w-3.5 h-3.5 text-gray-400" />
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        {stage.acceptanceCriteria && stage.acceptanceCriteria.length > 0 && !isCompleted && (
+          <div className="mt-1">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <ListChecks className="w-3.5 h-3.5 text-text-secondary/60" />
+              <p className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider">
                 완료 기준
               </p>
             </div>
-            <ul className="space-y-1.5">
+            <ul className="space-y-1">
               {stage.acceptanceCriteria.map((criteria, idx) => (
                 <li
                   key={idx}
-                  className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300"
+                  className="flex items-start gap-2 text-xs text-text-secondary"
                 >
                   <div
-                    className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
-                      isCompleted
-                        ? "bg-green-400"
-                        : "bg-gray-300 dark:bg-gray-600"
-                    }`}
+                    className={`w-1 h-1 rounded-full mt-1.5 shrink-0 bg-text-secondary/50`}
                   />
-                  <span
-                    className={isCompleted ? "line-through opacity-60" : ""}
-                  >
+                  <span>
                     {criteria}
                   </span>
                 </li>
@@ -254,3 +267,4 @@ export function RoadmapStageCard({
     </div>
   );
 }
+

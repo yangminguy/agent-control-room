@@ -29,17 +29,17 @@ Phases 1-39 are implemented and verified. All 273 tests are passing (280 total, 
   - TelegramClient with 6 message types (approval, status, phase complete, failure, warning, generic)
   - OrchestrationPacket & PhaseCompletePacket types for Hermes↔Control Room communication
   - RiskClassifier for Low/Medium/High auto-classification with file conflict detection
-  - API routes for approval handling and risk classification
+  - API routes for Telegram approval response intake (persists responses, updates matching in-memory dispatch jobs, never triggers execution) and risk classification
   - 22 new tests covering all 6 workflow scenarios (approval, classification, completion, failure, warnings, orchestration)
 
 ## current_agent
 Claude Code
 
 ## recommended_next_agent
-None (Production Ready with Real Telegram Integration Pending)
+None (Production Ready with Telegram Persistence Pending)
 
 ## reason
-All planned MVP phases through Phase 39 are complete, and all 273 tests are passing. The system is ready for deployment. Pending items: real Telegram bot token configuration, Obsidian memory loop, and Supabase integration.
+All planned MVP phases through Phase 39 are complete, and the Telegram approval intake bridge now persists responses and updates matching in-memory dispatch jobs. The system is ready for deployment trials once Antigravity's current UI changes compile. Pending items: real Telegram bot token/webhook configuration, durable multi-process approval synchronization, Obsidian memory loop, and Supabase integration.
 
 ## agent_statuses
 | Agent | Status | Reason |
@@ -60,8 +60,8 @@ All planned MVP phases through Phase 39 are complete, and all 273 tests are pass
 - MVP storage uses local JSON files in `data/`.
 - OpenAI Responses API with structured JSON output powers technical translation, task decomposition, prompt generation, and Advisor Mode.
 - Missing `OPENAI_API_KEY` or API failure falls back to deterministic local orchestration.
-- The execution runner (T018) uses `child_process.spawn` with SSE log streaming.
-- `RunnerLogView` is wired into `/plan` task cards for Claude Code and Codex tasks.
+- The execution runner (T018) uses `child_process.spawn` with SSE log streaming behind `/api/runner` approval tokens.
+- `RunnerLogView` is wired through the workbench run panel after the approval gate, not direct `/plan` auto-run.
 - A new git branch is always created before any agent execution.
 - Agent token status is manually set by the user in MVP.
 - Vibe Kanban handles detailed kanban/workspace/session/diff surfaces where possible.
@@ -70,7 +70,7 @@ All planned MVP phases through Phase 39 are complete, and all 273 tests are pass
 - Hermes is optional for background summaries/memory/monitoring only.
 
 ## next_task
-Configure real Telegram bot token, implement Obsidian memory loop, and perform production deployment verification.
+Configure real Telegram bot token/webhook, move approval state from local JSON/in-memory queue into Supabase or another durable store, implement Obsidian memory loop, and perform production deployment verification.
 
 ## next_prompt_target
 Optional (Ready for Deployment)

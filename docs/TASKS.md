@@ -1490,8 +1490,8 @@ Status: DONE (2026-05-22)
   
 - **Risk Classification Engine** (`lib/orchestration/risk-classifier.ts`, 156 LOC):
   - RiskClassifier class with pattern-based job classification
-  - Low Risk: git status, lint, typecheck, test, build (auto-execute)
-  - Medium Risk: git add/commit, local deploy, preview (execute + report)
+  - Low Risk: git status, lint, typecheck, test, build (eligible for approved runner or mock dispatch handling)
+  - Medium Risk: git add/commit, local deploy, preview (requires explicit review/reporting before real execution)
   - High Risk: git push, merge, reset, db migration, prod deploy (requires approval)
   - File ownership tracking and multi-agent conflict detection
   - Auto-recommendation generation based on risk level
@@ -1510,7 +1510,7 @@ Status: DONE (2026-05-22)
   - `renderPhaseCompletePacketMarkdown()` — formats phase packet as markdown
   
 - **API Routes** (64 LOC):
-  - `POST /api/orchestration/telegram/approve` — handles Telegram approval responses (approve/reject/preview_first/control_room)
+  - `POST /api/orchestration/telegram/approve` — persists Telegram approval responses and updates matching in-memory dispatch jobs for approve/reject without triggering execution
   - `POST /api/orchestration/classify` — classifies job risk and returns approval requirements
 
 ### Test Coverage
@@ -1542,19 +1542,19 @@ Status: DONE (2026-05-22)
 - ✅ Risk classifier auto-classifies Low/Medium/High with patterns
 - ✅ OrchestrationPacket & PhaseCompletePacket types formalized
 - ✅ Packet generation functions implemented (generation + markdown rendering)
-- ✅ API routes for approval handling and risk classification
+- ✅ API routes for approval response intake, local persistence, same-process job-state mutation, and risk classification
 - ✅ 22 new tests passing (273 total)
 - ✅ typecheck and lint run clean
-- ✅ 6 complete workflow scenarios validated with real Telegram API
+- ✅ 6 workflow scenarios defined; real Telegram e2e scenarios are skipped unless credentials are configured
 - ✅ Mock mode works when bot token not configured
 
 ### Key Achievements
 - **Workflow 1**: High-Risk Task Approval — sendApprovalRequest for production tasks
-- **Workflow 2**: Risk Classification & Auto-Execution — Low/Medium/High auto-routing with Telegram reports
+- **Workflow 2**: Risk Classification & Approved Execution Routing — Low/Medium/High routing with Telegram report support
 - **Workflow 3**: Phase Completion Reporting — sendPhaseCompleteReport + PhaseCompletePacket generation
 - **Workflow 4**: Task Failure Reporting — sendFailureReport + OrchestrationPacket generation
 - **Workflow 5**: High-Risk Operation Warnings — Pre-execution alerts for destructive operations
-- **Workflow 6**: Complete Orchestration Loop — Full classify → execute → report → packet → next decision cycle
+- **Workflow 6**: Orchestration Loop Skeleton — classify → report/packet → next decision; real execution remains approval-gated through `/api/runner`
 
 ## Overall Status
 
@@ -1568,4 +1568,3 @@ Status: DONE (2026-05-22)
 1. Real Telegram bot token integration and e2e testing with live Telegram
 2. Obsidian filesystem syncing for packet generation and memory loop
 3. Approval persistence to Supabase database
-

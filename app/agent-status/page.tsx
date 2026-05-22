@@ -12,11 +12,11 @@ const AGENT_DISPLAY_NAMES: Record<AgentType, string> = {
 };
 
 const STATUS_COLORS: Record<AgentStatusValue, string> = {
-  available: "bg-green-100 text-green-800",
-  limited: "bg-yellow-100 text-yellow-800",
-  cooling_down: "bg-orange-100 text-orange-800",
-  blocked: "bg-red-100 text-red-800",
-  manual_only: "bg-gray-100 text-gray-800",
+  available: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  limited: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+  cooling_down: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+  blocked: "bg-red-500/10 text-red-400 border border-red-500/20",
+  manual_only: "bg-surface-2 text-text-secondary border border-border/60",
 };
 
 type AgentStatusResponse = {
@@ -161,14 +161,14 @@ export default function AgentStatusPage() {
   };
 
   if (loading) {
-    return <div className="p-4">로딩 중...</div>;
+    return <div className="p-4 text-text-secondary">로딩 중...</div>;
   }
 
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold">Agent Status</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-text-primary">Agent Status</h1>
+        <p className="text-text-secondary mt-2">
           에이전트 상태를 관리하고 필요시 자동 핸드오프를 생성합니다.
         </p>
       </div>
@@ -181,28 +181,28 @@ export default function AgentStatusPage() {
           const recommendation = recommendations[agentType];
 
           return (
-            <div key={agent} className="rounded-lg border border-gray-200 p-6">
+            <div key={agent} className="rounded-xl border border-border bg-surface-2 p-6">
               {/* 헤더 */}
               <div className="mb-4">
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-xl font-bold text-text-primary">
                   {AGENT_DISPLAY_NAMES[agentType]}
                 </h2>
-                <div className="mt-2 flex items-center gap-2">
+                <div className="mt-3 flex items-center gap-2">
                   <span
-                    className={`rounded-full px-3 py-1 text-sm font-medium ${
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       STATUS_COLORS[currentStatus?.status || "available"]
                     }`}
                   >
-                    {currentStatus?.status || "available"}
+                    {(currentStatus?.status || "available").replace("_", " ")}
                   </span>
                 </div>
                 {currentStatus?.reason && (
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-text-secondary mt-3">
                     {currentStatus.reason}
                   </p>
                 )}
                 {currentStatus?.nextAvailableAt && (
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-text-tertiary mt-2">
                     복구 예상:{" "}
                     {new Date(currentStatus.nextAvailableAt).toLocaleString()}
                   </p>
@@ -210,9 +210,9 @@ export default function AgentStatusPage() {
               </div>
 
               {/* 상태 변경 폼 */}
-              <div className="space-y-3 border-t pt-4">
+              <div className="space-y-4 border-t border-border/50 pt-5 mt-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-semibold text-text-primary mb-1.5">
                     상태 변경
                   </label>
                   <select
@@ -223,7 +223,7 @@ export default function AgentStatusPage() {
                         [agentType]: e.target.value as AgentStatusValue,
                       })
                     }
-                    className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    className="block w-full rounded-lg border border-border/60 bg-surface px-3 py-2 text-sm text-text-primary focus:border-pink-primary focus:ring-1 focus:ring-pink-primary/30 outline-none transition-colors"
                   >
                     <option value="available">Available</option>
                     <option value="limited">Limited</option>
@@ -234,7 +234,7 @@ export default function AgentStatusPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-semibold text-text-primary mb-1.5">
                     사유 (선택사항)
                   </label>
                   <input
@@ -247,7 +247,7 @@ export default function AgentStatusPage() {
                         [agentType]: e.target.value,
                       })
                     }
-                    className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    className="block w-full rounded-lg border border-border/60 bg-surface px-3 py-2 text-sm text-text-primary placeholder-text-tertiary focus:border-pink-primary focus:ring-1 focus:ring-pink-primary/30 outline-none transition-colors"
                   />
                 </div>
 
@@ -255,7 +255,7 @@ export default function AgentStatusPage() {
                   selectedStatuses[agentType]
                 ) && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-semibold text-text-primary mb-1.5">
                       복구 예상 시간 (선택사항)
                     </label>
                     <input
@@ -267,7 +267,7 @@ export default function AgentStatusPage() {
                           [agentType]: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      className="block w-full rounded-lg border border-border/60 bg-surface px-3 py-2 text-sm text-text-primary focus:border-pink-primary focus:ring-1 focus:ring-pink-primary/30 outline-none transition-colors [color-scheme:dark]"
                     />
                   </div>
                 )}
@@ -275,7 +275,7 @@ export default function AgentStatusPage() {
                 <button
                   onClick={() => handleUpdateStatus(agentType)}
                   disabled={updatingAgent === agentType}
-                  className="w-full rounded bg-pink-primary px-4 py-2 text-white hover:bg-pink-soft disabled:bg-gray-400"
+                  className="w-full rounded-lg bg-pink-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-soft disabled:bg-surface-2 disabled:text-text-tertiary disabled:border disabled:border-border transition-colors"
                 >
                   {updatingAgent === agentType
                     ? "업데이트 중..."
@@ -284,13 +284,13 @@ export default function AgentStatusPage() {
               </div>
 
               {recommendation && (
-                <div className="mt-4 rounded border border-100 bg-surface-2 p-3 text-sm text-pink-primary">
-                  <div className="flex items-start gap-2">
+                <div className="mt-5 rounded-lg border border-pink-primary/30 bg-pink-primary/5 p-4 text-sm text-pink-primary">
+                  <div className="flex items-start gap-2.5">
                     <AlertCircle className="mt-0.5 h-4 w-4 flex-none" />
-                    <div className="space-y-1">
-                      <p>{recommendation.reason}</p>
+                    <div className="space-y-1.5">
+                      <p className="leading-relaxed">{recommendation.reason}</p>
                       {recommendation.agent && (
-                        <p className="flex items-center gap-2 font-medium">
+                        <p className="flex items-center gap-2 font-bold mt-2 text-pink-primary">
                           <span>{AGENT_DISPLAY_NAMES[agentType]}</span>
                           <ArrowRight className="h-4 w-4" />
                           <span>
@@ -304,7 +304,8 @@ export default function AgentStatusPage() {
               )}
 
               {handoff && (
-                <div className="mt-4 rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+                <div className="mt-5 rounded-lg border border-border bg-surface p-4 text-sm font-medium text-text-secondary flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-blue-400" />
                   Handoff prompt generated below.
                 </div>
               )}
@@ -314,18 +315,18 @@ export default function AgentStatusPage() {
       </div>
 
       {Object.values(generatedHandoffs).some(Boolean) && (
-        <section className="space-y-4">
+        <section className="space-y-5 pt-8 border-t border-border">
           <div>
-            <h2 className="text-2xl font-semibold">Generated Handoffs</h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-text-primary">Generated Handoffs</h2>
+            <p className="mt-1.5 text-sm text-text-secondary">
               Copy-ready prompts created from the latest manual status changes.
             </p>
           </div>
           <div className="space-y-6">
             {Object.entries(generatedHandoffs).map(([agent, handoff]) =>
               handoff ? (
-                <div key={agent} className="space-y-2">
-                  <h3 className="font-medium">
+                <div key={agent} className="space-y-3 bg-surface-2 p-6 rounded-xl border border-border">
+                  <h3 className="font-bold text-lg text-text-primary">
                     {AGENT_DISPLAY_NAMES[agent as AgentType]} status handoff
                   </h3>
                   <HandoffPreview handoff={handoff} />

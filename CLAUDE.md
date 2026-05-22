@@ -207,7 +207,7 @@ As of 2026-05-22, the codebase implements:
   - File ownership tracking and conflict detection
   - Auto-recommendation generation
   - Tests: 7 passing (high-risk, medium-risk, critical files, conflict detection)
-- **API Routes**: `/api/orchestration/telegram/approve` for approval handling, `/api/orchestration/classify` for risk classification.
+- **API Routes**: `/api/orchestration/telegram/approve` for approval response intake (persists responses and updates matching in-memory dispatch jobs without triggering execution), `/api/orchestration/classify` for risk classification.
 - **Packet Generation**: Functions to generate and render OrchestrationPacket and PhaseCompletePacket (Markdown + JSON).
 - **Integration Tests**: 1 Telegram workflow integration test covering 6 complete scenarios (273 total tests passing, 7 skipped).
 
@@ -237,7 +237,7 @@ Allowed values:
 - `claude-code` — Primary coding agent for complex implementation
 - `codex` — QA, testing, type checking, isolated fixes
 - `antigravity` — UI/UX, visual screen design
-- `hermes` — Approval-based execution worker (terminal, git, deployment, automation, logging, Telegram approval, Obsidian memory)
+- `hermes` — Approval-based operations worker (terminal/status checks, logging, Telegram approval packet/notification support, approval response persistence, Obsidian memory; real Telegram bot/webhook e2e wiring pending)
 
 ### Orchestrator
 The product layer that translates user intent into a roadmap, task sequence, agent routing, prompts, approval gates, and next-step decisions.
@@ -262,14 +262,14 @@ Use these defaults:
 | Architecture, complex reasoning, document review | Claude Code | Strong at context-heavy planning |
 | Clear implementation, bug fixing, tests, type errors | Codex | Strong at bounded implementation |
 | UI prototype, visual iteration, multi-file screen work | Antigravity | Strong for visual/product implementation |
-| Terminal execution, Git ops, deployment, monitoring | Hermes | Approval-based execution worker with Telegram integration |
+| Terminal/status checks, Git/deployment monitoring, approval packets | Hermes | Approval-based operations worker with Telegram client and approval response persistence |
 | Operational automation, logging, memory extraction | Hermes | Obsidian memory + failure pattern analysis |
 | Workspaces, sessions, diffs, previews | Vibe Kanban | Execution workbench, not product brain |
 | Unknown or ambiguous work | Claude Code first | Analyze before implementation |
 
 If preferred agent status is `cooling_down`, `token_limited`, `context_overloaded`, `blocked`, `manual_only`, or `experimental`, recommend a viable fallback and generate a handoff or Context Pack. Do not invent automatic token integrations; status is manually tracked unless explicitly implemented.
 
-**Hermes Approval Policy**: High-risk operations (git push, production deploy, dependency changes, DB migrations) require Telegram approval before execution. See [[docs/HERMES_BACKGROUND_WORKER.md]] for full approval matrix.
+**Hermes Approval Policy**: High-risk operations (git push, production deploy, dependency changes, DB migrations) require explicit approval before execution. Telegram request formatting/client support and approval response persistence exist; execution still remains gated through `/api/runner` approval tokens. See [[docs/HERMES_BACKGROUND_WORKER.md]] for the target approval matrix.
 
 ## Core Flow
 1. User selects or registers a project.

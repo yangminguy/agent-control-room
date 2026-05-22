@@ -1,9 +1,10 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { AgentStatus } from './types';
 import { AgentAvailabilityBadge } from './AgentAvailabilityBadge';
-import { AgentCapabilityList } from './AgentCapabilityList';
-import { Bot, User, Wrench, Terminal, Database, Sparkles, ArrowRight, FileText } from 'lucide-react';
+import { Bot, User, Wrench, Terminal, Database, Sparkles, ArrowRight, FileText, ChevronDown, ChevronUp, AlertOctagon } from 'lucide-react';
 
 interface AgentStatusCardProps {
   agent: AgentStatus;
@@ -11,76 +12,142 @@ interface AgentStatusCardProps {
 
 const getAgentIcon = (type: string) => {
   switch (type) {
-    case 'claude_code': return <Terminal className="w-5 h-5 text-purple-600 dark:text-purple-400" />;
-    case 'codex': return <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />;
-    case 'antigravity': return <Sparkles className="w-5 h-5 text-amber-500 dark:text-amber-400" />;
-    case 'hermes': return <Database className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />;
-    case 'vibe_kanban': return <Wrench className="w-5 h-5 text-slate-600 dark:text-slate-400" />;
-    case 'manual_user': return <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />;
-    default: return <Bot className="w-5 h-5 text-slate-500" />;
+    case 'claude_code': return <Terminal className="w-5 h-5 text-pink-primary" />;
+    case 'codex': return <Bot className="w-5 h-5 text-blue-400" />;
+    case 'antigravity': return <Sparkles className="w-5 h-5 text-amber-400" />;
+    case 'hermes': return <Database className="w-5 h-5 text-indigo-400" />;
+    case 'vibe_kanban': return <Wrench className="w-5 h-5 text-slate-400" />;
+    case 'manual_user': return <User className="w-5 h-5 text-emerald-400" />;
+    default: return <Bot className="w-5 h-5 text-slate-400" />;
   }
 };
 
 export function AgentStatusCard({ agent }: AgentStatusCardProps) {
+  const [showCapabilities, setShowCapabilities] = useState(false);
+
   const isBackground = agent.availability === 'background_worker';
   const isWorking = agent.availability === 'working';
-  const isBlocked = agent.availability === 'blocked' || agent.availability === 'token_limited' || agent.availability === 'context_overloaded' || agent.availability === 'disconnected';
+  const isBlocked = ['blocked', 'token_limited', 'context_overloaded', 'disconnected'].includes(agent.availability);
   const isApprovalRequired = agent.availability === 'approval_required';
-  const isIdle = agent.availability === 'idle' || agent.availability === 'available' || agent.availability === 'cooling_down';
+  const isIdle = ['idle', 'available', 'cooling_down'].includes(agent.availability);
 
-  let cardStyle = 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm';
-  if (isBackground) cardStyle = 'border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/40 dark:bg-indigo-950/20 opacity-85';
-  else if (isWorking) cardStyle = 'border-blue-300 dark:border-blue-700/50 bg-blue-50/20 dark:bg-blue-900/10 shadow-md ring-1 ring-blue-400/20';
-  else if (isBlocked) cardStyle = 'border-red-300 dark:border-red-800/50 bg-red-50/20 dark:bg-red-900/10 shadow-sm ring-1 ring-red-400/20';
-  else if (isApprovalRequired) cardStyle = 'border-amber-300 dark:border-amber-700/50 bg-amber-50/20 dark:bg-amber-900/10 shadow-sm ring-1 ring-amber-400/20';
-  else if (isIdle) cardStyle = 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 opacity-95 grayscale-[15%] shadow-sm';
-  
+  // Set card boundary glows using globals.css animation utility classes
+  let cardStyle = 'border-border bg-surface';
+  if (isBackground) cardStyle = 'border-indigo-500/20 bg-surface animate-breathing-indigo';
+  else if (isWorking) cardStyle = 'border-blue-500/20 bg-surface animate-breathing-blue';
+  else if (isBlocked) cardStyle = 'border-red-500/20 bg-surface animate-breathing-red';
+  else if (isApprovalRequired) cardStyle = 'border-amber-500/20 bg-surface animate-breathing-amber';
+  else if (isIdle) cardStyle = 'border-border bg-surface/80 opacity-90';
+
+  // Infer Risk Level
+  let riskLevel = "Safe";
+  let riskColor = "text-emerald-400";
+  if (isBlocked) {
+    riskLevel = "Critical Blocker";
+    riskColor = "text-red-400 font-bold";
+  } else if (isApprovalRequired) {
+    riskLevel = "Action/Approval Required";
+    riskColor = "text-amber-400 font-semibold";
+  } else if (agent.availability === 'cooling_down') {
+    riskLevel = "Moderate Risk";
+    riskColor = "text-yellow-400";
+  }
+
   return (
-    <div className={`flex flex-col p-4 rounded-xl border transition-all duration-200 hover:shadow-md ${cardStyle}`}>
+    <div className={`flex flex-col p-5 rounded-xl border transition-all duration-300 hover:border-pink-primary/30 hover:-translate-y-0.5 hover:shadow-lg ${cardStyle}`}>
+      {/* 1. Current Status Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${isBackground ? 'bg-indigo-100 dark:bg-indigo-900/50' : 'bg-slate-100 dark:bg-slate-900'}`}>
+          <div className={`p-2 rounded-lg bg-surface-2 border border-border`}>
             {getAgentIcon(agent.type)}
           </div>
           <div>
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100 leading-tight">{agent.name}</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{agent.role}</p>
+            <h3 className="font-semibold text-text-primary leading-tight">{agent.name}</h3>
+            <p className="text-xs text-text-secondary mt-0.5">{agent.role}</p>
           </div>
         </div>
         <AgentAvailabilityBadge status={agent.availability} />
       </div>
 
-      {agent.currentTask && (
-        <div className="mb-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
-          <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Current Task</p>
-          <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-2 leading-relaxed">{agent.currentTask}</p>
+      {/* 2. Current Mission (Task) */}
+      <div className="mb-4 flex-1">
+        <div className="p-3 rounded-lg bg-surface-2/60 border border-border/80">
+          <p className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Current Mission</p>
+          {agent.currentTask ? (
+            <p className="text-xs text-text-primary leading-relaxed line-clamp-2">{agent.currentTask}</p>
+          ) : (
+            <p className="text-xs text-text-secondary/50 italic leading-relaxed">No active mission</p>
+          )}
         </div>
-      )}
-
-      <div className="flex-1 mb-4">
-        <AgentCapabilityList bestFor={agent.bestFor} notFor={agent.notFor} />
       </div>
 
+      {/* 3. Risk Level / Approval Needed */}
+      <div className="mb-4 flex items-center gap-2 text-xs bg-surface-2/40 border border-border/40 p-2.5 rounded-lg">
+        <AlertOctagon className={`w-4 h-4 shrink-0 ${riskColor}`} />
+        <span className="text-text-secondary">Risk Status:</span>
+        <span className={`font-medium ${riskColor}`}>{riskLevel}</span>
+      </div>
+
+      {/* 4. Next Recommended Action */}
       {agent.nextRecommendedAction && (
-        <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-          <div className="flex items-start gap-2 text-sm text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-950/30 p-2.5 rounded-lg">
-            <ArrowRight className="w-4 h-4 mt-0.5 shrink-0" />
-            <span className="leading-snug">{agent.nextRecommendedAction}</span>
+        <div className="mb-4">
+          <div className="flex items-start gap-2.5 text-xs text-pink-primary font-medium bg-pink-primary/5 p-2.5 rounded-lg border border-pink-primary/10">
+            <ArrowRight className="w-3.5 h-3.5 mt-0.5 shrink-0 animate-status-ping" />
+            <span className="leading-snug">Next Action: {agent.nextRecommendedAction}</span>
           </div>
-
-          {agent.type === 'hermes' && (
-            <Link href="/hermes-packets" className="flex items-center gap-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
-              <FileText className="w-3.5 h-3.5" />
-              패킷 드래프트 보기
-            </Link>
-          )}
-
-          <Link href="/prompt-compiler" className="flex items-center gap-2 text-xs font-medium text-pink-primary hover:text-pink-soft transition-colors">
-            <Sparkles className="w-3.5 h-3.5" />
-            프롬프트 컴파일러 이동
-          </Link>
         </div>
       )}
+
+      {/* Additional Actions (Handoffs, Prompts) */}
+      <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4 text-xs">
+        {agent.type === 'hermes' && (
+          <Link href="/hermes-packets" className="inline-flex items-center gap-1.5 font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+            <FileText className="w-3.5 h-3.5" />
+            패킷 드래프트 보기
+          </Link>
+        )}
+
+        <Link href="/prompt-compiler" className="inline-flex items-center gap-1.5 font-medium text-pink-primary hover:text-pink-soft transition-colors">
+          <Sparkles className="w-3.5 h-3.5" />
+          프롬프트 컴파일러 이동
+        </Link>
+      </div>
+
+      {/* 5. Capability Explanation (Collapsible Bottom) */}
+      <div className="border-t border-border/50 pt-3 mt-auto">
+        <button
+          type="button"
+          onClick={() => setShowCapabilities(!showCapabilities)}
+          className="w-full flex items-center justify-between text-xs text-text-secondary hover:text-text-primary transition-colors"
+        >
+          <span>Capabilities & Limits</span>
+          {showCapabilities ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+        </button>
+
+        {showCapabilities && (
+          <div className="mt-2.5 space-y-2 text-xs text-text-secondary animate-fade-in bg-surface-2/40 p-2.5 rounded-lg border border-border/40">
+            <div>
+              <p className="font-semibold text-text-primary mb-0.5">Best For:</p>
+              <ul className="list-disc pl-4 space-y-0.5">
+                {agent.bestFor.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            {agent.notFor && agent.notFor.length > 0 && (
+              <div>
+                <p className="font-semibold text-text-primary mb-0.5">Not For:</p>
+                <ul className="list-disc pl-4 space-y-0.5">
+                  {agent.notFor.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+

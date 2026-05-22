@@ -32,20 +32,23 @@ export default function DashboardPage() {
 
   if (loading || !snapshot) {
     return (
-      <div className="p-8 text-center">
-        <Clock className="mx-auto mb-4 text-blue-600 animate-spin" size={32} />
-        <p className="text-slate-600">Loading dashboard...</p>
+      <div className="p-8 text-center min-h-screen">
+        <Clock className="mx-auto mb-4 text-pink-primary animate-spin" size={32} />
+        <p className="text-text-secondary">Loading dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen p-8 animate-fade-in">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-slate-600">Real-time multi-project monitoring</p>
+        <div className="mb-8 border-b border-border/50 pb-6">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-pink-primary mb-1">
+            System Monitoring
+          </p>
+          <h1 className="text-3xl font-extrabold mb-2 text-text-primary tracking-tight">Multi-Project Dashboard</h1>
+          <p className="text-text-secondary">Real-time execution monitoring across all active spaces</p>
         </div>
 
         {/* KPI Grid */}
@@ -56,22 +59,25 @@ export default function DashboardPage() {
           <KPICard label="Completion Rate" value={`${snapshot.kpi.completionRate}%`} icon="trend" />
           <KPICard label="Active Projects" value={snapshot.kpi.activeProjects} icon="folder" />
           <KPICard label="Safety Violations" value={snapshot.kpi.safetyViolations} icon="shield" color="red" />
-          <KPICard label="Pending Approvals" value={snapshot.kpi.pendingApprovals} icon="clock" />
+          <KPICard label="Pending Approvals" value={snapshot.kpi.pendingApprovals} icon="clock" color="amber" />
           <KPICard label="Avg Retries" value={snapshot.kpi.avgRetryCount.toFixed(1)} icon="repeat" />
         </div>
 
         {/* Agent Status */}
-        <div className="bg-white rounded-lg border p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Agent Status</h2>
-          <div className="grid grid-cols-3 gap-4">
+        <div className="bg-surface rounded-xl border border-border p-6 mb-8">
+          <h2 className="text-lg font-bold text-text-primary mb-4">Agent Status Pools</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {snapshot.agentSummaries.map((agent) => (
               <div
                 key={agent.agentId}
-                className="p-4 rounded-lg bg-slate-50 border border-slate-200"
+                className="p-4 rounded-xl bg-surface-2 border border-border/60 hover:border-pink-primary/30 transition-colors"
               >
-                <p className="font-medium text-sm">{agent.agentId}</p>
-                <p className="text-xs text-green-600 mt-1">Available</p>
-                <p className="text-xs text-slate-600 mt-2">
+                <p className="font-bold text-sm text-text-primary tracking-wide uppercase">{agent.agentId}</p>
+                <p className="text-xs font-semibold text-emerald-400 mt-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Available
+                </p>
+                <p className="text-[11px] text-text-secondary mt-3 bg-surface border border-border/50 px-2 py-1 rounded inline-block">
                   Projects: {agent.activeProjectIds.length}
                 </p>
               </div>
@@ -79,54 +85,58 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg border p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {snapshot.recentActivity.length > 0 ? (
-              snapshot.recentActivity.map((event) => (
-                <div key={event.id} className="flex gap-3 text-sm border-l-4 border-blue-500 pl-3">
-                  <div className="text-xs text-slate-500 whitespace-nowrap">
-                    {new Date(event.timestamp).toLocaleTimeString()}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Recent Activity */}
+          <div className="bg-surface rounded-xl border border-border p-6">
+            <h2 className="text-lg font-bold text-text-primary mb-4">Recent Operations Activity</h2>
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+              {snapshot.recentActivity.length > 0 ? (
+                snapshot.recentActivity.map((event) => (
+                  <div key={event.id} className="flex gap-3 text-sm border-l-2 border-pink-primary/40 pl-3">
+                    <div className="text-[10px] text-text-tertiary whitespace-nowrap uppercase tracking-wider font-semibold mt-0.5 w-16">
+                      {new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-text-primary">{event.eventType}</p>
+                      <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">{event.detail}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-900">{event.eventType}</p>
-                    <p className="text-slate-600">{event.detail}</p>
-                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-text-secondary/70 italic">No recent activity</p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            {/* Blocked Items */}
+            {snapshot.blockedItems.jobs.length > 0 && (
+              <div className="bg-red-500/5 rounded-xl border border-red-500/20 p-6">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <AlertCircle className="text-red-400 w-5 h-5" />
+                  <h2 className="text-lg font-bold text-red-300">Blocked Operational Items</h2>
                 </div>
-              ))
-            ) : (
-              <p className="text-slate-500">No recent activity</p>
+                <div className="space-y-2">
+                  {snapshot.blockedItems.jobs.map((job) => (
+                    <div key={job.id} className="text-xs text-red-200/80 bg-red-500/10 border border-red-500/10 px-3 py-2 rounded">
+                      <span className="font-semibold text-red-300">Job {job.id}</span> — Status: {job.status}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {snapshot.blockedItems.jobs.length === 0 && (
+              <div className="bg-emerald-500/5 rounded-xl border border-emerald-500/20 p-6 flex items-start gap-3">
+                <CheckCircle2 className="text-emerald-400 shrink-0 w-6 h-6" />
+                <div>
+                  <p className="font-bold text-emerald-300">All Operations Clear</p>
+                  <p className="text-xs text-emerald-200/70 mt-1">No blocked items or system-level approval requests across any projects.</p>
+                </div>
+              </div>
             )}
           </div>
         </div>
-
-        {/* Blocked Items */}
-        {snapshot.blockedItems.jobs.length > 0 && (
-          <div className="bg-red-50 rounded-lg border border-red-200 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="text-red-600" size={20} />
-              <h2 className="text-xl font-semibold text-red-900">Blocked Items</h2>
-            </div>
-            <div className="space-y-2">
-              {snapshot.blockedItems.jobs.map((job) => (
-                <div key={job.id} className="text-sm text-red-800">
-                  Job {job.id} - Status: {job.status}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {snapshot.blockedItems.jobs.length === 0 && (
-          <div className="bg-green-50 rounded-lg border border-green-200 p-6 flex items-center gap-3">
-            <CheckCircle2 className="text-green-600" size={24} />
-            <div>
-              <p className="font-semibold text-green-900">All Clear</p>
-              <p className="text-sm text-green-800">No blocked items or approval requests</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -141,24 +151,33 @@ function KPICard({
   label: string;
   value: string | number;
   icon: string;
-  color?: "blue" | "red" | "green";
+  color?: "blue" | "red" | "green" | "amber";
 }) {
   const bgColor = {
-    blue: "bg-blue-50",
-    red: "bg-red-50",
-    green: "bg-green-50",
+    blue: "bg-surface-2",
+    red: "bg-red-500/5",
+    green: "bg-emerald-500/5",
+    amber: "bg-amber-500/5",
+  }[color];
+
+  const borderColor = {
+    blue: "border-border/60",
+    red: "border-red-500/20",
+    green: "border-emerald-500/20",
+    amber: "border-amber-500/20",
   }[color];
 
   const textColor = {
-    blue: "text-blue-600",
-    red: "text-red-600",
-    green: "text-green-600",
+    blue: "text-text-primary",
+    red: "text-red-400",
+    green: "text-emerald-400",
+    amber: "text-amber-400",
   }[color];
 
   return (
-    <div className={`${bgColor} rounded-lg p-4 border border-slate-200`}>
-      <p className="text-xs text-slate-600 mb-2">{label}</p>
-      <p className={`text-2xl font-bold ${textColor}`}>{value}</p>
+    <div className={`${bgColor} rounded-xl p-4 border ${borderColor} hover:-translate-y-0.5 transition-transform`}>
+      <p className="text-[10px] font-bold text-text-secondary mb-2 uppercase tracking-wider">{label}</p>
+      <p className={`text-2xl font-extrabold tracking-tight ${textColor}`}>{value}</p>
     </div>
   );
 }

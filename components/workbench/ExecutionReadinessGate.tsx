@@ -130,12 +130,12 @@ export function ExecutionReadinessGate({
           {/* Acceptance Criteria */}
           {task.acceptanceCriteria && task.acceptanceCriteria.length > 0 && (
             <div className="rounded-lg border border-border bg-surface-2 p-4">
-              <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide block mb-2">
+              <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide block mb-2">
                 완료 조건 (수락 기준)
               </span>
               <ul className="space-y-1">
                 {task.acceptanceCriteria.map((criterion, idx) => (
-                  <li key={idx} className="text-xs text-gray-600 flex gap-2">
+                  <li key={idx} className="text-xs text-text-secondary flex gap-2">
                     <span className="shrink-0">•</span>
                     <span>{criterion}</span>
                   </li>
@@ -147,7 +147,7 @@ export function ExecutionReadinessGate({
           {/* Prompt preview */}
           <div className="rounded-lg border border-border bg-surface-2 p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
                 생성된 프롬프트
               </span>
               <div className="flex gap-1">
