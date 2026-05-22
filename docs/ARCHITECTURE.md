@@ -206,15 +206,25 @@ Each adapter checks `getSupabaseClient()` first, falls back to JSON if unavailab
 
 ## 6. Development Phases
 
-- **Phase 1: Manual Orchestration (DONE)**: Direction translation, Advisor Mode, manual copy-paste prompts, and manual session reporting.
-- **Phase 2: Structured Planning (DONE)**: HTML Plan View, Kanban data model mapping, task breakdown visibility.
-- **Phase 3: Semi-Automated Execution (DONE)**: CLI Runner, branch safety, log capture, Git Diff summary, and outcome analysis.
-- **Phase 4: Multi-Agent Routing (DONE)**: Auto-routing based on agent rate limits, tool strengths, and automatic handoffs.
-- **Phase 5: Autonomous Loop (DONE)**: Continue/Stop human-approved loop, auto-analysis, next-task preparation.
-- **Phase 6: Loop UX Refinement (DONE)**: Feedback banners, error recovery, state messaging.
-- **Phase 7: Security Hardening (DONE)**: npm audit fixes, path validation, input verification.
-- **Phase 8: Integration (DONE)**: Vibe Kanban real HTTP API, Supabase schema deployment.
-- **Phase 9: Roadmap-First Control Tower UX (NEXT)**: Reframe `/plan`, prompts, availability, context reset, and memory around the AI Development Control Tower direction.
-- **Phase 10: Vibe Kanban Workbench Bridge**: Deepen Vibe Kanban usage for workspace/session launch, result import, open-workspace links, and reducing duplicate internal board behavior.
+- **Phase 1-8 (DONE)**: Manual orchestration, planning, execution, routing, autonomous loop, security hardening.
+- **Phase 9 (DONE)**: Roadmap-first Control Tower UX, visual development panel, agent status manager.
+- **Phase 10-11 (DONE)**: Vibe Kanban workbench integration, prompt compilation, deployment readiness.
+- **Phase 12-16 (DONE)**: Core autonomous orchestration loop, task scheduling, result classification, Hermes monitoring.
+- **Phase 17-22 (DONE)**: Orchestration adapters, control panel UX, logs API, Hermes insight panel.
+- **Phase 28-32 (DONE)**: Real CLI integration, Vibe Kanban HTTP API, destructive pattern detector, context budget management.
+- **Phase 33-34 (DONE)**: Production hardening, error recovery, LLM-assisted validation, auto-decision layer.
+- **Phase 35-36 (DONE)**: Multi-project orchestration, concurrent queue management, real-time dashboard.
+- **Phase 37-39 (DONE)**: Hermes Telegram integration, OrchestrationPacket formalization, risk classification engine.
+- **Phase 40 (DONE)**: Planning→Orchestration auto-connection via localStorage bridge pattern.
+- **Phase 41 (DONE)**: Natural language project-aware orchestration — project analyzer, context store, LLM decision engine, CLI patch tool.
+  - Project file analysis and framework detection
+  - Automatic project context injection into planning chat
+  - `gpt-5-mini` based natural language orchestration decisions
+  - Decision source transparency (LLM vs rule-based tracking)
+  - CLI tool for AI-suggested file modifications
+  - Deployed to Vercel with 0 TypeScript errors
+
+**Next Phases**:
+- **Phase 42+**: Supabase durable storage, real Telegram bot integration, Obsidian memory loop, production monitoring.
 
 *(For detailed Task and Data Models, see `TASK_MODEL.md` and `ROADMAP.md`)*

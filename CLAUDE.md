@@ -211,11 +211,29 @@ As of 2026-05-22, the codebase implements:
 - **Packet Generation**: Functions to generate and render OrchestrationPacket and PhaseCompletePacket (Markdown + JSON).
 - **Integration Tests**: 1 Telegram workflow integration test covering 6 complete scenarios (273 total tests passing, 7 skipped).
 
+**Phase 40 (Complete — Planning→Orchestration Auto-Connection)** ✅:
+- **localStorage Bridge Pattern**: Cross-page state sharing for orchestration jobs
+  - `ChatControlRoom.tsx` stores `pending_orchestration_jobs` after planning execution
+  - `orchestration-context.tsx` loads and auto-creates dispatch jobs on mount
+  - Lightweight, instant state transfer without backend persistence
+
+**Phase 41 (Complete — Natural Language Project-Aware Orchestration)** ✅:
+- **Project Analyzer** (`project-context-manager.ts`): Scans project files, detects frameworks (Next.js, React, TypeScript, Supabase), identifies risk patterns
+- **Context Store** (`project-store.ts`): Caches analysis to `data/project-contexts/{projectId}.json`
+- **Analysis API** (`/api/projects/[id]/analyze`): On-demand project analysis endpoint with security checks
+- **LLM Decision Engine** (`llm-decision-engine.ts`): Uses `gpt-5-mini` for natural language orchestration decisions with automatic fallback to rule-based
+- **Project Context Injection** (`orchestrator.ts`): Automatically adds project info to OpenAI system prompt
+- **Decision Transparency**: Added `decisionSource: "llm" | "rule_fallback"` field to track decision origin
+- **CLI Patch Tool** (`scripts/analyze-and-patch.ts`): Analyzes project → gets AI suggestions → applies patches with user confirmation
+- **Status**: 0 TypeScript errors, production build successful, deployed to Vercel
+- **Key Achievement**: Full orchestration loop with natural language understanding of project context
+
 **Next Phase**:
+- Configure `OPENAI_API_KEY` on Vercel for live LLM-based decisions
 - Supabase Syncing and Live Database Hookup
 - Real Telegram Bot Token Integration
 - Obsidian Memory Loop Implementation
-- Production Deployment and Real-world Usage Feedback Loop
+- Production Monitoring and Real-world Usage Feedback Loop
 
 ## Recommended Tech Stack
 Use this unless the user explicitly changes direction.

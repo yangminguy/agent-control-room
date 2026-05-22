@@ -3,15 +3,23 @@
 This folder is split into active docs and archived context.
 
 ## Current Status
-**Phase 39 Complete (2026-05-22)**:
-- ✅ Phase 1-39 Fully Implemented and passing all **273 integration and unit tests** (280 total, 7 skipped).
+**Phase 41 Complete (2026-05-22)**:
+- ✅ Phase 1-41 Fully Implemented and passing all **TypeScript checks** (0 errors).
+- ✅ **Natural Language Project-Aware Orchestration** (Phase 41):
+  - Project file analyzer (`analyzeProjectPath()`) — scans local project structure, frameworks, risk files
+  - Project context persistence (`project-store.ts`) — caches analysis results to disk
+  - Project analysis API (`/api/projects/[id]/analyze`) — endpoint for on-demand project analysis
+  - LLM decision engine (`llm-decision-engine.ts`) — `gpt-5-mini` based natural language orchestration
+  - Project context injection — automatically adds project info to planning chat system prompt
+  - Decision source tracking (`decisionSource` field) — exposes whether decision came from LLM or rule-based fallback
+  - CLI patch tool (`scripts/analyze-and-patch.ts`) — analyzes project, gets AI suggestions, applies patches with user confirmation
 - ✅ Core Autonomous Orchestration Loop, Prompt compilers, Hermes LLM Validation and Auto-Decisions.
 - ✅ Multi-Project Queues and Live Monitoring Dashboard (`/dashboard`).
 - ✅ **Hermes Telegram Integration** (TelegramClient with 6 message types, mock mode support).
 - ✅ **OrchestrationPacket & PhaseCompletePacket** (formalized packet types for Hermes↔Control Room communication).
 - ✅ **Risk Classification Engine** (Low/Medium/High auto-classification with file conflict detection).
-- ✅ **6 Complete Workflow Scenarios** (approval, classification, phase completion, failure reporting, risk warnings, orchestration loop).
-- 🚀 Ready for: Real Telegram Bot Token Configuration, Obsidian Memory Loop, Production Deployment.
+- 🚀 **Deployed to Vercel**: https://agentcontrolroomdocs.vercel.app
+- 🚀 Ready for: OPENAI_API_KEY setup on Vercel, Real Telegram Bot Token Configuration, Obsidian Memory Loop.
 
 ## Active Docs — Read in Order
 

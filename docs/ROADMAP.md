@@ -347,9 +347,74 @@ Goal input
 
 ---
 
-## Phase 40+: Next Priorities
+## Phase 40: Planning→Orchestration Auto-Connection ✅ DONE (2026-05-22)
+
+**localStorage Bridge Pattern**
+- Planning chat execution writes `pending_orchestration_jobs` to localStorage
+- Orchestration page load reads jobs, creates dispatch entries, clears storage
+- Cross-page state sharing without backend persistence
+- Automatic agent ID mapping and risk level assignment
+
+**Key Achievement**: Seamless planning → orchestration handoff with zero backend round trips
+
+---
+
+## Phase 41: Natural Language Project-Aware Orchestration ✅ DONE (2026-05-22)
+
+**Project Analyzer** (`lib/orchestration/project-context-manager.ts`)
+- Scans local project files recursively (depth ≤ 3)
+- Detects frameworks: Next.js, React, Vue, Angular, Express, NestJS, Supabase, TypeScript, Tailwind
+- Identifies risk patterns: migrations, deployments, auth, middleware, API routes
+- Extracts tech stack from package.json
+- Generates human-readable context summary
+
+**Context Store** (`lib/orchestration/project-store.ts`)
+- Persistent storage: `data/project-contexts/{projectId}.json`
+- Fast load-on-demand for API calls
+- Secure with path validation (no system directory access)
+
+**Analysis API** (`app/api/projects/[id]/analyze/route.ts`)
+- POST endpoint accepts `projectPath` parameter
+- Security: Rejects dangerous paths (`/`, `/etc`, `/Users`, system dirs)
+- Returns cached context for future reuse
+
+**LLM Decision Engine** (`lib/orchestration/llm-decision-engine.ts`)
+- Uses `gpt-5-mini` (same as planning chat, NOT `gpt-4o-mini` which is Hermes-only)
+- Structured output with full `OrchestrationDecision` schema
+- Automatic fallback to rule-based engine if LLM unavailable or fails
+- System prompt includes project context, agent definitions, risk levels, execution modes
+
+**Project Context Injection** (`lib/control-room/orchestrator.ts`)
+- Planning chat automatically loads project context if `projectId` provided
+- Appends project info to OpenAI system prompt: frameworks, files, risk flags
+- Planning becomes project-aware without user interaction
+
+**Decision Transparency** (`lib/orchestration/types.ts`)
+- Added `decisionSource: "llm" | "rule_fallback" | "static"` field
+- All decisions track their origin for audit and debugging
+
+**CLI Patch Tool** (`scripts/analyze-and-patch.ts`)
+- Command: `npx ts-node scripts/analyze-and-patch.ts . "add hover effect"`
+- Flow: Analyze project → send to `gpt-4o-mini` (code modification model) → preview diff → user confirm → apply
+- Uses AI-suggested patches with before/after code blocks
+- Safe: requires user approval before any file modifications
+
+**Test Results**: 0 TypeScript errors, production build successful, deployed to Vercel
+
+**Key Achievements**:
+- ✅ Natural language orchestration with project understanding
+- ✅ Automatic context injection without user setup
+- ✅ LLM decisions aware of project structure and risk patterns
+- ✅ Safe fallback to rule-based decisions
+- ✅ Transparent decision sourcing
+- ✅ CLI integration for code modifications with approval gates
+
+---
+
+## Phase 42+: Next Priorities
 
 **Immediate (Priority: CRITICAL)**:
+- [ ] Configure `OPENAI_API_KEY` on Vercel for live LLM decisions
 - [ ] Real Telegram bot token integration and e2e testing with live Telegram
 - [ ] Obsidian filesystem syncing for packet generation and memory loop
 - [ ] Approval persistence to Supabase database
@@ -358,8 +423,10 @@ Goal input
 - [ ] Advanced monitoring dashboard enhancements (risk heatmaps, conflict detection visual)
 - [ ] Skills framework implementation (failure-log-analyzer, packet-writer skills)
 - [ ] Auto-approval threshold tuning and learning loop
+- [ ] Production monitoring and feedback loop integration
 
 **Long-term (Priority: MEDIUM)**:
 - [ ] Machine learning-based risk scoring (historical pattern analysis)
 - [ ] Pattern-based agent recommendations (success/failure pattern matching)
 - [ ] Automatic recovery strategies (self-healing orchestration)
+- [ ] Multi-project optimization and resource allocation
