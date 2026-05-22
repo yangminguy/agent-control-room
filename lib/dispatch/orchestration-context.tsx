@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, type ReactNode } from "react";
+import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from "react";
 import type {
   DispatchJob,
   DispatchJobStatus,
@@ -8,6 +8,7 @@ import type {
   ApprovalRequest,
   FeedbackLoopOutput,
 } from "@/lib/types";
+import type { OrchestrationDecision } from "@/lib/orchestration/types";
 
 // ── Client-safe logger stub ───────────────────────────────────────────────────
 // The server-side orchestration-logger.ts uses `fs` (Node-only).
@@ -221,6 +222,38 @@ const OrchestrationContext = createContext<OrchestrationContextValue | null>(nul
 
 export function OrchestrationProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("pending_orchestration_jobs");
+      if (!raw) return;
+
+      const items: Array<{ job: DispatchJob; decision: OrchestrationDecision }> =
+        JSON.parse(raw);
+
+      items.forEach(({ job, decision }) => {
+        const mappedAgentId =
+          decision.primaryAgent === "hermes" ||
+          decision.primaryAgent === "vibe-kanban" ||
+          decision.primaryAgent === "manual-user"
+            ? "claude-code"
+            : decision.primaryAgent;
+
+        dispatch({
+          type: "ADD_JOB",
+          payload: {
+            ...job,
+            riskLevel: decision.riskLevel,
+            agentId: mappedAgentId as DispatchJob["agentId"],
+          },
+        });
+      });
+
+      localStorage.removeItem("pending_orchestration_jobs");
+    } catch {
+      // localStorage parse 실패는 무시
+    }
+  }, []);
 
   const setStatusFilter = (s: DispatchJobStatus | "all") => {
     dispatch({ type: "SET_STATUS_FILTER", payload: s });

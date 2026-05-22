@@ -170,6 +170,34 @@ export function ChatControlRoom({
         throw new Error(data.error || "실행을 시작하지 못했습니다.");
       }
 
+      // 각 startedTask에 OrchestrationDecision 부착
+      const decisions = await Promise.allSettled(
+        data.run.startedTasks.map(async (job) => {
+          const res = await fetch("/api/orchestration/decision", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: job.taskId,
+              description: job.prompt?.slice(0, 500) ?? "",
+              taskType: "feature",
+              planId: plan.id,
+              taskId: job.taskId,
+            }),
+          });
+          const { decision } = await res.json() as { decision: { riskLevel: string; primaryAgent: string } };
+          return { job, decision };
+        })
+      );
+
+      // localStorage에 저장
+      const resolved = decisions
+        .filter((r) => r.status === "fulfilled")
+        .map((r) => (r as PromiseFulfilledResult<{ job: typeof data.run.startedTasks[0]; decision: { riskLevel: string; primaryAgent: string } }>).value);
+
+      if (resolved.length > 0) {
+        localStorage.setItem("pending_orchestration_jobs", JSON.stringify(resolved));
+      }
+
       setRun(data.run);
       setMessages((current) => [
         ...current,
@@ -368,6 +396,12 @@ export function ChatControlRoom({
                 일부 고위험 작업은 별도 승인이 필요합니다.
               </p>
             )}
+            <a
+              href="/orchestration"
+              className="mt-3 inline-flex items-center gap-2 rounded-lg border border-emerald-500 bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 hover:bg-emerald-500/30 transition-colors"
+            >
+              오케스트레이션 보드에서 확인 →
+            </a>
           </section>
         )}
       </aside>

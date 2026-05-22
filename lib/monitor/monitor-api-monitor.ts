@@ -1,4 +1,4 @@
-import { getGeminiClient } from "./gemini-client";
+import { getHermesLLMClient } from "./hermes-llm-client";
 
 type ApiAlert = {
   type: "api_failure" | "consecutive_failures" | "recovery";
@@ -14,7 +14,7 @@ class MonitorApiMonitor {
   private alertThrottleMs = 5000; // 5초마다 최대 1회 알림
 
   checkHealth(): { isHealthy: boolean; status: string; alert?: ApiAlert } {
-    const client = getGeminiClient();
+    const client = getHermesLLMClient();
     const status = client.getStatus();
 
     // 연속 실패가 3회 이상이면 critical
@@ -46,9 +46,8 @@ class MonitorApiMonitor {
       };
     }
 
-    // 정상
+    // 이전 실패에서 복구됨
     if (status.failureCount > 0 && status.consecutiveFailures === 0) {
-      // 이전 실패에서 복구됨
       const alert: ApiAlert = {
         type: "recovery",
         severity: "warning",
@@ -70,12 +69,12 @@ class MonitorApiMonitor {
   }
 
   getStatus() {
-    const client = getGeminiClient();
+    const client = getHermesLLMClient();
     return client.getStatus();
   }
 
   reset() {
-    const client = getGeminiClient();
+    const client = getHermesLLMClient();
     client.resetStatus();
     this.alerts = [];
     this.lastAlertTime = 0;

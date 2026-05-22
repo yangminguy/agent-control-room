@@ -5,7 +5,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { getGeminiClient } from "@/lib/monitor/gemini-client";
+import { getHermesLLMClient } from "@/lib/monitor/hermes-llm-client";
 import { getMonitorMonitor } from "@/lib/monitor/monitor-api-monitor";
 import type { MonitorAnalysis } from "@/lib/types";
 
@@ -26,8 +26,8 @@ export async function POST(req: Request): Promise<NextResponse> {
   const state = body.state ?? {};
 
   try {
-    // Gemini API 호출 (Primary → Secondary fallback)
-    const client = getGeminiClient();
+    // OpenAI API 호출 (Primary → Secondary fallback)
+    const client = getHermesLLMClient();
     const analysis: MonitorAnalysis = await client.analyzeOrchestrationState(state);
 
     // API 상태 확인 및 모니터링

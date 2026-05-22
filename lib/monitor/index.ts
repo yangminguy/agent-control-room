@@ -30,6 +30,9 @@ export {
   type TimeoutSummary,
 } from "./timeout-fallback-summary";
 
+// Hermes LLM Client (OpenAI)
+export { getHermesLLMClient } from "./hermes-llm-client";
+
 // Existing exports (from prior phases)
 export { renderMonitorPacketMarkdown, exportMonitorPacketJSON } from "./task-packets";
 export {
