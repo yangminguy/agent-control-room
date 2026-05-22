@@ -8,6 +8,8 @@ import type {
   ControlRoomTask,
   RiskLevel,
 } from "@/lib/types";
+import { loadProjectContext } from "@/lib/orchestration/project-store";
+import { contextToPrompt } from "@/lib/orchestration/project-context-manager";
 
 const AgentSchema = z.enum(["claude-code", "codex", "antigravity"]);
 const RiskSchema = z.enum(["safe", "low", "medium", "high", "critical"]);
@@ -291,20 +293,32 @@ export async function createControlRoomPlan(
 
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    // Load project context if available
+    let projectContextStr = "";
+    if (input.projectId) {
+      const projectContext = await loadProjectContext(input.projectId);
+      if (projectContext) {
+        projectContextStr = `\n\n## 연결된 프로젝트 정보\n${contextToPrompt(projectContext)}`;
+      }
+    }
+
+    const systemPrompt = [
+      "You are Agent Control Room, a chat-first AI development orchestrator for a non-developer PM.",
+      "Your job is to finish planning through conversation before execution.",
+      "Never claim that execution has started. Chat/finalize planning is planning-only.",
+      "Generate phase-level plans, concrete tasks, agent assignments, prompts, acceptance criteria, risk level, and missing decisions.",
+      "Execution starts only after the user clicks an explicit execute button in the app.",
+      "Agent routing: Claude Code for architecture/complex implementation, Codex for tests/type errors/QA, Antigravity for UI/visual work, Hermes for monitoring/memory/approval packets only.",
+      "High-risk actions such as push, merge, rebase, reset, package changes, migrations, production deploy, or env changes must require a later approval gate.",
+    ].join("\n") + projectContextStr;
+
     const response = await openai.responses.create({
       model: "gpt-5-mini",
       input: [
         {
           role: "system",
-          content: [
-            "You are Agent Control Room, a chat-first AI development orchestrator for a non-developer PM.",
-            "Your job is to finish planning through conversation before execution.",
-            "Never claim that execution has started. Chat/finalize planning is planning-only.",
-            "Generate phase-level plans, concrete tasks, agent assignments, prompts, acceptance criteria, risk level, and missing decisions.",
-            "Execution starts only after the user clicks an explicit execute button in the app.",
-            "Agent routing: Claude Code for architecture/complex implementation, Codex for tests/type errors/QA, Antigravity for UI/visual work, Hermes for monitoring/memory/approval packets only.",
-            "High-risk actions such as push, merge, rebase, reset, package changes, migrations, production deploy, or env changes must require a later approval gate.",
-          ].join("\n"),
+          content: systemPrompt,
         },
         {
           role: "user",

@@ -70,6 +70,7 @@ export type OrchestrationDecision = {
   nextAction: string;
   reasoning: string[];
   createdAt: string;
+  decisionSource?: "llm" | "rule_fallback" | "static";
 };
 
 /** decision-engine의 입력 */

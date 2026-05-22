@@ -7,12 +7,13 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { makeOrchestrationDecision } from "@/lib/orchestration/decision-engine";
+import { makeLLMOrchestrationDecision } from "@/lib/orchestration/llm-decision-engine";
+import { loadProjectContext } from "@/lib/orchestration/project-store";
 import type { OrchestrationDecisionInput } from "@/lib/orchestration/types";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as Partial<OrchestrationDecisionInput>;
+    const body = await request.json() as Partial<OrchestrationDecisionInput & { projectId?: string }>;
 
     if (!body.title || !body.description) {
       return NextResponse.json(
@@ -33,7 +34,17 @@ export async function POST(request: NextRequest) {
       taskId: body.taskId ? String(body.taskId) : undefined,
     };
 
-    const decision = makeOrchestrationDecision(input);
+    // Load project context if available
+    let projectContext: any = undefined;
+    if (body.projectId) {
+      const loaded = await loadProjectContext(String(body.projectId));
+      if (loaded) {
+        projectContext = loaded;
+      }
+    }
+
+    // Use LLM-based decision engine (falls back to rule-based if LLM fails)
+    const decision = await makeLLMOrchestrationDecision(input, projectContext);
 
     return NextResponse.json({ decision });
   } catch (error) {

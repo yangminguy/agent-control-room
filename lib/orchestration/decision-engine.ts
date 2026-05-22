@@ -343,5 +343,6 @@ export function makeOrchestrationDecision(
     nextAction,
     reasoning,
     createdAt: new Date().toISOString(),
+    decisionSource: "rule_fallback",
   };
 }
