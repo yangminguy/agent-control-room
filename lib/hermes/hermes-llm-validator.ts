@@ -25,7 +25,7 @@ export class DefaultHermesValidator implements HermesLLMValidator {
   async validateStage(
     request: HermesValidationRequest
   ): Promise<HermesValidationResult> {
-    const cacheKey = `${request.planId}-${request.stageIndex}`;
+    const cacheKey = this.getCacheKey(request);
     if (this.validationCache.has(cacheKey)) {
       return this.validationCache.get(cacheKey)!;
     }
@@ -45,8 +45,10 @@ export class DefaultHermesValidator implements HermesLLMValidator {
     // Simulate LLM validation (in production, call OpenAI/Claude API)
     // For MVP, use deterministic heuristics based on completion metrics
 
-    const acceptanceCriteriaMatches = request.completedWork.length;
     const totalCriteria = request.acceptanceCriteria.length;
+    const acceptanceCriteriaMatches = request.acceptanceCriteria.filter((criteria) =>
+      this.hasEvidenceForCriteria(criteria, request.completedWork)
+    ).length;
     const completionRatio = totalCriteria > 0 ? acceptanceCriteriaMatches / totalCriteria : 0;
 
     let confidenceScore: number;
@@ -60,23 +62,23 @@ export class DefaultHermesValidator implements HermesLLMValidator {
       confidenceScore = 95;
       isValid = true;
       suggestedAction = "approve";
-      reasoning = "All acceptance criteria met or exceeded. Stage is ready for completion.";
+      reasoning = "All acceptance criteria have matching completion evidence. Stage is ready for completion review.";
     } else if (completionRatio >= 0.8) {
       confidenceScore = 85;
       isValid = true;
       suggestedAction = "approve";
-      reasoning = "Most acceptance criteria met (80%+). Minor refinements may be needed post-completion.";
+      reasoning = "Most acceptance criteria have matching evidence (80%+). Minor refinements may be needed post-completion.";
     } else if (completionRatio >= 0.6) {
       confidenceScore = 65;
       isValid = false;
       suggestedAction = "manual_review";
-      reasoning = "Partial completion (60-80%). Recommend manual review before proceeding.";
+      reasoning = "Partial criteria evidence (60-80%). Recommend manual review before proceeding.";
       risks = ["incomplete_criteria", "potential_edge_cases"];
     } else {
       confidenceScore = 40;
       isValid = false;
       suggestedAction = "reject";
-      reasoning = "Low completion ratio (<60%). Stage should not advance without significant additional work.";
+      reasoning = "Low criteria evidence (<60%). Stage should not advance without significant additional work.";
       risks = ["critical_gaps", "missing_deliverables"];
     }
 
@@ -107,7 +109,7 @@ export class DefaultHermesValidator implements HermesLLMValidator {
 
     if (!isValid) {
       const unmetCriteria = request.acceptanceCriteria.filter(
-        (criteria) => !request.completedWork.some((work) => work.includes(criteria))
+        (criteria) => !this.hasEvidenceForCriteria(criteria, request.completedWork)
       );
 
       if (unmetCriteria.length > 0) {
@@ -146,6 +148,37 @@ export class DefaultHermesValidator implements HermesLLMValidator {
       risks: ["validation_service_error"],
       timestamp: new Date().toISOString(),
     };
+  }
+
+  private getCacheKey(request: HermesValidationRequest): string {
+    return JSON.stringify({
+      planId: request.planId,
+      stageIndex: request.stageIndex,
+      acceptanceCriteria: request.acceptanceCriteria,
+      completedWork: request.completedWork,
+      contextSummary: request.contextSummary,
+      riskFlags: request.riskFlags ?? [],
+    });
+  }
+
+  private hasEvidenceForCriteria(criteria: string, completedWork: string[]): boolean {
+    const criteriaTokens = this.tokenize(criteria);
+    if (criteriaTokens.length === 0) return false;
+
+    return completedWork.some((work) => {
+      const workTokens = new Set(this.tokenize(work));
+      const matched = criteriaTokens.filter((token) => workTokens.has(token)).length;
+      const requiredMatches = Math.max(1, Math.ceil(criteriaTokens.length * 0.6));
+      return matched >= requiredMatches;
+    });
+  }
+
+  private tokenize(text: string): string[] {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9가-힣\s]/g, " ")
+      .split(/\s+/)
+      .filter((token) => token.length >= 2);
   }
 
   getConfig(): ValidationConfig {

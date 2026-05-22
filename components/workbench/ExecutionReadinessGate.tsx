@@ -46,14 +46,14 @@ const AGENT_EXECUTION_MODE: Record<AgentType, { type: 'executable' | 'manual' | 
     description: '이 작업은 로컬 머신에서 실행됩니다. 승인 후 자동으로 진행되며 실시간으로 로그를 볼 수 있습니다.'
   },
   codex: {
-    type: 'manual',
-    label: '수동 핸드오프 필요',
-    description: '이 작업은 현재 로컬 자동 실행을 지원하지 않습니다. 복사된 프롬프트로 Codex를 별도 실행하세요.'
+    type: 'executable',
+    label: '로컬 실행 가능',
+    description: '이 작업은 로컬 Codex CLI에서 실행됩니다. 승인 후 자동으로 진행되며 실시간으로 로그를 볼 수 있습니다.'
   },
   antigravity: {
-    type: 'manual',
-    label: '수동 핸드오프 필요',
-    description: '이 UI/시각 작업은 현재 로컬 자동 실행을 지원하지 않습니다. 복사된 프롬프트로 Antigravity를 별도 실행하세요.'
+    type: 'executable',
+    label: '로컬 실행 가능',
+    description: '이 UI/시각 작업은 Antigravity IDE CLI chat 모드에서 실행됩니다. 승인 후 자동으로 진행됩니다.'
   }
 };
 
@@ -84,7 +84,7 @@ export function ExecutionReadinessGate({
   const autoChecks = {
     taskSelected: true,
     agentAssigned: Boolean(task.assignedAgent),
-    agentSupported: task.assignedAgent === "claude-code",
+    agentSupported: ["claude-code", "codex", "antigravity"].includes(task.assignedAgent),
     promptGenerated: Boolean(task.generatedPrompt),
     projectPathSet: Boolean(projectPath),
   };
@@ -353,7 +353,7 @@ export function ExecutionReadinessGate({
       )}
 
       {/* Gate open for executable agents */}
-      {gateOpen && task.assignedAgent === "claude-code" && (
+      {gateOpen && AGENT_EXECUTION_MODE[task.assignedAgent]?.type === 'executable' && (
         <>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 flex items-start gap-3">
             <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />

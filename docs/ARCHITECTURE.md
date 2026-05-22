@@ -48,11 +48,11 @@ graph TD
 
     R --> LR[Local Runner Bridge]
     
-    LR --> F[Claude Code<br/>CLI Local Spawn]
-    LR --> G[Codex<br/>Manual or CLI]
-    LR --> H[Antigravity<br/>Manual or IDE]
-    LR --> O[Hermes<br/>Background Worker]
-    LR --> M[Vibe Kanban<br/>Workbench]
+    LR --> F[Claude Code<br/>Coding Agent]
+    LR --> G[Codex<br/>QA & Testing]
+    LR --> H[Antigravity<br/>UI & Design]
+    LR --> O[Hermes<br/>Approval-Based<br/>Execution Worker]
+    LR --> M[Vibe Kanban<br/>Execution Workbench]
 
     F --> I[Execution Result]
     G --> I
@@ -137,8 +137,23 @@ When context is too long, token-limited, blocked, or ready for a new agent/sessi
 ### 3.10 Obsidian Knowledge Memory
 Future module for exporting development insights, decisions, failed attempts, successful prompt patterns, agent performance notes, handoffs, and checklists as Obsidian-compatible Markdown.
 
-### 3.11 Hermes Background Worker
-Hermes is optional and should be positioned as a background/status/memory worker for monitoring, summaries, retry candidates, and Obsidian note generation. It should not be responsible for high-risk autonomous code changes, DB migrations, deployment, or auto-merge without explicit user approval.
+### 3.11 Hermes Approval-Based Execution Worker
+Hermes is the **operational execution and approval worker**. It is NOT a secondary coding agent.
+
+**Hermes responsibilities**:
+- Terminal execution (status checks, build/test runs, git operations)
+- Operational automation (log summaries, failure analysis, monitoring)
+- Approval workflows (Telegram requests for high-risk operations)
+- Result collection (analyzing Phase completion, summarizing agent outcomes)
+- Memory and reporting (Obsidian notes, Orchestration Packets, Session summaries)
+
+**Hermes constraints**:
+- Cannot modify code files during agent execution
+- Requires Telegram approval for git push, production deployment, dependency changes, DB migrations
+- Always returns major results to Agent Control Room (not autonomous endpoint)
+- Uses Gemini API initially, with OpenAI API fallback
+
+See [[docs/HERMES_BACKGROUND_WORKER.md]] and related policy docs for complete Hermes role definition.
 
 ## 4. Open-Source Integration (Vibe Kanban)
 Agent Control Room integrates with **Vibe Kanban** (open-source) as an execution workbench and issue/workspace surface.

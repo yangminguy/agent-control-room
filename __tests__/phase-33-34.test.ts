@@ -4,6 +4,8 @@ import { DefaultErrorRecoveryManager } from "@/lib/dispatch/error-recovery-manag
 import { DefaultHermesValidator } from "@/lib/hermes/hermes-llm-validator";
 import { DefaultAutoDecisionEngine } from "@/lib/hermes/auto-decision-engine";
 import { HermesValidationRequest, DispatchJob } from "@/lib/types";
+import { POST as validateStage } from "@/app/api/orchestration/validation/route";
+import { POST as decideStage } from "@/app/api/orchestration/auto-decision/route";
 
 // Phase 33 Tests: Production Hardening
 describe("Phase 33: Production Hardening", () => {
@@ -142,7 +144,12 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
         stageIndex: 1,
         stageName: "Development",
         acceptanceCriteria: ["Write code", "Add tests", "Code review", "Deploy", "Monitor"],
-        completedWork: ["Write code", "Add tests", "Code review", "Deploy"],
+        completedWork: [
+          "Write code for implementation",
+          "Add tests for implementation",
+          "Code review completed",
+          "Deploy to staging",
+        ],
         contextSummary: "Most work done, pending monitoring",
         timestamp: new Date().toISOString(),
       };
@@ -220,6 +227,48 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
 
       expect(result1.validationId).toBe(result2.validationId);
     });
+
+    it("should not approve unrelated completed work just because counts match", async () => {
+      const request: HermesValidationRequest = {
+        id: "req-unrelated",
+        planId: "plan-123",
+        stageIndex: 5,
+        stageName: "Safety",
+        acceptanceCriteria: ["Add approval gate", "Block destructive commands", "Run regression tests"],
+        completedWork: ["Updated hero copy", "Changed button color", "Renamed a doc"],
+        contextSummary: "Unrelated UI copy work completed",
+        timestamp: new Date().toISOString(),
+      };
+
+      const result = await validator.validateStage(request);
+
+      expect(result.isValid).toBe(false);
+      expect(result.suggestedAction).not.toBe("approve");
+    });
+
+    it("should invalidate cache when completed work changes", async () => {
+      const baseRequest: HermesValidationRequest = {
+        id: "req-cache",
+        planId: "plan-cache",
+        stageIndex: 0,
+        stageName: "Cache Test",
+        acceptanceCriteria: ["Add approval gate"],
+        completedWork: ["Unrelated note"],
+        contextSummary: "Incomplete",
+        timestamp: new Date().toISOString(),
+      };
+
+      const first = await validator.validateStage(baseRequest);
+      const second = await validator.validateStage({
+        ...baseRequest,
+        completedWork: ["Add approval gate for risky jobs"],
+        contextSummary: "Complete",
+      });
+
+      expect(first.validationId).not.toBe(second.validationId);
+      expect(first.isValid).toBe(false);
+      expect(second.isValid).toBe(true);
+    });
   });
 
   describe("Auto-Decision Engine", () => {
@@ -249,6 +298,25 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
 
       expect(outcome.decision).toBe("auto_approved");
       expect(outcome.decisionLog.decisionMaker).toBe("hermes");
+    });
+
+    it("should require user confirmation for high-confidence validation by default", () => {
+      const validationResult = {
+        validationId: "val-default-confirm",
+        requestId: "req-default-confirm",
+        isValid: true,
+        confidenceScore: 95,
+        reasoning: "All criteria met",
+        suggestedAction: "approve" as const,
+        timestamp: new Date().toISOString(),
+      };
+
+      const outcome = engine.makeDecision({
+        validationId: "val-default-confirm",
+        validationResult,
+      });
+
+      expect(outcome.decision).toBe("user_confirmation_required");
     });
 
     it("should auto-reject validation", () => {
@@ -328,6 +396,55 @@ describe("Phase 34: Hermes LLM Validation & Auto-Decision", () => {
       expect(stats.total).toBe(1);
       expect(stats.autoApproved).toBe(1);
       expect(stats.autoRejected).toBe(0);
+    });
+  });
+
+  describe("Validation APIs", () => {
+    function requestFor(url: string, body: unknown): Request {
+      return new Request(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    }
+
+    it("should reject malformed validation payloads", async () => {
+      const response = await validateStage(
+        requestFor("http://localhost/api/orchestration/validation", {
+          id: "bad",
+          planId: "plan",
+        }) as any
+      );
+      const body = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(body.error).toContain("Invalid validation request");
+    });
+
+    it("should require user confirmation by default in auto-decision API", async () => {
+      const validationResponse = await validateStage(
+        requestFor("http://localhost/api/orchestration/validation", {
+          id: "req-api-confirm",
+          planId: "plan-api-confirm",
+          stageIndex: 0,
+          stageName: "API Confirm",
+          acceptanceCriteria: ["Add approval gate"],
+          completedWork: ["Add approval gate for risky jobs"],
+          contextSummary: "Complete",
+          timestamp: new Date().toISOString(),
+        }) as any
+      );
+      const validation = await validationResponse.json();
+
+      const decisionResponse = await decideStage(
+        requestFor("http://localhost/api/orchestration/auto-decision", {
+          validationId: validation.validationId,
+        }) as any
+      );
+      const decision = await decisionResponse.json();
+
+      expect(decisionResponse.status).toBe(200);
+      expect(decision.decision).toBe("user_confirmation_required");
     });
   });
 });

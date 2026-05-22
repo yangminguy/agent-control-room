@@ -182,84 +182,115 @@ Goal input
 ## Current Priority Queue
 
 ```text
-1. Roadmap-First Control Tower UX — make /plan a visual roadmap control panel
-2. Senior Dev Prompt Compiler — standardize prompt sections and file/edit boundaries
-3. Agent Availability + Context Reset — token/context handoff and Context Pack workflow
-4. Obsidian Knowledge Memory — Markdown exports for insights, decisions, handoffs, prompt patterns
-5. Vibe Kanban Workbench Bridge — workspace/session launch, open links, result import
-6. Production hardening — deployment checks, env validation, bridge failure states
+1. Production Hardening — Deployment, Supabase sync verification, environment variables setup
+2. Real-world Integration — Real Discord/Telegram webhook approvals hookup
+3. Operational Pilot — Deploying to staging/prod and running test cycles
 ```
 
-## Phase 9: Roadmap-First Control Tower UX 🚀 IN_PROGRESS
+---
+
+## Phase 9: Roadmap-First Control Tower UX ✅ DONE
 
 **Goal**: Reframe the product from prompt/handoff-first to roadmap-first AI Development Control Tower while keeping all existing implemented features.
 
 | Task | Status | Recommended Agent | Notes |
 |---|---|---|---|
 | T027 `/plan` Visual Development Roadmap Control Panel | ✅ DONE | Claude Code (data) + Antigravity (UI) | Roadmap data model, UI integration, agent status panel connected |
-| T028 Senior Dev Prompt Compiler structure | 🔜 NEXT | Claude Code | Standardize prompt sections: goal, context, scope, files, acceptance criteria, handoff |
-| T029 Agent Availability Manager status model cleanup | READY | Codex | Agent status data layer created; availability model documented |
-| T030 Context Reset Protocol and Context Pack generator | READY | Claude Code | Foundation laid; awaiting implementation after T028 |
-| T031 Obsidian Knowledge Memory export | READY | Codex | Concept in roadmap-data-model.md; ready for UI implementation |
-| T032 Hermes background worker positioning docs/data model | IN_PROGRESS | Codex | Spike: verifying Hermes installation and integration options |
+| T028 Senior Dev Prompt Compiler structure | ✅ DONE | Claude Code | Standardize prompt sections: goal, context, scope, files, acceptance criteria, handoff |
+| T029 Agent Availability Manager status model cleanup | ✅ DONE | Codex | Agent status data layer created; availability model documented |
+| T030 Context Reset Protocol and Context Pack generator | ✅ DONE | Claude Code | Foundation laid; context and handoff pack generator implemented |
+| T031 Obsidian Knowledge Memory export | ✅ DONE | Codex | Concept in roadmap-data-model.md; implemented in UI/memory route |
+| T032 Hermes background worker positioning docs/data model | ✅ DONE | Codex | Spike: verifying Hermes installation and integration options; background positioning confirmed |
 
-**T027 Completion Summary**:
+---
 
-**Data Foundation** (Complete):
-- Roadmap type system: `RoadmapStatus` (completed/active/waiting/blocked/user_input_required/failed/handoff_needed)
-- Roadmap stages with: goal, status, agent, current task, next action, blockers, user decisions, acceptance criteria
-- Storage layer: JSON-based with Supabase pattern
-- Helper functions: progress calculation, active stage detection, blocker detection, next action routing
-
-**UI Integration** (Complete):
-- `/plan` page refactored as Control Tower (roadmap-first, not kanban-first)
-- Layout: Header → Roadmap Overview → Agent Status → Task Detail (Kanban)
-- Roadmap Timeline component with status badges and agent displays
-- Agent Status Panel integrated with live agent status
-- Existing Kanban board preserved as secondary detail view
-
-**Completed Deliverables**:
-1. ✅ Roadmap data model (lib/types.ts, lib/roadmap.ts)
-2. ✅ Sample 10-phase roadmap (data/roadmap.json)
-3. ✅ Storage and API layers (lib/storage/roadmap-store.ts, app/api/roadmap/route.ts)
-4. ✅ UI components (components/roadmap/*)
-5. ✅ Data ↔ UI adapter (lib/roadmap-ui-adapter.ts)
-6. ✅ Agent Status integration (lib/agents/agent-status.ts)
-7. ✅ Documentation (docs/ROADMAP_DATA_MODEL.md)
-8. ✅ Self-review and status corrections
-
-**Agent Status Updated**:
-- 🧠 Claude Code: available (T028 ready)
-- ⚙️ Codex: working (Hermes spike in progress)
-- 🎨 Antigravity: working (Visual QA on /plan)
-- 🔄 Hermes: background_worker (pending installation completion)
-- 📋 Vibe Kanban: idle (bridge implementation Phase 10)
-- ✅ Manual/User: approval_required (Phase 9 completion review)
-
-**Success criteria met**:
-- ✅ `/plan` shows roadmap stages with all statuses (completed, active, waiting, blocked, user_input_required, failed, handoff_needed)
-- ✅ Completed stages show check marks
-- ✅ Active stages show responsible agent, current task, next action
-- ✅ Blocked stages show blocker reason and required action
-- ✅ User-input-required stages show exact user question
-- ✅ Acceptance criteria visible
-- ✅ Non-PM-friendly Control Tower layout (not Kanban-first)
-- ✅ Human approval remains central
-- ✅ Existing Kanban functionality preserved
-- ✅ typecheck, lint, build all pass
-
-## Phase 10: Vibe Kanban Workbench Bridge
+## Phase 10: Vibe Kanban Workbench Bridge ✅ DONE
 
 **Goal**: Stop treating Vibe Kanban as a simple issue export target. Use it as the execution workbench while keeping Agent Control Room as the orchestration brain.
 
-| Task | Status | Recommended Agent |
-|---|---|---|
-| T033 Vibe Kanban workspace/card open link | TODO | Codex |
-| T034 Vibe Kanban workspace/session launch research + adapter | TODO | Claude Code |
-| T035 Vibe Kanban result import into session report / diff summary | TODO | Codex |
+| Task | Status | Recommended Agent | Notes |
+|---|---|---|---|
+| T033 Vibe Kanban workspace/card open link | ✅ DONE | Codex | Workspace URL added to issue creation, allowing quick links |
+| T034 Vibe Kanban workspace/session launch research + adapter | ✅ DONE | Claude Code | Real adapter for Vibe Kanban and mock fallback created |
+| T035 Vibe Kanban result import into session report / diff summary | ✅ DONE | Codex | Vibe Kanban issues results imports normalized via `/api/vibe-kanban/import` |
 
-**Success criteria**:
-- A prepared Agent Control Room task can be sent to Vibe Kanban and opened from Agent Control Room.
-- The Vibe Kanban issue/workspace preserves prompt, context, acceptance criteria, and recommended executor.
-- A Vibe Kanban outcome can be imported back into Agent Control Room.
-- Agent Control Room uses the imported outcome to update task state and generate the next prompt.
+---
+
+## Phase 11: Production Hardening & Real Integration ✅ DONE
+
+**Goal**: Prepare the application for deployment with robust security and real HTTP capabilities.
+
+- **Vibe Kanban HTTP Integration**: Connect with Vibe Kanban APIs using credentials, adding workspace and project dropdowns.
+- **Hermes CLI Feasibility Spike**: Investigate CLI integration and map out safety constraints.
+- **Deployment Hardening**: Update env variable checklists, smoke test lists, and guides for Node.js, Vercel, and Docker.
+
+---
+
+## Phase 12-16: Core Autonomous Orchestration Loop ✅ DONE
+
+**Goal**: Automate task scheduling, result classification, and feedback loops with approval gates.
+
+- **Task Scheduling System**: Multi-mode scheduling (`single`, `sequential`, `parallel`, `token_relay`) evaluating file conflicts and task risk levels.
+- **Result Classification**: Heuristic classifier mapping agent output to `Pass`, `MinorFix`, `QA`, `Blocked`, and `SafetyViolation`.
+- **Failed Task Retry Queue**: Tracking retry limits (max 3) to prevent infinite loops.
+- **Hermes Observer Monitor**: Execution metrics summaries and 7 Obsidian-compatible markdown note builders.
+- **Discord Mock Gate**: High-risk tasks pause for a 5-minute approval timeout, prompting a mock Discord channel.
+
+---
+
+## Phase 17-18: Orchestration Adapters & Control Panel UI ✅ DONE
+
+**Goal**: Create agent-specific CLI adapters and the base Control Panel UI.
+
+- **CLI Adapters**: Created adapters for `claude-code`, `codex`, and `antigravity` to handle mock/CLI operations.
+- **`/orchestration` Control Panel**: A tabbed view containing Queue, Results, Approvals, Progress, and Feedback metrics.
+- **React Context State**: Centralized state management in `orchestration-context.tsx` with mock seeds.
+
+---
+
+## Phase 19-22: Orchestration UX Completion & Logs ✅ DONE
+
+**Goal**: Finalize orchestration components, logger endpoints, and Hermes cycle analysis views.
+
+- **Conversation Job Panel**: UI panel to convert natural language descriptions to queues of dispatch jobs.
+- **Logs API & Viewer**: Real NDJSON-based logging service (`/api/orchestration/logs`) and event table filter component.
+- **Hermes Insight View**: Section displaying metrics, performance stats, routing suggestions, and one-click Obsidian export packages.
+
+---
+
+## Phase 28-32: Real CLI Integration & Production Safety ✅ DONE
+
+**Goal**: Implement real CLI subprocess spawning and safety validation gates.
+
+- **Codex CLI & Antigravity Copy**: Subprocess spawn runner for Codex and copy-paste drawer panels for Antigravity.
+- **Destructive Pattern Detector**: Regex checks preventing dangerous commands (e.g. `rm -rf`, `npm deprecate`) and do-not-touch file edits.
+- **Context Budget Manager**: Heuristic token budget controller tracking remaining context length and prompting token-relay handoffs.
+
+---
+
+## Phase 33: Production Hardening & Error Recovery ✅ DONE
+
+**Goal**: Implement error classification and resilient retry scheduling.
+
+- **Exponential Backoff**: Delay formula (capped at 30s) automatically retrying network and rate-limit faults.
+- **Error Recovery Manager**: Stores recovery logs per job and coordinates retry scheduling.
+
+---
+
+## Phase 34: Hermes LLM Validation & Auto-Decision Layer ✅ DONE
+
+**Goal**: Integrate LLM validation scoring and confidence-based auto-decisions.
+
+- **LLM Validator**: Analyzes agent results to assign a completion confidence ratio (0-100%).
+- **Auto-Decision Engine**: Auto-approves jobs with confidence $\ge 75\%$, auto-rejects failed tasks, and flags borderline tasks for manual user review.
+- **Validation Store**: Persistent records of validation requests, results, and auto-decisions.
+
+---
+
+## Phase 35-36: Multi-Project Integration & Dashboard ✅ DONE
+
+**Goal**: Enable multi-project context management and a unified activity monitoring dashboard.
+
+- **Multi-Project Orchestrator**: Manages parallel workspace sessions (up to 2 active concurrently) with isolated execution queues.
+- **Agent Slot Allocator**: Allocates and releases agent resources to projects safely to avoid file edit overlaps.
+- **Dashboard API & UI**: Live dashboard at `/dashboard` displaying system-wide KPI metrics, agent statuses, recent activity feeds, and project filters.

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleAutoDecision(req: AutoDecisionRequest) {
-  const { validationId, autoApproveThreshold = 75, requireUserConfirmation = false } = req;
+  const { validationId, autoApproveThreshold = 75, requireUserConfirmation = true } = req;
 
   if (!validationId) {
     return NextResponse.json(

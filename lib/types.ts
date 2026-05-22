@@ -520,6 +520,88 @@ export type FeedbackLoopOutput = {
 };
 
 // ─────────────────────────────────────────────────────────
+// Chat-first Control Room orchestration
+// ─────────────────────────────────────────────────────────
+
+export type ControlRoomMessageRole = "user" | "assistant" | "system";
+
+export type ControlRoomMessage = {
+  id: string;
+  role: ControlRoomMessageRole;
+  content: string;
+  createdAt: string;
+};
+
+export type ControlRoomTask = {
+  id: string;
+  phaseId: string;
+  title: string;
+  summary: string;
+  assignedAgent: AgentType;
+  priority: "P0" | "P1" | "P2" | "P3";
+  acceptanceCriteria: string[];
+  prompt: string;
+  allowedFiles: string[];
+  doNotTouchFiles: string[];
+  riskLevel: RiskLevel;
+};
+
+export type ControlRoomPhase = {
+  id: string;
+  number: number;
+  title: string;
+  goal: string;
+  status: RoadmapStatus;
+  responsibleAgent: AgentType;
+  completionPercentage: number;
+  acceptanceCriteria: string[];
+  tasks: ControlRoomTask[];
+  nextAction: string;
+  vibeIssueId?: string;
+  vibeWorkspaceUrl?: string;
+};
+
+export type ControlRoomPlan = {
+  id: string;
+  projectId?: string;
+  projectName: string;
+  title: string;
+  productVision: string;
+  conversationState: string;
+  assistantReply: string;
+  clarifyingQuestions: string[];
+  phases: ControlRoomPhase[];
+  executionReadiness: "not_ready" | "needs_user_decision" | "ready";
+  requiresUserDecision: boolean;
+  finalPlanReady: boolean;
+  riskLevel: RiskLevel;
+  assumptions: string[];
+  openAiRequired: boolean;
+  source: "openai" | "fallback";
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ControlRoomExecutionRun = {
+  id: string;
+  planId: string;
+  status: "queued" | "running" | "blocked" | "completed";
+  startedAt: string;
+  completedAt?: string;
+  message: string;
+  startedTasks: DispatchJob[];
+  vibeIssues: Array<{
+    taskId: string;
+    success: boolean;
+    issueId?: string;
+    workspaceUrl?: string;
+    message?: string;
+  }>;
+  hermesPacket: string;
+  approvalRequired: boolean;
+};
+
+// ─────────────────────────────────────────────────────────
 // Phase 26 — Hermes LLM Analysis (Gemma 4 via Ollama)
 // ─────────────────────────────────────────────────────────
 
@@ -765,4 +847,147 @@ export type DashboardSnapshot = {
     approvalRequests: ApprovalRequest[];
   };
   generatedAt: string;
+};
+
+// ─────────────────────────────────────────────────────────
+// Phase 37 — Hermes Telegram & OrchestrationPacket
+// ─────────────────────────────────────────────────────────
+
+/** Hermes가 Agent Control Room에 반환하는 오케스트레이션 패킷 */
+export type OrchestrationPacket = {
+  // 기본 메타데이터
+  packet_type: "orchestration_packet";
+  source: "hermes";
+  packet_id: string;
+
+  // Phase 정보
+  phase_id: string;
+  phase_title: string;
+
+  // 실행 상태
+  status: "completed" | "failed" | "blocked" | "needs_approval" | "partial";
+  source_agent: AgentType;
+
+  // 작업 결과
+  task_summary: string;
+  result_summary: string;
+
+  // 변경사항
+  changed_files: string[];
+  affected_files: string[];
+
+  // 실패 정보 (status가 failed/blocked일 때)
+  failure_summary?: string;
+  suspected_cause?: string;
+
+  // 위험도 평가
+  risk_level: RiskLevel;
+  conflict_risk: "low" | "medium" | "high";
+
+  // 다음 단계 추천
+  suggested_next_agent_type?: AgentType;
+  suggested_next_action?: string;
+
+  // 파일 정책
+  do_not_touch_files: string[];
+
+  // 컨텍스트 정보
+  required_context: string[];
+
+  // 프롬프트 생성
+  suggested_prompt?: string;
+
+  // 승인/알림 필요 여부
+  user_approval_needed: boolean;
+  telegram_notification_needed: boolean;
+
+  // Obsidian 메모리
+  obsidian_note_path?: string;
+  insight_tags?: string[];
+
+  // 타임스탬프
+  created_at: string;
+};
+
+/** Phase 완료 시 Hermes가 생성하는 패킷 */
+export type PhaseCompletePacket = {
+  packet_type: "phase_complete_packet";
+  source: "hermes";
+  packet_id: string;
+
+  // Phase 정보
+  phase_id: string;
+  phase_title: string;
+  phase_number: number;
+
+  // 완료 정보
+  status: "completed" | "partial" | "failed";
+  completion_percentage: number;
+
+  // 담당 에이전트
+  owner_agent: AgentType;
+
+  // 결과 요약
+  completion_summary: string;
+  completed_tasks: string[];      // 완료된 task IDs
+  blocked_tasks?: string[];        // 차단된 task IDs
+  partial_tasks?: string[];        // 일부 완료 task IDs
+
+  // 검증 결과
+  validation_state: Record<string, string>;  // typecheck, lint, build 등 검증 상태
+  test_results?: {
+    total: number;
+    passed: number;
+    failed: number;
+  };
+
+  // 변경사항
+  changed_files: string[];
+  file_summary: string;
+
+  // 위험도 평가
+  risk_level: RiskLevel;
+  safety_concerns?: string[];
+
+  // 다음 Phase 추천
+  next_phase_recommendation?: {
+    phase_id: string;
+    phase_title: string;
+    agent_recommendation: AgentType;
+    context_needed: string[];
+  };
+
+  // Obsidian 메모리
+  obsidian_note_path: string;
+  lessons_learned?: string[];
+  recommendations?: string[];
+
+  // 타임스탐프
+  completed_at: string;
+};
+
+/** 위험도 분류 엔진의 결과 */
+export type RiskClassificationResult = {
+  task_id: string;
+  risk_level: RiskLevel;
+  classification_reason: string;
+
+  // Low Risk: 자동 실행 가능
+  // Medium Risk: 실행 가능하지만 보고 필요
+  // High Risk: Telegram 승인 필요
+
+  conflict_risk: "none" | "low" | "medium" | "high";
+  conflicting_files?: string[];
+  conflicting_agents?: AgentType[];
+
+  requires_user_approval: boolean;
+  requires_telegram_approval: boolean;
+
+  approval_required_reason?: string;
+
+  // 권장 사항
+  recommendations?: string[];
+
+  // 타임스탐프
+  classified_at: string;
 };

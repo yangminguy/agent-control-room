@@ -4,30 +4,36 @@
 Build Agent Control Room as an AI Development Control Tower for non-developer PMs — a system where a user inputs an idea or product direction, the system translates it into requirements and a visual roadmap, decomposes tasks, routes work to the right AI agent or workbench, compiles senior-dev prompts, tracks execution, analyzes results/diffs, marks completion, handles token/context handoffs, and saves durable development insights.
 
 ## active_phase
-Phase 11 — Production Hardening & Real Integration (T036-T038 Complete, QA hardening in progress)
+Phase 36 — Multi-Project Integration & Dashboard (All Core Features & Multi-Project Queue Complete)
 
 ## active_task
-Phases 1-11 are implemented. Phase 11 complete:
+Phases 1-36 are implemented and verified. All 251 tests are passing:
 - T027 `/plan` Visual Development Roadmap Control Panel ✅
 - T027-Hermes Hermes Packet Draft UI (safe, static generation) ✅
 - T028 Senior Dev Prompt Compiler Structure ✅
 - T029 Agent Availability Manager & Foundation Modules ✅
 - T030 Hermes CLI Installation Spike (Research Complete) ✅
 - T031 Full MVP Integration / Hermes Memory Loop ✅
-- T032 Hermes Background Worker Positioning ✅ (background-only; no code execution)
+- T032 Hermes Background Worker Positioning ✅
 - T036 Vibe Kanban result/workbench integration ✅
-- T037 Hermes CLI integration roadmap ✅ (documentation only)
+- T037 Hermes CLI integration roadmap ✅
 - T038 deployment checklist update ✅
-- Current: fix QA hardening findings and run final verification
+- Phases 12-16: Core Autonomous Orchestration Loop (4 scheduling modes, result classifications, retries) ✅
+- Phases 17-18: CLI adapters and `/orchestration` panel React Context state ✅
+- Phases 19-22: ConversationToJobPanel, logs API with NDJSON parsing, and Hermes insights ✅
+- Phases 28-32: Real Codex CLI adapter, Destructive Pattern Detector, and token budgets ✅
+- Phase 33: Exponential backoff retry policies & Error Recovery Manager ✅
+- Phase 34: LLM Validation scoring and Auto-Decision gates ✅
+- Phases 35-36: Multi-Project queue managers, Agent slot concurrency, and the `/dashboard` UI ✅
 
 ## current_agent
 Claude Code
 
 ## recommended_next_agent
-Antigravity, Claude Code, or Codex
+None (Staging/Production Ready)
 
 ## reason
-Antigravity is a fit for the roadmap-first `/plan` UI, Claude Code is a fit for prompt/context architecture, and Codex is a fit for bounded data/model updates. Vibe Kanban bridge work should follow after the control-tower UX is clearer.
+All planned MVP phases are complete, and all 251 tests are passing. The system is ready for manual verification, deployment, and pilot testing.
 
 ## agent_statuses
 | Agent | Status | Reason |
@@ -58,34 +64,16 @@ Antigravity is a fit for the roadmap-first `/plan` UI, Claude Code is a fit for 
 - Hermes is optional for background summaries/memory/monitoring only.
 
 ## next_task
-Finish QA hardening verification: runner file-boundary checks, complete Context Pack fields, result classifier edge cases, preferred agent handling, Phase 11 docs, and final typecheck/lint/build/test.
+Verify the deployment package, configure initial production environments, and perform staging pilot tests on active developer features.
 
 ## next_prompt_target
-Codex for bounded QA fixes and verification
+None (Production / Staging Ready)
 
 ## next_prompt
 ```txt
-Roadmap-First Control Tower UX
-
-Current state:
-- Agent Control Room is now defined as an AI Development Control Tower for non-developer PMs.
-- /plan should be a Visual Development Roadmap Control Panel, not only a kanban board.
-- Prompt and handoff generation remain submodules.
-- Vibe Kanban remains the execution workbench and should not be cloned.
-
-Next priorities:
-1. Reframe /plan around roadmap stages, completion checks, current task, next action, responsible agent, blockers, and acceptance criteria.
-2. Standardize generated prompts with Senior Dev Prompt Compiler sections.
-3. Add Context Pack workflow for token/context reset.
-4. Prepare Obsidian-compatible Markdown export for insights and handoffs.
-5. Keep risky execution human-approved.
-
-Acceptance criteria:
-- A non-developer can understand total product progress at a glance.
-- Completed roadmap stages show check marks.
-- Active stages show responsible agent, current task, and next action.
-- Blocked stages show the exact user decision needed.
-- Generated prompts include goal, context, scope, non-goals, files, acceptance criteria, checks, and handoff instructions.
+All 36 development phases of the Agent Control Room (AI Development Control Tower) have been successfully completed. 
+The system has 251 passing tests covering prompt compilation, autonomous execution loops, retry policies, LLM validation, multi-project queue management, agent slot concurrency, and the real-time monitoring dashboard.
+The product is ready for staging deployment and initial project trials.
 ```
 
 ## agent_execution_policy
@@ -109,4 +97,4 @@ See [[AGENT_RUN_POLICY.md]] for how agents are executed (CLI, Workbench, Manual)
 - No autonomous execution without explicit user approval
 
 ## last_updated
-2026-05-21 (added agent scheduling + token relay policies)
+2026-05-22 (Phase 36 Complete, 251 passing tests)

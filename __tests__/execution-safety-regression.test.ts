@@ -169,11 +169,10 @@ describe("Execution safety regression guardrails", () => {
 
   it("keeps /plan as a roadmap control surface without direct runner wiring", () => {
     const planPage = read("app/plan/page.tsx");
-    const kanbanCard = read("components/plan/KanbanCard.tsx");
-    const planSurface = `${planPage}\n${kanbanCard}`;
+    const planSurface = planPage;
 
-    expect(planPage).toContain("AI Development Control Tower");
-    expect(planPage).toContain("에이전트를 자동으로 실행하거나 파일을 수정하지 않습니다");
+    expect(planPage).toContain("Phase Roadmap");
+    expect(planPage).toContain("실제 실행 시작 버튼을 누르기 전까지");
     expect(planSurface).not.toContain("RunnerLogView");
     expect(planSurface).not.toContain('fetch("/api/runner"');
 
@@ -181,12 +180,12 @@ describe("Execution safety regression guardrails", () => {
       expect(planSurface).not.toContain(unsafeLabel);
     });
 
-    expect(planSurface).toContain("프롬프트 복사");
-    expect(planSurface).toContain("프롬프트 검토");
-    expect(planSurface).toContain("승인 필요");
+    expect(planSurface).toContain("Vibe Kanban");
+    expect(planSurface).toContain("Hermes");
+    expect(planSurface).toContain("완료 기준");
   });
 
-  it("keeps the controlled runner backend available and narrowly scoped", () => {
+  it("keeps the controlled runner backend available behind approval tokens", () => {
     expect(exists("app/api/runner/route.ts")).toBe(true);
     expect(exists("lib/runner/spawn-runner.ts")).toBe(true);
     expect(exists("lib/runner/git-utils.ts")).toBe(true);
@@ -194,12 +193,10 @@ describe("Execution safety regression guardrails", () => {
 
     const runnerRoute = read("app/api/runner/route.ts");
 
-    expect(runnerRoute).toContain('SUPPORTED_RUNNER_AGENTS = new Set(["claude-code"])');
+    expect(runnerRoute).toContain('SUPPORTED_RUNNER_AGENTS = new Set(["claude-code", "codex", "antigravity"])');
     expect(runnerRoute).toContain("validateCwdSafety");
     expect(runnerRoute).toContain("checkUncommittedChanges");
     expect(runnerRoute).toContain("createBranch");
-    expect(runnerRoute).toContain("CLI execution is not supported yet");
-    expect(runnerRoute).toContain("Use the copy-ready prompt for manual execution");
     expect(runnerRoute).toContain("approvalToken");
     expect(runnerRoute).toContain("validateAndConsumeApprovalToken");
   });
@@ -212,23 +209,23 @@ describe("Execution safety regression guardrails", () => {
     expect(runnerRoute).toContain("403");
   });
 
-  it("blocks non-claude-code agents from workbench execution", () => {
+  it("allows configured local agents only after the workbench approval gate", () => {
     const readinessGate = read("components/workbench/ExecutionReadinessGate.tsx");
     expect(readinessGate).toContain("agentSupported");
-    expect(readinessGate).toContain('task.assignedAgent === "claude-code"');
+    expect(readinessGate).toContain('["claude-code", "codex", "antigravity"].includes(task.assignedAgent)');
 
     const runPanel = read("components/workbench/WorkbenchRunPanel.tsx");
-    expect(runPanel).toContain('task.assignedAgent === "claude-code"');
-    expect(runPanel).toContain("지원하지 않는 에이전트");
+    expect(runPanel).toContain("approvalToken");
+    expect(runPanel).toContain("RunnerLogView");
   });
 
-  it("keeps Antigravity dispatch implementation free of process spawning", () => {
+  it("routes Antigravity through its local IDE CLI instead of manual prompt-copy", () => {
     const adapter = read("lib/dispatch/adapters/antigravity-cli-adapter.ts");
 
-    expect(adapter).not.toContain("child_process");
-    expect(adapter).not.toContain("spawn(");
-    expect(adapter).toContain("manual prompt-copy target");
-    expect(adapter).toContain("No Antigravity CLI process was spawned");
+    expect(adapter).toContain("spawn(");
+    expect(adapter).toContain("child_process");
+    expect(adapter).toContain("antigravity-ide");
+    expect(adapter).toContain('"chat", "--mode", "agent"');
   });
 
   it("validates workbench approval gate requires both auto and manual checks", () => {
@@ -542,8 +539,8 @@ describe("Execution safety regression guardrails", () => {
     const invalidCwd = await approveWorkbenchExecution(makeApprovalRequest({ cwd: os.tmpdir() }));
     expect(invalidCwd.status).toBe(403);
 
-    const unsupportedAgent = await approveWorkbenchExecution(makeApprovalRequest({ agent: "codex" }));
-    expect(unsupportedAgent.status).toBe(400);
+    const mismatchedAgent = await approveWorkbenchExecution(makeApprovalRequest({ agent: "codex" }));
+    expect(mismatchedAgent.status).toBe(403);
 
     const badPrompt = await approveWorkbenchExecution(makeApprovalRequest({ promptHash: sha256("different prompt") }));
     expect(badPrompt.status).toBe(403);
@@ -679,7 +676,7 @@ describe("Execution safety regression guardrails", () => {
     expect(spawnAgent).not.toHaveBeenCalled();
   });
 
-  it("/api/runner rejects unsupported agents and unapproved cwd before spawning", async () => {
+  it("/api/runner accepts supported agent tokens but still validates plan and cwd before spawning", async () => {
     const { runAgent, tokenStore, spawnAgent } = await loadMockedRunnerRoute();
 
     const codexToken = tokenStore.issueApprovalToken({
@@ -692,7 +689,7 @@ describe("Execution safety regression guardrails", () => {
       agent: "codex",
       approvalToken: codexToken,
     }));
-    expect(codex.status).toBe(400);
+    expect(codex.status).toBe(404);
 
     const outsideCwd = os.tmpdir();
     const outsideToken = tokenStore.issueApprovalToken({

@@ -83,28 +83,32 @@ describe("Phase 19 dispatch API", () => {
     expect(payload.success).toBe(false);
   });
 
-  it("returns a blocked result when real CLI mode cannot complete", async () => {
+  it("blocks real CLI mode on the dispatch endpoint", async () => {
     process.env.MOCK_DISPATCH = "false";
 
     const response = await POST(requestFor({ ...baseJob, id: "job-real-missing-cli-001" }));
     const payload = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(payload.success).toBe(true);
-    expect(payload.result.resultStatus).toBe("blocked");
+    expect(response.status).toBe(403);
+    expect(payload.success).toBe(false);
+    expect(payload.error).toContain("Use /api/runner");
   });
 
-  it("returns a CLI-not-found result when real CLI mode cannot find the CLI", async () => {
+  it("still blocks real CLI mode even when the submitted job claims approval", async () => {
     process.env.MOCK_DISPATCH = "false";
     process.env.PATH = "";
 
-    const response = await POST(requestFor({ ...baseJob, id: "job-real-no-path-001" }));
+    const response = await POST(requestFor({
+      ...baseJob,
+      id: "job-real-no-path-001",
+      status: "approved",
+      approvedAt: new Date().toISOString(),
+    }));
     const payload = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(payload.success).toBe(true);
-    expect(payload.result.resultStatus).toBe("blocked");
-    expect(payload.result.rawOutput).toContain("Codex CLI not found");
+    expect(response.status).toBe(403);
+    expect(payload.success).toBe(false);
+    expect(payload.error).toContain("Use /api/runner");
   });
 
   it("honors CODEX_MOCK_MODE when MOCK_DISPATCH is unset", async () => {
@@ -114,9 +118,8 @@ describe("Phase 19 dispatch API", () => {
     const response = await POST(requestFor({ ...baseJob, id: "job-codex-env-real-001" }));
     const payload = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(payload.result.resultStatus).toBe("blocked");
-    expect(payload.result.rawOutput).toContain("Codex CLI not found");
+    expect(response.status).toBe(403);
+    expect(payload.error).toContain("Use /api/runner");
   });
 
   it("classifies Codex output keywords into normalized result statuses", () => {
@@ -130,18 +133,17 @@ describe("Phase 19 dispatch API", () => {
     expect(classifyCodexOutput("All checks passed", 1)).toBe("blocked");
   });
 
-  it("keeps Antigravity as manual prompt-copy without spawning a CLI", async () => {
-    const adapter = new AntigravityCliAdapter(false);
+  it("can queue Antigravity through the executable adapter in mock mode", async () => {
+    const adapter = new AntigravityCliAdapter(true);
     const result = await adapter.dispatch({
       ...baseJob,
-      id: "job-antigravity-manual-001",
+      id: "job-antigravity-cli-001",
       agentId: "antigravity",
       prompt: "Polish the plan UI.",
     });
 
     expect(result.agentId).toBe("antigravity");
-    expect(result.resultStatus).toBe("blocked");
-    expect(result.rawOutput).toContain("manual prompt-copy target");
-    expect(result.rawOutput).toContain("No Antigravity CLI process was spawned");
+    expect(result.resultStatus).toBe("pass");
+    expect(result.rawOutput).toContain("[MOCK] Antigravity job");
   });
 });

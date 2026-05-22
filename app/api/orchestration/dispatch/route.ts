@@ -1,6 +1,10 @@
 import { getAdapter } from "@/lib/dispatch";
+import { getGlobalQueue } from "@/lib/dispatch/safe-dispatch-queue";
 import { logOrchestrationEvent } from "@/lib/dispatch/orchestration-logger";
 import { checkRateLimit } from "@/lib/dispatch/rate-limiter";
+import { addSessionReport } from "@/lib/storage/json-store";
+import { FeedbackLoopEngine } from "@/lib/orchestration/feedback-loop-engine";
+import { generateObsidianNote } from "@/lib/memory/obsidian-note-generator";
 import type { AgentType, DispatchJob, DispatchJobStatus, RiskLevel } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -125,6 +129,17 @@ export async function POST(req: Request) {
 
     const mockMode = shouldUseMockDispatch(job.agentId);
 
+    if (!mockMode) {
+      return Response.json(
+        {
+          success: false,
+          error:
+            "Real agent dispatch is disabled on this endpoint. Use /api/runner with a server-issued workbench approval token for local CLI execution.",
+        },
+        { status: 403 },
+      );
+    }
+
     logOrchestrationEvent({
       event: "job_dispatched",
       jobId: job.id,
@@ -144,6 +159,94 @@ export async function POST(req: Request) {
       timestamp: new Date().toISOString(),
       detail: result.resultStatus,
     });
+
+    // Auto-create session report after dispatch
+    let report = null;
+    try {
+      const summary = result.extractedSummary || result.rawOutput.substring(0, 200);
+      const isSuccess = result.resultStatus === "pass";
+      report = await addSessionReport({
+        projectId: "agent-control-room",
+        taskId: result.taskId,
+        agent: result.agentId,
+        summary: summary,
+        executionTimeMinutes: 5, // Default estimate for now
+        tokensUsed: 0, // Will be updated later with actual token data
+        errors: isSuccess ? [] : [result.resultStatus],
+        changedFiles: result.changedFiles || [],
+        testsRun: [],
+        codeReviewScore: 0,
+        accessibilityScore: 0,
+        manualNotes: `Auto-generated from dispatch job ${job.id}`,
+        remainingIssues: [],
+        completionJudgment: isSuccess ? "completed" : "partial",
+        completionReason: `Dispatch completed with status: ${result.resultStatus}`,
+        nextTask: "Review result and approve merge",
+        nextPrompt: "",
+        recommendedAgent: "manual",
+        prdAlignmentScore: 0,
+        risks: [],
+      });
+
+      console.log(`[dispatch] Auto-created session report ${report.id} for task ${result.taskId}`);
+
+      // Auto-generate Obsidian note for session report
+      try {
+        const obsidianNote = generateObsidianNote("session-summary", {
+          project: "Agent Control Room",
+          source_agent: result.agentId,
+          task_id: result.taskId,
+          dispatch_job_id: result.dispatchJobId,
+          status: result.resultStatus,
+          summary: summary,
+          changed_files: result.changedFiles?.join(", ") || "none",
+          execution_time: "5 min",
+        });
+        console.log(`[dispatch] Generated Obsidian note for report ${report.id}`);
+        // Note: Hermes will later fetch these and store in actual Obsidian
+      } catch (noteError) {
+        console.warn("[dispatch] Failed to generate Obsidian note:", noteError);
+      }
+    } catch (reportError) {
+      console.warn("[dispatch] Failed to auto-create session report:", reportError);
+      // Don't fail the dispatch if report creation fails
+    }
+
+    // Auto-process feedback loop for next action decision
+    try {
+      const queue = getGlobalQueue();
+      const feedbackEngine = new FeedbackLoopEngine(queue);
+      const feedbackOutput = await feedbackEngine.processFeedback(result);
+
+      console.log(`[dispatch] Feedback loop decision: ${feedbackOutput.decision}`);
+
+      // Auto-handle redispatch for minor_fix + low risk
+      if (feedbackOutput.decision === "redispatch" && feedbackOutput.nextDispatchJob) {
+        try {
+          // Auto-dispatch the retry job
+          const redispatchResult = await getAdapter(feedbackOutput.nextDispatchJob.agentId, true).dispatch(
+            feedbackOutput.nextDispatchJob,
+          );
+          console.log(`[dispatch] Auto-redispatched job for retry: ${feedbackOutput.nextDispatchJob.id}`);
+
+          // Recursively process the redispatch result (could create infinite loop, but limited by maxRetries)
+          // For now, just log it
+          logOrchestrationEvent({
+            event: "job_completed",
+            jobId: feedbackOutput.nextDispatchJob.id,
+            agentId: feedbackOutput.nextDispatchJob.agentId,
+            riskLevel: feedbackOutput.nextDispatchJob.riskLevel,
+            timestamp: new Date().toISOString(),
+            detail: "auto_redispatched",
+          });
+        } catch (redispatchError) {
+          console.warn("[dispatch] Failed to auto-redispatch:", redispatchError);
+        }
+      }
+    } catch (feedbackError) {
+      console.warn("[dispatch] Feedback loop processing failed:", feedbackError);
+      // Don't fail the dispatch if feedback processing fails
+    }
 
     return Response.json({ success: true, result });
   } catch (error) {

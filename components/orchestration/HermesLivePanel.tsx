@@ -210,7 +210,7 @@ export function HermesLivePanel() {
           <div>
             <h2 className="text-sm font-semibold text-text-primary">Hermes Live Analysis</h2>
             <p className="text-xs text-text-secondary mt-0.5">
-              Powered by Gemini 1.5 Flash (Primary/Secondary fallback) — observing only, not executing.
+              백그라운드 Hermes Agent (Gemini 1.5 Flash) — 오케스트레이션 보조, 코드 작성 안 함
             </p>
           </div>
           {getStatusBadge()}

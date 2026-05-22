@@ -11,20 +11,16 @@ export interface SpawnAgentOptions {
 /**
  * 지정된 에이전트 CLI를 spawning으로 실행한다.
  * - claude-code: `claude -p "prompt"`
- * - codex: 미지원 (설치되지 않음)
- * - antigravity: 미지원 (CLI 없음)
+ * - codex: `codex exec --cd cwd "prompt"`
+ * - antigravity: `antigravity-ide chat --mode agent "prompt"`
  */
 export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
   const { agent, prompt, cwd, onLog, onComplete } = options;
 
-  if (agent === "antigravity") {
-    throw new Error("Antigravity CLI not found. Generate a copy-ready prompt instead.");
-  }
-
   let cmd: string;
   let args: string[];
   try {
-    [cmd, ...args] = buildCommand(agent, prompt);
+    [cmd, ...args] = buildCommand(agent, prompt, cwd);
   } catch (error) {
     onLog(`[ERROR] ${error instanceof Error ? error.message : String(error)}`);
     onComplete(1);
@@ -68,13 +64,24 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
 function buildCommand(
   agent: "claude-code" | "codex" | "antigravity",
   prompt: string,
+  cwd: string,
 ): string[] {
   if (agent === "claude-code") {
     return ["claude", "-p", prompt];
   }
 
   if (agent === "codex") {
-    throw new Error("Codex CLI not found. Install via 'npm install -g @anthropic/codex' or similar.");
+    return ["codex", "exec", "--cd", cwd, prompt];
+  }
+
+  if (agent === "antigravity") {
+    return [
+      "/Applications/Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide",
+      "chat",
+      "--mode",
+      "agent",
+      prompt,
+    ];
   }
 
   throw new Error(`Unsupported agent for CLI: ${agent}`);

@@ -1,14 +1,13 @@
 /**
  * Agent Capability Detector
  *
- * Shell-based safe detection of Claude Code CLI availability.
+ * Shell-based safe detection of local agent CLI availability.
  * No external API calls. Uses execFile with shell:false only.
  *
  * Safety contract:
- * - Only `which claude` and `claude --version` are ever executed
+ * - Only version/path checks are executed
  * - shell: false is mandatory on all execFile calls
  * - All errors (not found, timeout, stderr) resolve to not_detected
- * - codex / antigravity are intentionally disabled (matches spawn-runner.ts policy)
  * - hermes is background_worker only
  */
 
@@ -33,6 +32,40 @@ export interface CapabilityResult {
   version?: string;
   detectedAt: string;  // ISO timestamp
   reason: string;
+}
+
+const ANTIGRAVITY_CLI =
+  "/Applications/Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide";
+
+async function detectExecutable(input: {
+  agentId: string;
+  command: string;
+  versionArgs: string[];
+  notFoundReason: string;
+}): Promise<CapabilityResult> {
+  const detectedAt = new Date().toISOString();
+  try {
+    const { stdout } = await execFileAsync(input.command, input.versionArgs, {
+      timeout: EXEC_TIMEOUT_MS,
+      shell: false,
+    });
+    const raw = stdout.trim();
+    const match = raw.match(/(\d+\.\d+[\.\d-]*(?:-[a-zA-Z0-9.]+)?)/);
+    return {
+      agentId: input.agentId,
+      status: "executable",
+      version: match ? match[1] : raw,
+      detectedAt,
+      reason: `${input.agentId} executable found: ${input.command}`,
+    };
+  } catch {
+    return {
+      agentId: input.agentId,
+      status: "not_detected",
+      detectedAt,
+      reason: input.notFoundReason,
+    };
+  }
 }
 
 /**
@@ -109,20 +142,20 @@ export async function detectAgentCapability(
       return detectClaudeCapability();
 
     case "codex":
-      return {
+      return detectExecutable({
         agentId,
-        status: "disabled",
-        detectedAt,
-        reason: "Intentionally unsupported: matches spawn-runner.ts policy",
-      };
+        command: "codex",
+        versionArgs: ["--version"],
+        notFoundReason: "codex CLI not found or timed out",
+      });
 
     case "antigravity":
-      return {
+      return detectExecutable({
         agentId,
-        status: "disabled",
-        detectedAt,
-        reason: "Intentionally unsupported: matches spawn-runner.ts policy",
-      };
+        command: ANTIGRAVITY_CLI,
+        versionArgs: ["--version"],
+        notFoundReason: "Antigravity IDE CLI not found at the expected app bundle path",
+      });
 
     case "hermes":
       return {

@@ -36,7 +36,7 @@ import {
  * No external credentials are used in this flow.
  */
 
-const SUPPORTED_RUNNER_AGENTS = new Set(["claude-code"]);
+const SUPPORTED_RUNNER_AGENTS = new Set(["claude-code", "codex", "antigravity"]);
 
 export async function POST(request: Request) {
   let responseStarted = false;
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       taskId: string;
       prompt: string;
       cwd: string;
-      agent: "claude-code" | "codex";
+      agent: "claude-code" | "codex" | "antigravity";
       approvalToken?: string;
     };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy, Check, FileCode2, ChevronDown, ChevronUp, Download } from "lucide-react";
+import { Copy, Check, FileCode2, ChevronDown, ChevronUp, Download, Upload } from "lucide-react";
 import {
   type ResultClassification,
   classifyResult,
@@ -78,6 +78,18 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState(false);
 
+  // Auto-export state
+  const [lastUsedIssueId, setLastUsedIssueId] = useState<string>("");
+  const [autoExportLoading, setAutoExportLoading] = useState(false);
+  const [autoExportMessage, setAutoExportMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("lastUsedKanbanIssueId");
+      if (stored) setLastUsedIssueId(stored);
+    }
+  }, []);
+
   useEffect(() => {
     if (rawResult.length > 0) {
       const classified = classifyResult(rawResult);
@@ -120,10 +132,54 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
       setImportOpen(false);
       setImportIssueId("");
       setImportWorkspaceResult("");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("lastUsedKanbanIssueId", importIssueId.trim());
+      }
     } catch (err: any) {
       setImportError(err.message ?? "네트워크 오류");
     } finally {
       setImportLoading(false);
+    }
+  }
+
+  async function handleAutoExportToKanban() {
+    if (!lastUsedIssueId.trim()) {
+      setAutoExportMessage("최근 사용한 이슈 ID가 없습니다. 먼저 Kanban에서 임포트하세요.");
+      return;
+    }
+
+    setAutoExportLoading(true);
+    setAutoExportMessage(null);
+
+    try {
+      const classificationText = [
+        `분류: ${classification}`,
+        `변경 파일: ${changedFiles.length > 0 ? changedFiles.join(", ") : "없음"}`,
+        `다음 에이전트: ${AGENT_SUGGESTION[classification!]}`,
+        `재시도 후보: ${isRetryCandidate ? "예" : "아니오"}`,
+      ].join("\n");
+
+      const res = await fetch("/api/vibe-kanban/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          issueId: lastUsedIssueId.trim(),
+          workspaceResult: classificationText,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setAutoExportMessage(`Kanban 업로드 실패: ${data.message ?? "알 수 없는 오류"}`);
+        return;
+      }
+
+      setAutoExportMessage("✓ Kanban에 자동 업로드되었습니다!");
+      setTimeout(() => setAutoExportMessage(null), 3000);
+    } catch (err: any) {
+      setAutoExportMessage(`오류: ${err.message ?? "네트워크 오류"}`);
+    } finally {
+      setAutoExportLoading(false);
     }
   }
 
@@ -354,6 +410,17 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
                 {copied ? "복사됨!" : "클립보드 복사"}
               </button>
 
+              {lastUsedIssueId && (
+                <button
+                  onClick={handleAutoExportToKanban}
+                  disabled={autoExportLoading}
+                  className="inline-flex items-center gap-1.5 rounded bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  {autoExportLoading ? "업로드 중..." : "Kanban 자동 업로드"}
+                </button>
+              )}
+
               <a
                 href="/hermes-packets"
                 className="inline-flex items-center gap-1.5 rounded border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors"
@@ -366,6 +433,13 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
             {copied && (
               <p className="text-xs text-emerald-600 font-medium">
                 복사됨! ✓
+              </p>
+            )}
+
+            {/* Auto-export message */}
+            {autoExportMessage && (
+              <p className={`text-xs font-medium ${autoExportMessage.includes("✓") ? "text-emerald-600" : "text-amber-600"}`}>
+                {autoExportMessage}
               </p>
             )}
           </div>

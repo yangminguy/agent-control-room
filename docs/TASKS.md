@@ -1150,14 +1150,14 @@ Files Created/Modified:
 - components/workbench/ResultReviewPanel.tsx (updated with AgentResult section)
 - __tests__/qa-fixes-phase12.test.ts (23 integration tests)
 
-## Phase 19-22 — Orchestration UX Completion & Logs (Planning)
+## Phase 19-22 — Orchestration UX Completion & Logs (Complete)
 
-Status: TODO (planned 2026-05-21)
+Status: DONE (2026-05-21)
 
-Strategic direction:
-- Complete `/orchestration` page with remaining UI components (ConversationToJobPanel, HermesInsightPanel)
-- Add logs API and viewer for orchestration event monitoring
-- Organize Phase 19-22 execution using agent-organizer for parallel Wave A (frontend) and Wave B (backend)
+Strategic direction (Complete):
+- ✅ Complete `/orchestration` page with remaining UI components (ConversationToJobPanel, HermesInsightPanel)
+- ✅ Add logs API and viewer for orchestration event monitoring
+- ✅ Organize Phase 19-22 execution using agent-organizer for parallel Wave A (frontend) and Wave B (backend)
 
 Execution Plan (Agent-Organizer Based):
 ```
@@ -1176,7 +1176,7 @@ HermesInsightPanel             (with OrchestrationLogEvent type migration)
 
 ### Phase 19 — Documentation Update
 
-Status: TODO  
+Status: DONE (2026-05-21)  
 Recommended agent: (solo task, no code)  
 Priority: P0
 
@@ -1191,7 +1191,7 @@ Acceptance criteria:
 
 ### Phase 20 — Conversation-to-Job Panel (Wave A, frontend-developer)
 
-Status: TODO  
+Status: DONE (2026-05-21)  
 Recommended agent: frontend-developer  
 Priority: P1
 
@@ -1199,20 +1199,20 @@ Goal:
 - Build UI for converting natural language to DispatchJob array with preview and approval
 
 Acceptance criteria:
-- New component: `components/orchestration/ConversationToJobPanel.tsx`
-- Reuses: `lib/dispatch/conversation-to-task-engine.ts` conversationToTasks() function
-- Reuses: `lib/dispatch/orchestration-context.tsx` addJob() action
-- UI flow: textarea input → Generate Jobs button → DispatchJob[] preview cards → Add All to Queue
-- Preview shows: riskLevel badge, agentId, prompt (first 60 chars)
-- Errors displayed clearly (JSON parse, validation)
-- Modified: OrchestrationPageLayout.tsx Tab 0 (insert panel at top)
-- Modified: components/orchestration/index.ts (export ConversationToJobPanel)
-- Tests: preview display, error handling, add job action
-- `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
+- ✅ New component: `components/orchestration/ConversationToJobPanel.tsx`
+- ✅ Reuses: `lib/dispatch/conversation-to-task-engine.ts` conversationToTasks() function
+- ✅ Reuses: `lib/dispatch/orchestration-context.tsx` addJob() action
+- ✅ UI flow: textarea input → Generate Jobs button → DispatchJob[] preview cards → Add All to Queue
+- ✅ Preview shows: riskLevel badge, agentId, prompt (first 60 chars)
+- ✅ Errors displayed clearly (JSON parse, validation)
+- ✅ Modified: OrchestrationPageLayout.tsx Tab 0 (insert panel at top)
+- ✅ Modified: components/orchestration/index.ts (export ConversationToJobPanel)
+- ✅ Tests: preview display, error handling, add job action
+- ✅ `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
 
 ### Phase 21 — Hermes Insight Panel (Wave A, frontend-developer)
 
-Status: TODO  
+Status: DONE (2026-05-21)  
 Recommended agent: frontend-developer  
 Priority: P1
 
@@ -1220,28 +1220,28 @@ Goal:
 - Build dashboard displaying 4 Hermes insights with copy-to-clipboard and export
 
 Acceptance criteria:
-- New component: `components/orchestration/HermesInsightPanel.tsx`
-- Reuses: `lib/hermes/index.ts` 4 generator functions
+- ✅ New component: `components/orchestration/HermesInsightPanel.tsx`
+- ✅ Reuses: `lib/hermes/index.ts` 4 generator functions
   - generateOrchestrationInsight()
   - generateAgentPerformanceSummary()
   - generateRoutingRecommendation()
   - generateTimeoutFallbackSummary()
-- 4 internal sections (InsightSection component):
+- ✅ 4 internal sections (InsightSection component):
   1. Orchestration Cycle Insights
   2. Agent Performance Summary
   3. Routing Recommendation
   4. Timeout / Fallback Summary
-- Each section: title + `<pre className="whitespace-pre-wrap max-h-64">` + Copy button
-- Top banner: "Hermes is observing only — not executing" (safety notice)
-- Bottom: "Export All as Obsidian Note" button (concatenate all 4 sections to clipboard)
-- Modified: OrchestrationPageLayout.tsx Tab 5 addition
-- Modified: components/orchestration/index.ts (export HermesInsightPanel)
-- Tests: generator function outputs render correctly, copy works
-- `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
+- ✅ Each section: title + `<pre className="whitespace-pre-wrap max-h-64">` + Copy button
+- ✅ Top banner: "Hermes is observing only — not executing" (safety notice)
+- ✅ Bottom: "Export All as Obsidian Note" button (concatenate all 4 sections to clipboard)
+- ✅ Modified: OrchestrationPageLayout.tsx Tab 5 addition
+- ✅ Modified: components/orchestration/index.ts (export HermesInsightPanel)
+- ✅ Tests: generator function outputs render correctly, copy works
+- ✅ `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
 
 ### Phase 22 — Orchestration Log Viewer API + UI (Wave B, backend-developer)
 
-Status: TODO  
+Status: DONE (2026-05-21)  
 Recommended agent: backend-developer  
 Priority: P1
 
@@ -1250,16 +1250,16 @@ Goal:
 - **Critical**: Migrate OrchestrationLogEvent type from orchestration-logger.ts to lib/types.ts first
 
 Acceptance criteria:
-- **Type Migration**: Move `OrchestrationLogEvent` to `lib/types.ts` (prevent client bundle pollution)
+- ✅ **Type Migration**: Move `OrchestrationLogEvent` to `lib/types.ts` (prevent client bundle pollution)
   - Update `lib/dispatch/orchestration-logger.ts` imports
   - Verify no `import fs` on client routes after migration
-- New API: `app/api/orchestration/logs/route.ts`
+- ✅ New API: `app/api/orchestration/logs/route.ts`
   - GET endpoint with ?limit=100&event=job_dispatched filters
   - Reads `data/orchestration-logs.json` (NDJSON format)
   - Parses, filters by event type, reverse chronological, paginates
   - Returns: `{ events: OrchestrationLogEvent[], total: number }`
   - Pattern: matches `app/api/reports/route.ts` NDJSON reading
-- New component: `components/orchestration/OrchestrationLogViewer.tsx`
+- ✅ New component: `components/orchestration/OrchestrationLogViewer.tsx`
   - States: logs[], isLoading, eventFilter
   - useEffect([eventFilter]) fetches /api/orchestration/logs
   - Refresh button to re-fetch
@@ -1273,26 +1273,26 @@ Acceptance criteria:
     - result_collected → yellow
     - status_changed → zinc
   - Empty state: "No logs yet"
-- Modified: lib/types.ts (OrchestrationLogEvent type added, if not present)
-- Modified: lib/dispatch/orchestration-logger.ts (update import to lib/types.ts)
-- Modified: OrchestrationPageLayout.tsx Tab 6 addition
-- Modified: components/orchestration/index.ts (export OrchestrationLogViewer)
-- Tests: API returns NDJSON correctly, viewer displays events, filters work
-- `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
+- ✅ Modified: lib/types.ts (OrchestrationLogEvent type added, if not present)
+- ✅ Modified: lib/dispatch/orchestration-logger.ts (update import to lib/types.ts)
+- ✅ Modified: OrchestrationPageLayout.tsx Tab 6 addition
+- ✅ Modified: components/orchestration/index.ts (export OrchestrationLogViewer)
+- ✅ Tests: API returns NDJSON correctly, viewer displays events, filters work
+- ✅ `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` all pass
 
 ### Wave A + B Synchronization
 
-Status: TODO (after Phase 20, 21, 22 complete)  
+Status: DONE (2026-05-21)  
 Priority: P1
 
 Goal:
 - Integrate Wave A (frontend: ConversationToJobPanel, HermesInsightPanel) and Wave B (backend: logs API, LogViewer) into unified `/orchestration` page
 
 Acceptance criteria:
-- OrchestrationPageLayout.tsx: all 6 tabs wired (0: Dispatch Queue + ConversationToJobPanel, 1: Results, 2: Approvals, 3: Progress, 4: Feedback, 5: Hermes Insights, 6: Logs)
-- components/orchestration/index.ts: all components exported
-- Full typecheck, lint, build, test passing
-- Manual verification in browser: all tabs functional, no console errors
+- ✅ OrchestrationPageLayout.tsx: all 6 tabs wired (0: Dispatch Queue + ConversationToJobPanel, 1: Results, 2: Approvals, 3: Progress, 4: Feedback, 5: Hermes Insights, 6: Logs)
+- ✅ components/orchestration/index.ts: all components exported
+- ✅ Full typecheck, lint, build, test passing
+- ✅ Manual verification in browser: all tabs functional, no console errors
 
 ## T064 — Auto Dispatch API (HOLD)
 
@@ -1426,7 +1426,7 @@ Suggested Action = reject
 ✅ All 22 tests passing
 ✅ typecheck + lint pass
 
-## Overall Status
+## Overall Status (Phase 1-34)
 
 **Phase 1-34 Complete (All Core Features Implemented)**
 - 225 tests passing
@@ -1434,4 +1434,52 @@ Suggested Action = reject
 - All major orchestration loops implemented
 - Production error handling + auto-decision layer ready
 - Ready for deployment and real-world usage
+
+## Phase 35-36 — Multi-Project Integration & Dashboard (Complete)
+
+Status: DONE (2026-05-22)
+
+**Phase 35-36 Completed (26 new tests, 225→251 total)**
+
+### Implementation Summary
+- **Multi-Project Queue Management**:
+  - Independent queues per project implemented via `ProjectQueueManager` (`lib/multi-project/project-queue-manager.ts`).
+  - Active project registration, activation, deactivation, and status checking.
+- **Agent Slot Concurrency**:
+  - `AgentSlotAllocator` (`lib/multi-project/agent-slot-allocator.ts`) allocates specific agents to specific projects with max concurrency constraints.
+  - MultiProjectOrchestrator (`lib/multi-project/multi-project-orchestrator.ts`) coordinates queue and slot manager components.
+- **Real-Time Dashboard UI & API**:
+  - Dashboard route at `/dashboard` (`app/dashboard/page.tsx`) with a periodic 30-second background refresh.
+  - `/api/dashboard` GET route (`app/api/dashboard/route.ts`) supporting project filtering via `?projectId=...`.
+  - Comprehensive KPI Aggregator (`lib/dashboard/kpi-aggregator.ts`) mapping Total Jobs, Completed, Blocked, Completion Rate, Active Projects, Safety Violations, Pending Approvals, Avg Retries.
+  - Recent Activity Feed builder (`lib/dashboard/activity-feed-builder.ts`) and Dashboard Snapshot Builder (`lib/dashboard/dashboard-snapshot-builder.ts`).
+  - Blocked items container or "All Clear" success banner depending on project state.
+
+### Files Created/Modified
+- `lib/multi-project/project-queue-manager.ts`
+- `lib/multi-project/agent-slot-allocator.ts`
+- `lib/multi-project/multi-project-orchestrator.ts`
+- `lib/dashboard/kpi-aggregator.ts`
+- `lib/dashboard/activity-feed-builder.ts`
+- `lib/dashboard/dashboard-snapshot-builder.ts`
+- `app/api/dashboard/route.ts`
+- `app/dashboard/page.tsx`
+- `__tests__/phase-35-36-integration.test.ts` (26 integration tests)
+
+### Acceptance Criteria
+- ✅ Independent dispatch queues maintained per active project
+- ✅ Agent slot allocator enforces max concurrent project constraints (limit: 2 projects)
+- ✅ 3-agent same-project parallel execution and tracking verified
+- ✅ KPI aggregation across all registered projects and individual projects
+- ✅ Real-time dashboard view with 30s polling, KPI grid, agent status, and live event activity feed
+- ✅ All 26 new tests pass (251/251 total tests passing)
+- ✅ typecheck and lint run clean
+
+## Overall Status
+
+**Phase 1-36 Complete (All Core Features & Multi-Project Integration Implemented)**
+- 251 tests passing
+- typecheck clean
+- Production-ready error handling, LLM validation, multi-project queue management, and real-time dashboard UI
+- Ready for deployment and staging trials
 

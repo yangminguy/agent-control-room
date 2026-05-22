@@ -6,7 +6,12 @@ import { AlertCircle, CheckCircle, XCircle, Clock } from "lucide-react";
 
 type ValidationState = "idle" | "validating" | "completed" | "error";
 
-export function HermesValidationPanel() {
+export interface HermesValidationPanelProps {
+  request?: HermesValidationRequest;
+  onValidation?: (result: HermesValidationResult) => void;
+}
+
+export function HermesValidationPanel({ request, onValidation }: HermesValidationPanelProps) {
   const [state, setstate] = useState<ValidationState>("idle");
   const [validationResult, setValidationResult] = useState<HermesValidationResult | null>(null);
   const [error, setError] = useState<string>("");
@@ -29,6 +34,7 @@ export function HermesValidationPanel() {
       const result = await response.json();
       setValidationResult(result);
       setstate("completed");
+      onValidation?.(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
       setstate("error");
@@ -53,7 +59,16 @@ export function HermesValidationPanel() {
       {state === "idle" && (
         <div className="text-center py-8 text-slate-500">
           <Clock className="mx-auto mb-2 opacity-50" size={32} />
-          <p>Ready for validation</p>
+          <p>{request ? "Ready for validation" : "No validation request selected"}</p>
+          {request && (
+            <button
+              type="button"
+              onClick={() => handleValidate(request)}
+              className="mt-4 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Run Validation
+            </button>
+          )}
         </div>
       )}
 

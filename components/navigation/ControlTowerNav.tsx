@@ -3,34 +3,27 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Target, Cpu, Database, ShieldAlert } from "lucide-react";
+import { MessageSquare, Target, ShieldAlert } from "lucide-react";
 
 const TABS = [
   {
+    href: "/",
+    label: "기획 채팅",
+    englishLabel: "Planning Chat",
+    icon: MessageSquare,
+  },
+  {
     href: "/plan",
-    label: "실행 계획 / 컨트롤 타워",
-    englishLabel: "Control Tower",
+    label: "Phase 로드맵",
+    englishLabel: "Roadmap",
     icon: Target,
-  },
-  {
-    href: "/prompt-compiler",
-    label: "프롬프트 컴파일러",
-    englishLabel: "Prompt Compiler",
-    icon: Cpu,
-  },
-  {
-    href: "/hermes-packets",
-    label: "Hermes 패킷 초안",
-    englishLabel: "Hermes Packets",
-    icon: Database,
   },
 ];
 
 export function ControlTowerNav() {
   const pathname = usePathname();
 
-  // Only show this navigation shell on the three control tower-related pages
-  const isControlTowerRoute = ["/plan", "/prompt-compiler", "/hermes-packets"].includes(pathname);
+  const isControlTowerRoute = ["/", "/plan"].includes(pathname);
 
   if (!isControlTowerRoute) {
     return null;
@@ -72,9 +65,9 @@ export function ControlTowerNav() {
             <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
             <p className="text-xs text-amber-500/90 font-medium leading-normal">
               <span className="font-semibold block sm:inline">초안 전용 제어판:</span>{" "}
-              이 화면은 프롬프트 및 작업 패킷 초안만 생성하며, 실제 에이전트를 실행하거나 소스 코드를 수정하지 않습니다.
+              채팅과 계획 고정은 실행하지 않습니다. 실제 실행은 사용자가 실행 버튼을 누른 뒤에만 시작됩니다.
               <span className="block text-[10px] text-amber-500/60 mt-0.5">
-                Draft-only control surface. This app prepares prompts and packets. It does not execute agents or modify files.
+                Planning is safe by default. Execution requires explicit user action.
               </span>
             </p>
           </div>

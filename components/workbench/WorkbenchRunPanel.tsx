@@ -208,10 +208,10 @@ export function WorkbenchRunPanel({
               로컬 머신에서 실행됩니다
             </p>
             <ul className="text-xs text-amber-700 space-y-1 list-disc list-inside">
-              <li>Claude Code 도구가 실행됩니다</li>
+              <li>{task.assignedAgent} 로컬 도구가 실행됩니다</li>
               <li>프로젝트 파일이 수정될 수 있습니다</li>
               <li>실시간 로그를 확인할 수 있습니다</li>
-              <li>Claude Code에 이미 로그인되어 있어야 합니다</li>
+              <li>해당 로컬 도구에 이미 로그인되어 있어야 합니다</li>
               <li>기본적으로 유료 API를 호출하지 않습니다</li>
             </ul>
           </div>
@@ -234,7 +234,7 @@ export function WorkbenchRunPanel({
       )}
 
       {/* RunnerLogView (visible during pre-execution and after) */}
-      {task.assignedAgent === "claude-code" && approvalToken ? (
+      {approvalToken ? (
         <div>
           <RunnerLogView
             planId={planId}
@@ -245,18 +245,6 @@ export function WorkbenchRunPanel({
             approvalToken={approvalToken}
             onComplete={(status) => handleRunnerComplete(status)}
           />
-        </div>
-      ) : task.assignedAgent !== "claude-code" ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-red-700">
-              지원하지 않는 에이전트
-            </p>
-            <p className="text-xs text-red-600 mt-1">
-              현재는 Claude Code만 실행 가능합니다. 할당된 에이전트: {task.assignedAgent}
-            </p>
-          </div>
         </div>
       ) : (
         <div className="flex items-center gap-2 text-sm text-gray-500 py-4">

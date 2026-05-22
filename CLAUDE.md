@@ -149,12 +149,62 @@ As of 2026-05-22, the codebase implements:
   - `docs/HERMES_CLI_INSTALLATION_SPIKE.md`: Spike guide with safety boundaries (no installation/execution)
   - `docs/VIBE_KANBAN_BRIDGE.md`: Bridge architecture and integration roadmap
 
-**Next Phase (Phase 10)**:
-- Antigravity Full UI/UX Polish
-- Integration Testing (end-to-end flow validation)
-- Vibe Kanban Real API Integration
-- Context Pack Workflow & Storage
-- Production Monitoring Setup
+**Phase 12-16 (Complete — Core Autonomous Orchestration Loop)**:
+- Task scheduling decisions (`single`, `sequential`, `parallel`, `token_relay`) based on task risk level and file conflict checks.
+- Automatic agent result collection and classification (`Pass`, `MinorFix`, `QA`, `Blocked`, `SafetyViolation`).
+- Failed task retry tracking with max 3 retries (infinite loop prevention) and retry candidates management.
+- Hermes background observer-only monitoring summaries and Obsidian note exports (7 types: Insight, Decision, Failed-Attempt, Prompt, Handoff, Status, QA-Finding).
+- Webhooks and Discord approval preview card (mock) for high-risk actions.
+- 23 integration tests, all checks passing.
+
+**Phase 17-18 (Complete — Orchestration Adapters & Control Panel UI)**:
+- CLI agent adapters for `claude-code`, `codex`, `antigravity`.
+- `/orchestration` page layout with a 5-tab panel (Queue, Results, Approvals, Progress, Feedback).
+- State management via React Context (`orchestration-context.tsx`) with seed data for manual verification.
+
+**Phase 19-22 (Complete — Orchestration UX Completion & Logs)**:
+- Conversation-to-task job generation panel (`ConversationToJobPanel`).
+- Logs API endpoint (`/api/orchestration/logs`) reading NDJSON file logs.
+- OrchestrationLogViewer UI component displaying event categories, agents, risk metrics, and timestamps.
+- Hermes Insight Panel rendering cycle summaries, performance reviews, routing tips, and Obsidian note export concatenation.
+
+**Phase 28-32 (Complete — Real CLI Integration & Production Safety)**:
+- Real Codex CLI stdout parsing and Antigravity Prompt-Copy workflows.
+- Vibe Kanban HTTP API integration and card status polling.
+- Destructive Pattern Detector protecting do-not-touch files.
+- Context budget auto-management based on token limits (chars/4 heuristic).
+- Risk escalation approval gates.
+- 199 tests passing.
+
+**Phase 33 (Complete — Production Hardening & Error Recovery)**:
+- Exponential backoff retry policies for network and API errors.
+- Error recovery manager scheduling retries and logging strategies.
+
+**Phase 34 (Complete — Hermes LLM Validation & Auto-Decision Layer)**:
+- LLM-assisted validation logic scoring completion ratio and risks.
+- Auto-decision engine with confidence threshold (default 75%) for auto-approving/rejecting tasks, and user approval workflows.
+- 22 new tests passing (225 total passing).
+
+**Phase 35-36 (Complete — Multi-Project Integration & Dashboard)**:
+- `MultiProjectOrchestrator` for managing parallel projects (up to 2 concurrent) with independent queues.
+- `AgentSlotAllocator` restricting agent concurrency across projects.
+- Dashboard snapshot builder aggregating KPI metrics, activity feeds, and active slot statuses.
+- Real-time client dashboard UI at `/dashboard` displaying metrics, agent listings, and active project filters.
+- 26 new tests passing (251 total passing).
+
+**Phase 37-39 (Complete — Hermes Enhancements: Telegram, OrchestrationPacket, Risk Classification)** ✅:
+- **Telegram Integration**: `TelegramClient` for approval requests, status reports, phase complete alerts, failure reports, high-risk operation warnings.
+- **OrchestrationPacket & PhaseCompletePacket**: Formalized packet types in `lib/types.ts` for Hermes→Agent Control Room communication.
+- **Risk Classification Engine**: `RiskClassifier` auto-classifies tasks by risk level (Low/Medium/High) and detects file conflicts.
+- **API Routes**: `/api/orchestration/telegram/approve` for approval handling, `/api/orchestration/classify` for risk classification.
+- **Packet Generation**: Functions to generate and render OrchestrationPacket and PhaseCompletePacket (Markdown + JSON).
+- **21 new tests passing (272 total passing)**.
+
+**Next Phase**:
+- Supabase Syncing and Live Database Hookup
+- Real Telegram Bot Token Integration
+- Obsidian Memory Loop Implementation
+- Production Deployment and Real-world Usage Feedback Loop
 
 ## Recommended Tech Stack
 Use this unless the user explicitly changes direction.
@@ -173,10 +223,10 @@ Use this unless the user explicitly changes direction.
 ### Agent
 An external AI coding tool used by the user.
 Allowed values:
-- `claude-code`
-- `codex`
-- `antigravity`
-- `hermes` (optional background/status/memory worker, not primary coding brain)
+- `claude-code` — Primary coding agent for complex implementation
+- `codex` — QA, testing, type checking, isolated fixes
+- `antigravity` — UI/UX, visual screen design
+- `hermes` — Approval-based execution worker (terminal, git, deployment, automation, logging, Telegram approval, Obsidian memory)
 
 ### Orchestrator
 The product layer that translates user intent into a roadmap, task sequence, agent routing, prompts, approval gates, and next-step decisions.
@@ -201,11 +251,14 @@ Use these defaults:
 | Architecture, complex reasoning, document review | Claude Code | Strong at context-heavy planning |
 | Clear implementation, bug fixing, tests, type errors | Codex | Strong at bounded implementation |
 | UI prototype, visual iteration, multi-file screen work | Antigravity | Strong for visual/product implementation |
-| Long-running monitoring, summaries, memory extraction | Hermes | Background/status/memory worker, not primary coding agent |
+| Terminal execution, Git ops, deployment, monitoring | Hermes | Approval-based execution worker with Telegram integration |
+| Operational automation, logging, memory extraction | Hermes | Obsidian memory + failure pattern analysis |
 | Workspaces, sessions, diffs, previews | Vibe Kanban | Execution workbench, not product brain |
 | Unknown or ambiguous work | Claude Code first | Analyze before implementation |
 
 If preferred agent status is `cooling_down`, `token_limited`, `context_overloaded`, `blocked`, `manual_only`, or `experimental`, recommend a viable fallback and generate a handoff or Context Pack. Do not invent automatic token integrations; status is manually tracked unless explicitly implemented.
+
+**Hermes Approval Policy**: High-risk operations (git push, production deploy, dependency changes, DB migrations) require Telegram approval before execution. See [[docs/HERMES_BACKGROUND_WORKER.md]] for full approval matrix.
 
 ## Core Flow
 1. User selects or registers a project.

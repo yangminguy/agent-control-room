@@ -5,31 +5,13 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Target,
-  FolderKanban,
-  Bot,
-  ArrowRightLeft,
-  FileText,
-  Cpu,
-  Database,
-  Lightbulb,
-  ClipboardCheck,
-  PackageOpen,
-  BrainCircuit,
+  Settings,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
-  { href: "/", label: "대시보드", icon: LayoutDashboard },
-  { href: "/plan", label: "실행 계획", icon: Target },
-  { href: "/projects", label: "프로젝트", icon: FolderKanban },
-  { href: "/agent-status", label: "에이전트 상태", icon: Bot },
-  { href: "/prompt-compiler", label: "프롬프트 컴파일러", icon: Cpu },
-  { href: "/hermes-packets", label: "Hermes 패킷 초안", icon: Database },
-  { href: "/memory", label: "메모리 & 인사이트", icon: BrainCircuit },
-  { href: "/context-pack", label: "Context / Handoff Pack", icon: PackageOpen },
-  { href: "/handoffs", label: "핸드오프", icon: ArrowRightLeft },
-  { href: "/reports", label: "리포트", icon: FileText },
-  { href: "/result-review", label: "결과 리뷰", icon: ClipboardCheck },
-  { href: "/advisor", label: "어드바이저", icon: Lightbulb },
+  { href: "/", label: "기획 채팅", icon: LayoutDashboard },
+  { href: "/plan", label: "Phase 로드맵", icon: Target },
+  { href: "/projects", label: "고급 도구", icon: Settings },
 ];
 
 export function Sidebar() {

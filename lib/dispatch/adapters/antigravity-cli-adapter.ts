@@ -1,6 +1,12 @@
+import { spawn } from "child_process";
+import fs from "fs";
 import type { AgentResult, DispatchJob } from "../../types";
 import { logOrchestrationEvent } from "../orchestration-logger";
 import type { AgentAdapter } from "./index";
+
+const TIMEOUT_MS = 30 * 60 * 1000;
+const ANTIGRAVITY_CLI =
+  "/Applications/Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide";
 
 function generateJobResultId(): string {
   return `result-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -32,12 +38,8 @@ export class AntigravityCliAdapter implements AgentAdapter {
   async dispatch(job: DispatchJob): Promise<AgentResult> {
     const prompt = job.prompt ?? "(no prompt)";
     if (this.mockMode) {
-      console.log(`Antigravity Prompt Ready (MOCK): ${prompt}`);
-      return makeResult(
-        job,
-        `[MOCK ANTIGRAVITY PROMPT]\n\n${prompt}\n\nCopy above and paste into Antigravity UI, then bring result back to orchestration.`,
-        "blocked",
-      );
+      console.log(`Dispatching to Antigravity (MOCK): ${prompt}`);
+      return makeResult(job, `[MOCK] Antigravity job ${job.id} queued`, "pass");
     }
 
     logOrchestrationEvent({
@@ -46,29 +48,62 @@ export class AntigravityCliAdapter implements AgentAdapter {
       agentId: "antigravity",
       riskLevel: job.riskLevel,
       timestamp: new Date().toISOString(),
-      detail: (job.prompt ?? "").slice(0, 200),
+      detail: prompt.slice(0, 200),
     });
 
-    logOrchestrationEvent({
-      event: "job_completed",
-      jobId: job.id,
-      agentId: "antigravity",
-      riskLevel: job.riskLevel,
-      timestamp: new Date().toISOString(),
-      detail: "manual_prompt_copy_required",
-    });
+    if (!fs.existsSync(ANTIGRAVITY_CLI)) {
+      return makeResult(
+        job,
+        `Antigravity IDE CLI not found at ${ANTIGRAVITY_CLI}.`,
+        "blocked",
+      );
+    }
 
-    return makeResult(
-      job,
-      [
-        "Antigravity is a manual prompt-copy target in this MVP.",
-        "No Antigravity CLI process was spawned.",
-        "",
-        "Copy this prompt into Antigravity and import the result manually:",
-        "",
-        prompt,
-      ].join("\n"),
-      "blocked",
-    );
+    return new Promise<AgentResult>((resolve) => {
+      let settled = false;
+      const stdout: string[] = [];
+      const stderr: string[] = [];
+      const child = spawn(ANTIGRAVITY_CLI, ["chat", "--mode", "agent", prompt], {
+        cwd: process.cwd(),
+        shell: false,
+      });
+
+      const timer = setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          child.kill("SIGTERM");
+          resolve(makeResult(job, `Antigravity job ${job.id} timed out after 30 minutes`, "blocked"));
+        }
+      }, TIMEOUT_MS);
+
+      child.stdout?.on("data", (data: Buffer) => stdout.push(data.toString()));
+      child.stderr?.on("data", (data: Buffer) => stderr.push(data.toString()));
+
+      child.on("error", (error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(makeResult(job, `Antigravity spawn error: ${error.message}`, "blocked"));
+      });
+
+      child.on("close", (code) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        const rawOutput = [...stdout, ...stderr].join("\n");
+        const resultStatus: AgentResult["resultStatus"] = code === 0 ? "pass" : "blocked";
+
+        logOrchestrationEvent({
+          event: "job_completed",
+          jobId: job.id,
+          agentId: "antigravity",
+          riskLevel: job.riskLevel,
+          timestamp: new Date().toISOString(),
+          detail: `exitCode=${code} status=${resultStatus}`,
+        });
+
+        resolve(makeResult(job, rawOutput, resultStatus));
+      });
+    });
   }
 }

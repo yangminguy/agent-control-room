@@ -33,7 +33,7 @@ export class DefaultAutoDecisionEngine implements AutoDecisionEngine {
   private readonly DEFAULT_THRESHOLD = 75;
 
   makeDecision(input: AutoDecisionInput): AutoDecisionOutcome {
-    const { validationResult, autoApproveThreshold = this.DEFAULT_THRESHOLD, requireUserConfirmation = false } = input;
+    const { validationResult, autoApproveThreshold = this.DEFAULT_THRESHOLD, requireUserConfirmation = true } = input;
 
     let decision: "auto_approved" | "auto_rejected" | "user_confirmation_required";
     let reasoning: string;

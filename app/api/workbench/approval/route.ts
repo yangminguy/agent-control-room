@@ -33,7 +33,7 @@ import { getProjects } from "@/lib/storage/json-store";
 import { resolveRealPath, validateCwdSafety } from "@/lib/runner/git-utils";
 import { createHash } from "crypto";
 
-const SUPPORTED_AGENTS = new Set(["claude-code"]);
+const SUPPORTED_AGENTS = new Set(["claude-code", "codex", "antigravity"]);
 const APPROVAL_STATEMENT = "I approve local execution for this exact task";
 
 type ApprovalChecklist = {

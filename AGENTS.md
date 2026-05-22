@@ -55,31 +55,18 @@ Excluded:
 - deep Vibe Kanban fork or replacement of Agent Control Room's orchestration layer
 
 ## Current Implementation Status
-As of 2026-05-21, the codebase implements:
+As of 2026-05-22, the codebase implements the full AI Development Control Tower features (Phases 1-36 Complete):
 
-- Direction to Prompt at `/`.
-- `/api/orchestrate` with OpenAI structured output and deterministic local fallback.
-- TypeScript domain types in `lib/types.ts`.
-- Local JSON seed/read storage in `data/` and `lib/storage/json-store.ts`.
-- Session report input and persistence at `/reports` and `/api/reports`.
-- Vibe Kanban issue draft conversion and HTTP bridge in `lib/integrations/vibe-kanban.ts`.
-- Project registration/list/detail routes and UI.
-- Handoff preview UI.
-- Plan, task, and card data model (`FeaturePlan`, `PlanTask`, `KanbanCard`, `SubAgentTrack`, `ExecutionLog`).
-- `/plan` HTML plan view with current card/status UI and manual task status updates; next direction is roadmap-first.
-- Agent Execution Runner foundation: git branch creation, Claude Code CLI spawn, SSE log streaming, execution log storage, and `RunnerLogView`.
-- T019 Git Diff & Outcome Analyzer.
-- T020 Multi-Agent Router Enhancement.
-- T021 Token / Rate Limit Handoff.
-- T022 human-approved Autonomous Execution Loop.
-- T024 Vibe Kanban HTTP issue integration with mock fallback.
-- T026 Supabase schema/storage migration readiness with JSON fallback.
-
-Still missing:
-
-- Deeper Vibe Kanban workbench usage: workspace/session launch, open workspace links, result import, and diff/review handoff.
-- Clear separation between Agent Control Room's control panel and Vibe Kanban's board/execution UI.
-- Production hardening.
+- **Core Planning & Roadmap**: `/plan` Visual Development Roadmap Control Panel with 10-phase sample data, stage progress indicators, active stage agent tracking, and blockers detection.
+- **Prompt & Handoff Orchestration**: Senior Dev Prompt Compiler (`/prompt-compiler`) compiling copy-ready prompts with safety guidelines, forbidden files, and agent routing recommendations.
+- **Autonomous Dispatch & Scheduling**: State machine queue (`lib/dispatch/safe-dispatch-queue.ts`) routing jobs based on risk levels (`safe`, `low`, `medium`, `high`, `critical`) and file conflict matrices. Four scheduling modes: Single, Sequential, Parallel Safe, and Token Relay.
+- **Local adapters**: Local adapters for `claude-code`, `codex`, and `antigravity` handling shell subprocess spawns, stdout/stderr parsing, log streams, and copy-paste fallback.
+- **Result & Error Recovery**: Heuristic result classifier (`Pass`, `MinorFix`, `QA`, `Blocked`, `SafetyViolation`), automated retry queues (max 3 retries), and exponential backoff retry policy for transient errors.
+- **Hermes Worker Layer**: Mock Discord approval interface with 5-minute timeout window. LLM-based validation layer checking completion confidence (75% threshold for auto-approval) and safety violations.
+- **Memory & Obsidian Insights**: Obsidian note generator creating 7 distinct note formats with frontmatter. Prompt pattern synthesizer extracting successful patterns into a shared knowledge base.
+- **Vibe Kanban Bridge**: Bidirectional real HTTP bridge handling issue creation, status querying, workspace link launches, and result imports.
+- **Multi-Project & Dashboard**: `MultiProjectOrchestrator` limiting concurrent projects (max 2 active), isolated queues per project, and a unified `/dashboard` with KPI card stats, activity feeds, and project filters.
+- **Production Hardening**: Production-ready Supabase schema, RLS integration, dependency security hardening, and safe path traversal checks. All 251 tests passing.
 
 ## Recommended Tech Stack
 Use this unless the user explicitly changes direction.
@@ -132,6 +119,30 @@ Use these defaults:
 
 If preferred agent status is `cooling_down`, `token_limited`, `context_overloaded`, `blocked`, `manual_only`, or `experimental`, recommend a viable fallback and generate a handoff or Context Pack. Do not invent automatic token integrations; status is manually tracked unless explicitly implemented.
 
+## Agent Roles in Detail
+
+### Claude Code
+- **Strong at**: Architecture, complex reasoning, multi-file changes, integration
+- **Not responsible for**: QA (→ Codex), UI polish (→ Antigravity), operational execution (→ Hermes)
+- **Token profile**: High token usage, benefits from context packs
+
+### Codex
+- **Strong at**: Tests, validation, type checking, isolated fixes, QA verification
+- **Not responsible for**: Architecture (← Claude Code), UI (← Antigravity), operations (← Hermes)
+- **Token profile**: Low-to-medium token usage, fast turnaround
+
+### Antigravity
+- **Strong at**: UI screens, responsive design, visual polish, component refinement
+- **Not responsible for**: Logic (← Claude Code), testing (← Codex), operations (← Hermes)
+- **Token profile**: Medium token usage, iteration-friendly
+
+### Hermes
+- **Strong at**: Operational monitoring, logging, Git/deployment status, Telegram approval, packet generation
+- **Not responsible for**: Coding (← Claude/Codex/Antigravity)
+- **Role**: Approval-based execution worker, not primary coding agent
+- **Model**: Gemini API (initial), OpenAI API (fallback)
+- **Returns to**: Agent Control Room (always)
+
 ## Multi-Agent Execution Strategy
 
 Agent Control Room does **not** run all agents simultaneously by default.
@@ -150,6 +161,7 @@ Instead, use these execution modes based on task risk, file conflicts, and token
 See `docs/AGENT_SCHEDULING_POLICY.md` for detailed decision tree and file conflict matrix.
 See `docs/AGENT_RUN_POLICY.md` for execution surfaces (CLI, Workbench, Manual).
 See `docs/CONTEXT_TOKEN_RESUME_PROTOCOL.md` for token limit handoff and Context Pack generation.
+See `docs/HERMES_BACKGROUND_WORKER.md` for Hermes approval and operational policy.
 
 ## Core Flow
 1. User selects or registers a project.
