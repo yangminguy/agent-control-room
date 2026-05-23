@@ -4,6 +4,7 @@ import { normalizeExecutionResult } from "@/lib/runner/execution-result-normaliz
 import { buildHermesPacket } from "@/lib/hermes/packet-builder";
 import { classifyExecutionResult } from "@/lib/orchestration/decision-classifier";
 import { applyStatusUpdate } from "@/lib/orchestration/status-updater";
+import { saveExecutionPacket } from "@/lib/storage/execution-packet-store";
 import type {
   HermesExecutionInput,
   RiskLevel,
@@ -96,6 +97,14 @@ export async function POST(request: Request) {
 
     // ── Step 5: Build Hermes packet ──────────────────────────────────────────
     const packet = buildHermesPacket(hermesInput);
+
+    // ── Step 5a: Save Hermes packet to local store ──────────────────────────
+    try {
+      saveExecutionPacket(packet);
+    } catch (error) {
+      console.error("[execution-result] Failed to save Hermes packet:", error);
+      // Continue even if save fails — the packet is still in the response
+    }
 
     // ── Step 6: Classify the result ─────────────────────────────────────────
     const decision = classifyExecutionResult(hermesInput);
