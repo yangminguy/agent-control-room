@@ -1,1 +1,45 @@
-[]
+[
+  {
+    "id": "smoke-e2e-run",
+    "planId": "smoke-e2e-plan",
+    "featurePlanId": "smoke-e2e-feature-plan",
+    "status": "completed",
+    "startedAt": "2026-05-23T08:54:33.186Z",
+    "completedAt": "2026-05-23T08:54:33.194Z",
+    "message": "Smoke test execution completed successfully",
+    "startedTasks": [
+      {
+        "id": "smoke-e2e-task-job",
+        "taskId": "smoke-e2e-task",
+        "phaseId": "smoke-phase-1",
+        "featurePlanId": "smoke-e2e-feature-plan",
+        "agentId": "claude-code",
+        "riskLevel": "safe",
+        "status": "completed",
+        "executionSurface": "local_runner",
+        "createdAt": "2026-05-23T08:54:33.194Z",
+        "completedAt": "2026-05-23T08:54:33.194Z",
+        "retryCount": 0,
+        "maxRetries": 2,
+        "prompt": "Create docs/smoke-test.md with exactly this content:\n\nAgent Control Room E2E smoke test passed.\n"
+      }
+    ],
+    "vibeIssues": [],
+    "hermesPacket": {
+      "id": "smoke-e2e-run-hermes",
+      "runId": "smoke-e2e-run",
+      "status": "completed",
+      "resultSummary": "Smoke test file created successfully",
+      "changedFiles": [
+        "docs/smoke-test.md"
+      ],
+      "verificationChecks": {
+        "fileExists": true,
+        "contentMatches": true,
+        "noUnexpectedFiles": true
+      },
+      "createdAt": "2026-05-23T08:54:33.194Z"
+    },
+    "approvalRequired": false
+  }
+]
