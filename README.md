@@ -1,137 +1,84 @@
 # Agent Control Room
 
-Agent Control Room is a personal **AI Development Control Tower** for non-developer PMs.
-It turns an idea or product direction into a visual development roadmap,
-implementation tasks, agent recommendations, senior-dev prompts, execution
-tracking, completion checks, handoffs, and durable development memory.
+Agent Control Room is a **roadmap-driven local AI development automation control tower for non-developer PMs**.
 
-## Run locally
+It turns product direction into a roadmap, decomposes the roadmap into executable tasks, routes work to local AI agents, runs approved local CLI automation, lets Hermes supervise execution, analyzes logs/diffs/checks, updates roadmap progress, and re-orchestrates when work drifts from the plan.
 
-**Development (JSON storage):**
+It is not a copy-paste prompt generator. Prompt compilation and handoff generation are supporting tools inside the control tower loop.
+
+## Core Flow
+
+1. Register or select a project.
+2. Enter product direction.
+3. Generate a visual roadmap and executable tasks.
+4. Review agent assignment, risk, and recommended execution mode.
+5. Approve risky execution when required.
+6. Run supported local CLI execution or send detailed work to Vibe Kanban.
+7. Watch logs and collect git diff/check results.
+8. Let Hermes produce completion, failure, drift, or approval packets.
+9. Update roadmap and kanban status.
+10. Continue, retry, QA, pause, or re-orchestrate.
+
+## UI Map
+
+- `/plan` — main roadmap control panel.
+- Kanban/task cards — detailed task inspection.
+- `/workbench` — execution readiness, approval, local runner, logs.
+- `/orchestration` — queue, approvals, validation, auto-decision suggestions, re-orchestration.
+- `/dashboard` — multi-project status summary.
+- Hermes panel/routes — supervision packets, monitoring, validation, reports.
+
+Roadmap is the main surface. Kanban is detail.
+
+## Run Locally
+
 ```bash
 npm install
 npm run dev
 ```
 
-**With Supabase (optional):**
-```bash
-# Set environment variables
-cp .env.example .env.local
-# Edit .env.local with your Supabase URL and key
-nano .env.local
+Open the local URL printed by Next.js, usually `http://localhost:3000`.
 
-# Then run
-npm run dev
-```
+Local JSON storage is the default development path. Supabase-related work exists for later durable storage, but Supabase is not required for the current local automation loop.
 
-Open the local URL printed by Next.js (typically `http://localhost:3000`).
+## Core Docs
 
-## MVP flow
+- `AGENTS.md` — agent instructions and current project rules
+- `CLAUDE.md` — coding context for Claude Code
+- `docs/CONTROL_TOWER_DIRECTION.md` — canonical product direction
+- `docs/PRD.md` — current requirements
+- `docs/ARCHITECTURE.md` — system architecture
+- `docs/TASKS.md` — active development focus and backlog
+- `docs/ROADMAP.md` — phase roadmap
+- `docs/AGENT_STATE.md` — current state
+- `docs/HANDOFF.md` — handoff and session context
+- `docs/DECISIONS.md` — product/technical decisions
+- `docs/LOCAL_RUNNER_ARCHITECTURE.md` — local CLI runner model
+- `docs/HERMES_BACKGROUND_WORKER.md` — Hermes supervision policy
+- `docs/AGENT_RUN_POLICY.md` — execution surfaces and approval gates
+- `docs/AGENT_SCHEDULING_POLICY.md` — single/sequential/parallel/token-relay rules
 
-1. **Register or select a project** at `/` → `/projects`
-2. **Enter an idea or product direction** in natural language → Direction input form
-3. **Generate control-tower output**:
-   - Technical translation (OpenAI structured output)
-   - Visual roadmap and stage/task breakdown
-   - Task decomposition
-   - Agent routing + recommendation
-   - Senior-dev copy-ready prompt
-4. **Track execution** in `/plan`:
-   - Visual Development Roadmap Control Panel
-   - Completed/active/waiting/blocked/user-input-required states
-   - Check marks for completed stages
-   - Execute button (spawns Claude Code or displays copy prompt)
-   - Auto-analysis after execution
-5. **Loop control**:
-   - Continue → prepare next task
-   - Stop → save current result
-   - Error recovery with Retry buttons
-6. **Export/handoff**:
-   - Session report at `/reports`
-   - Send to Vibe Kanban at task card (with project/status selection)
+## Backlog Boundaries
 
-## Files
+The following are not current core-loop requirements:
 
-- `CLAUDE.md` — Main AI coding context file
-- `docs/README.md` — Active vs archived documentation map
-- `docs/CONTROL_TOWER_DIRECTION.md` — Canonical current product direction
-- `docs/PRD.md` — Current concise product requirements
-- `docs/ARCHITECTURE.md` — System architecture and module design
-- `docs/TASKS.md` — Current task status and next task
-- `docs/HANDOFF.md` — Tool-to-tool handoff format
-- `docs/AGENT_STATE.md` — Current project state and next prompt
-- `docs/DECISIONS.md` — Product/technical decisions
-- `docs/ROADMAP.md` — Phase-level roadmap
-- `docs/TASK_MODEL.md` — Plan, task, roadmap/kanban, diff, and execution log models
-- `docs/VIBE_KANBAN_INTEGRATION.md` — Vibe Kanban bridge notes
-- `docs/PROMPT_TEMPLATES.md` — Reusable prompts for Claude Code, Codex, Antigravity
-- `docs/DESIGN_SYSTEM.md` — Current UI design rules
-- `docs/archive/` — Historical long-form research and superseded docs
+- Telegram full approval bot integration
+- Obsidian filesystem sync
+- Supabase durable storage
+- Codex CLI automation if not verified
+- Antigravity IDE automation if not verified
+- GitHub PR automation
+- Production deployment automation
+- Multi-user collaboration
+- Discord Webhook
 
-## Current Status (2026-05-22)
-
-- **Phase**: 10/11+ complete (Full MVP + Workbench integration ready)
-- **Tests**: 101/101 passing (including Phase 11 integration tests)
-- **Build**: 33 routes, all checks green
-- **Deployment**: Ready for Vercel (checklist updated, env vars documented)
-
-See `docs/DEPLOYMENT_CHECKLIST.md` for production deployment guide.
-
-## Deploy to Vercel
-
-1. **Push to GitHub** (optional but recommended):
-   ```bash
-   git add .
-   git commit -m "Deploy: Agent Control Room Phase 11 complete (MVP + workbench integration)"
-   git push
-   ```
-
-2. **Set Environment Variables** in Vercel dashboard:
-   ```
-   OPENAI_API_KEY=sk-...
-   NEXT_PUBLIC_SUPABASE_URL=https://pqqgkhowiaeznkumwhwl.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
-   ```
-
-3. **Deploy**:
-   ```bash
-   npm run build
-   vercel --prod
-   ```
-
-## Current Status
-
-✅ **Completed Phases:**
-- Phase 1-5: Core orchestration, structured planning, execution, analysis, routing, autonomous loop
-- Phase 6: Loop UX refinement (feedback banners, error recovery)
-- Phase 7: Security hardening (npm audit, path validation)
-- Phase 8: Integration (Vibe Kanban HTTP API, Supabase schema)
-
-🔜 **Current Phase:**
-- Phase 9: Roadmap-First Control Tower UX
-- Next focus: `/plan` as Visual Development Roadmap Control Panel, Senior Dev Prompt Compiler structure, Context Packs, Obsidian-compatible insight memory, and Hermes background-worker positioning
-
-✅ **Ready for Production:**
-- Zero critical/high security vulnerabilities (direct dependencies)
-- All core flows tested and verified
-- JSON fallback ensures offline capability
-- Supabase optional (app runs without it)
-
-⚠️ **Known Limitations:**
-- Vibe Kanban `/api/scratch/` scratch API not fully integrated (general `/api/issues` endpoint used)
-- No multi-user authentication (single-user personal tool)
-- npm audit: 2 moderate (Next.js bundled PostCSS, not exploitable in this app)
-
-## Recommended Start
-
-1. Run the app: `npm run dev`
-2. Start from the Direction to Prompt screen at `/`
-3. For implementation handoffs, keep prompts bounded:
+## Recommended Start For Agents
 
 ```txt
-Read CLAUDE.md, docs/PRD.md, docs/ARCHITECTURE.md, and docs/TASKS.md.
-Also read docs/CONTROL_TOWER_DIRECTION.md before changing product direction.
-Keep the change scoped to the current task and update docs if task status changes.
+Read AGENTS.md, CLAUDE.md, docs/CONTROL_TOWER_DIRECTION.md, docs/PRD.md,
+docs/ARCHITECTURE.md, and docs/TASKS.md.
+Keep Roadmap as the main surface.
+Keep Kanban as task detail.
+Keep Hermes as supervisor, not coder.
+Keep high/critical work approval-gated.
 ```
-
-4. For cloud deployment, configure Supabase environment variables and re-deploy
