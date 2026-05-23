@@ -136,4 +136,24 @@ export const HERMES_PACKET_KINDS: Record<
     label: "Obsidian Note",
     description: "Personal knowledge management note (Obsidian-compatible).",
   },
+  "phase-completion": {
+    label: "Phase Completion",
+    description: "Task completed successfully with results and next steps.",
+  },
+  failure: {
+    label: "Task Failure",
+    description: "Task failed with root cause analysis and recovery recommendations.",
+  },
+  "drift-detection": {
+    label: "Drift Detection",
+    description: "Detected deviation from original plan during execution.",
+  },
+  "approval-request": {
+    label: "Approval Request",
+    description: "High/critical operation requiring explicit user approval.",
+  },
+  "re-orchestration": {
+    label: "Re-orchestration",
+    description: "Execution plan needs adjustment due to drift or failure.",
+  },
 };
