@@ -6,20 +6,20 @@ import { type DispatchJob, type DispatchJobStatus, type RiskLevel } from "@/lib/
 // ── Badge configs ─────────────────────────────────────────
 
 const STATUS_BADGE: Record<DispatchJobStatus, { label: string; cls: string }> = {
-  queued: { label: "Queued", cls: "bg-zinc-700 text-zinc-300 border-zinc-600" },
-  running: { label: "Running", cls: "bg-blue-900 text-blue-300 border-blue-700" },
-  approved: { label: "Approved", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
-  skipped_due_to_risk: { label: "Skipped", cls: "bg-orange-900 text-orange-300 border-orange-700" },
-  completed: { label: "Completed", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
-  failed: { label: "Failed", cls: "bg-red-900 text-red-300 border-red-700" },
+  queued: { label: "대기 중", cls: "bg-zinc-700 text-zinc-300 border-zinc-600" },
+  running: { label: "실행 중", cls: "bg-blue-900 text-blue-300 border-blue-700" },
+  approved: { label: "승인됨", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
+  skipped_due_to_risk: { label: "위험으로 생략", cls: "bg-orange-900 text-orange-300 border-orange-700" },
+  completed: { label: "완료됨", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
+  failed: { label: "실패", cls: "bg-red-900 text-red-300 border-red-700" },
 };
 
 const RISK_BADGE: Record<RiskLevel, { label: string; cls: string }> = {
-  safe: { label: "Safe", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
-  low: { label: "Low", cls: "bg-yellow-900 text-yellow-300 border-yellow-700" },
-  medium: { label: "Medium", cls: "bg-orange-900 text-orange-300 border-orange-700" },
-  high: { label: "High", cls: "bg-red-900 text-red-300 border-red-700" },
-  critical: { label: "Critical", cls: "bg-red-950 text-red-200 border-red-800 font-bold" },
+  safe: { label: "안전", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
+  low: { label: "낮음", cls: "bg-yellow-900 text-yellow-300 border-yellow-700" },
+  medium: { label: "중간", cls: "bg-orange-900 text-orange-300 border-orange-700" },
+  high: { label: "높음", cls: "bg-red-900 text-red-300 border-red-700" },
+  critical: { label: "치명적", cls: "bg-red-950 text-red-200 border-red-800 font-bold" },
 };
 
 const ALL_STATUSES: Array<DispatchJobStatus | "all"> = [
@@ -33,13 +33,13 @@ const ALL_STATUSES: Array<DispatchJobStatus | "all"> = [
 ];
 
 const STATUS_LABELS: Record<DispatchJobStatus | "all", string> = {
-  all: "All",
-  queued: "Queued",
-  running: "Running",
-  approved: "Approved",
-  skipped_due_to_risk: "Skipped",
-  completed: "Completed",
-  failed: "Failed",
+  all: "전체",
+  queued: "대기 중",
+  running: "실행 중",
+  approved: "승인됨",
+  skipped_due_to_risk: "생략됨",
+  completed: "완료됨",
+  failed: "실패",
 };
 
 // ── Helpers ───────────────────────────────────────────────
@@ -82,14 +82,14 @@ export function DispatchStatusPanel({
     <div className="space-y-4">
       {/* Summary counts */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary px-1">
-        <span className="text-text-primary font-medium">{jobs.length} jobs total</span>
+        <span className="text-text-primary font-medium">총 {jobs.length}개 작업</span>
         {(["queued", "running", "approved", "skipped_due_to_risk", "completed", "failed"] as DispatchJobStatus[]).map(
           (s) => {
             const count = countByStatus(jobs, s);
             if (count === 0) return null;
             return (
               <span key={s}>
-                {count} {STATUS_LABELS[s].toLowerCase()}
+                {count} {STATUS_LABELS[s]}
               </span>
             );
           }
@@ -120,18 +120,19 @@ export function DispatchStatusPanel({
       {/* Job list */}
       {filtered.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-6 text-center">
-          <p className="text-sm text-text-secondary">No jobs match the current filter.</p>
+          <p className="text-sm text-text-secondary">아직 실행 대기 중인 작업이 없습니다.</p>
+          <p className="text-sm text-text-secondary mt-1">기획 채팅에서 작업을 만들면 여기에 표시됩니다.</p>
         </div>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
           {/* Table header */}
           <div className="grid grid-cols-[1fr_1fr_auto_auto_1fr_auto] gap-3 px-4 py-2 bg-surface-2 border-b border-border text-xs font-semibold text-text-secondary uppercase tracking-wide">
-            <span>Job / Task</span>
-            <span>Agent</span>
-            <span>Risk</span>
-            <span>Status</span>
-            <span>Timestamps</span>
-            <span>Action</span>
+            <span>작업 / 태스크</span>
+            <span>에이전트</span>
+            <span>리스크</span>
+            <span>상태</span>
+            <span>타임스탬프</span>
+            <span>액션</span>
           </div>
 
           {/* Rows */}
@@ -166,12 +167,12 @@ export function DispatchStatusPanel({
 
                   {/* Timestamps */}
                   <div className="space-y-0.5 text-xs text-text-secondary">
-                    <p>Created: {formatTs(job.createdAt)}</p>
-                    {job.approvedAt && <p>Approved: {formatTs(job.approvedAt)}</p>}
-                    {job.timeoutAt && <p>Timeout: {formatTs(job.timeoutAt)}</p>}
-                    {job.completedAt && <p>Completed: {formatTs(job.completedAt)}</p>}
+                    <p>생성: {formatTs(job.createdAt)}</p>
+                    {job.approvedAt && <p>승인: {formatTs(job.approvedAt)}</p>}
+                    {job.timeoutAt && <p>타임아웃: {formatTs(job.timeoutAt)}</p>}
+                    {job.completedAt && <p>완료: {formatTs(job.completedAt)}</p>}
                     {job.retryCount > 0 && (
-                      <p className="text-orange-400">Retries: {job.retryCount}</p>
+                      <p className="text-orange-400">재시도: {job.retryCount}</p>
                     )}
                   </div>
 

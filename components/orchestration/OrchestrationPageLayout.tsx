@@ -27,16 +27,16 @@ import type { ParallelSafetyDecision } from "@/lib/orchestration/parallel-safety
 // ── Tab config ────────────────────────────────────────────────────────────────
 
 const TABS = [
-  "OrchestrationDecision",
-  "Dispatch Queue",
-  "Results",
-  "Approvals",
-  "Progress",
-  "Feedback",
-  "Hermes Insights",
-  "Logs",
-  "Metrics",
-  "Hermes Live",
+  "실행 판단",
+  "실행 작업 대기열",
+  "실행 결과",
+  "승인 요청",
+  "진행 상황",
+  "피드백",
+  "Hermes 인사이트",
+  "실행 로그",
+  "실행 지표",
+  "Hermes 실시간 감시",
 ] as const;
 
 type TabIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
@@ -143,9 +143,9 @@ export function OrchestrationPageLayout() {
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-xl font-bold text-text-primary">Orchestration Control Panel</h1>
+          <h1 className="text-xl font-bold text-text-primary">실행 제어판</h1>
           <p className="text-sm text-text-secondary mt-1">
-            Monitor dispatch jobs, collect results, manage approvals, and review feedback.
+            실행 작업을 모니터링하고, 결과를 수집하며, 승인 및 피드백을 관리합니다.
           </p>
         </div>
 
@@ -249,7 +249,7 @@ export function OrchestrationPageLayout() {
             <div className="space-y-4">
               {approvals.length === 0 || !firstApproval ? (
                 <div className="rounded-lg border border-dashed border-border p-6 text-center">
-                  <p className="text-sm text-text-secondary">No approval requests.</p>
+                  <p className="text-sm text-text-secondary">현재 대기 중인 승인 요청이 없습니다.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -274,14 +274,14 @@ export function OrchestrationPageLayout() {
                               onClick={() => mockApprove(approval.id)}
                               className="px-3 py-1.5 rounded border border-emerald-700 bg-emerald-950 text-emerald-300 text-xs font-medium hover:bg-emerald-900 transition-colors"
                             >
-                              Mock Approve
+                              [개발용] 모의 승인
                             </button>
                             <button
                               type="button"
                               onClick={() => mockReject(approval.id)}
                               className="px-3 py-1.5 rounded border border-red-700 bg-red-950 text-red-300 text-xs font-medium hover:bg-red-900 transition-colors"
                             >
-                              Mock Reject
+                              [개발용] 모의 거절
                             </button>
                           </div>
                         )}

@@ -167,7 +167,7 @@ export default function AgentStatusPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-text-primary">Agent Status</h1>
+        <h1 className="text-3xl font-bold text-text-primary">에이전트 상태</h1>
         <p className="text-text-secondary mt-2">
           에이전트 상태를 관리하고 필요시 자동 핸드오프를 생성합니다.
         </p>
@@ -225,11 +225,11 @@ export default function AgentStatusPage() {
                     }
                     className="block w-full rounded-lg border border-border/60 bg-surface px-3 py-2 text-sm text-text-primary focus:border-pink-primary focus:ring-1 focus:ring-pink-primary/30 outline-none transition-colors"
                   >
-                    <option value="available">Available</option>
-                    <option value="limited">Limited</option>
-                    <option value="cooling_down">Cooling Down</option>
-                    <option value="blocked">Blocked</option>
-                    <option value="manual_only">Manual Only</option>
+                    <option value="available">사용 가능 (Available)</option>
+                    <option value="limited">사용량 제한 (Limited)</option>
+                    <option value="cooling_down">회복 중 (Cooling Down)</option>
+                    <option value="blocked">차단됨 (Blocked)</option>
+                    <option value="manual_only">수동 제어 전용 (Manual Only)</option>
                   </select>
                 </div>
 
@@ -279,7 +279,7 @@ export default function AgentStatusPage() {
                 >
                   {updatingAgent === agentType
                     ? "업데이트 중..."
-                    : "Update Status"}
+                    : "상태 업데이트"}
                 </button>
               </div>
 
@@ -306,7 +306,7 @@ export default function AgentStatusPage() {
               {handoff && (
                 <div className="mt-5 rounded-lg border border-border bg-surface p-4 text-sm font-medium text-text-secondary flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-blue-400" />
-                  Handoff prompt generated below.
+                  아래에 핸드오프 프롬프트가 생성되었습니다.
                 </div>
               )}
             </div>
@@ -317,9 +317,9 @@ export default function AgentStatusPage() {
       {Object.values(generatedHandoffs).some(Boolean) && (
         <section className="space-y-5 pt-8 border-t border-border">
           <div>
-            <h2 className="text-2xl font-bold text-text-primary">Generated Handoffs</h2>
+            <h2 className="text-2xl font-bold text-text-primary">생성된 핸드오프</h2>
             <p className="mt-1.5 text-sm text-text-secondary">
-              Copy-ready prompts created from the latest manual status changes.
+              최근 수동 상태 변경으로 생성된 프롬프트입니다. 복사하여 사용할 수 있습니다.
             </p>
           </div>
           <div className="space-y-6">
@@ -327,7 +327,7 @@ export default function AgentStatusPage() {
               handoff ? (
                 <div key={agent} className="space-y-3 bg-surface-2 p-6 rounded-xl border border-border">
                   <h3 className="font-bold text-lg text-text-primary">
-                    {AGENT_DISPLAY_NAMES[agent as AgentType]} status handoff
+                    {AGENT_DISPLAY_NAMES[agent as AgentType]} 상태 핸드오프
                   </h3>
                   <HandoffPreview handoff={handoff} />
                 </div>

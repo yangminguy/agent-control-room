@@ -66,11 +66,12 @@ function main() {
   const waitingTasks = getWaitingTasks();
   const pendingGates = getPendingReleaseGates();
 
-  console.log(`📊 Waiting Tasks: ${waitingTasks.length}`);
-  console.log(`🔒 Pending Release Gates: ${pendingGates.length}\n`);
+  console.log(`📊 실행 작업 대기열(Waiting Tasks): ${waitingTasks.length}`);
+  console.log(`🔒 승인 대기 중(Pending Release Gates): ${pendingGates.length}\n`);
 
   if (waitingTasks.length === 0 && pendingGates.length === 0) {
-    console.log("✅ No waiting tasks or pending approvals.");
+    console.log("✅ 현재 대기 중인 작업이나 승인 요청이 없습니다.");
+    console.log("   (정상 상태: 기획 채팅에서 작업을 만들거나 실행을 시작하면 이곳에 표시됩니다.)");
     process.exit(0);
   }
 

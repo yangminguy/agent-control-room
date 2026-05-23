@@ -215,7 +215,7 @@ export function ChatControlRoom({
       <section className="flex min-h-[640px] flex-col rounded-xl border border-border bg-surface-2">
         <div className="border-b border-border px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-pink-primary">
-            Chat Control Room
+            기획 제어판
           </p>
           <h1 className="mt-1 text-2xl font-bold text-text-primary">
             기획을 끝낸 뒤 버튼으로만 실행합니다
@@ -293,7 +293,7 @@ export function ChatControlRoom({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">
-                Roadmap Preview
+                로드맵 미리보기
               </p>
               <h2 className="mt-1 text-xl font-bold text-text-primary">
                 {plan?.title ?? "아직 계획 없음"}
@@ -329,7 +329,7 @@ export function ChatControlRoom({
                       {phase.number}. {phase.title}
                     </p>
                     <p className="mt-1 text-xs text-text-secondary">
-                      {agentLabel(phase.responsibleAgent)} · {phase.tasks.length} tasks
+                      {agentLabel(phase.responsibleAgent)} · 태스크 {phase.tasks.length}개
                     </p>
                     <p className="mt-2 text-xs leading-5 text-text-tertiary">
                       {phase.nextAction}
@@ -381,7 +381,7 @@ export function ChatControlRoom({
             </button>
           </div>
           <p className="mt-3 text-xs leading-5 text-text-secondary">
-            실행 버튼을 누르기 전까지는 planning-only입니다. 실행 후에는 Vercel이 직접 CLI를 실행하지 않고 로컬 Mac runner/workbench가 작업을 가져가 수행합니다.
+            실행 버튼을 누르기 전까지는 기획 단계(planning-only)입니다. 실행 후에는 웹 서버가 직접 코드를 실행하지 않고, 로컬 환경(Mac runner)에서 안전하게 작업을 가져가 수행합니다.
           </p>
         </section>
 
