@@ -74,7 +74,9 @@ Next task, retry, QA, pause, or re-orchestration
 | Decision Classifier | ✅ Implemented | `lib/orchestration/decision-classifier.ts` |
 | Status Updater | ✅ Implemented | `lib/orchestration/status-updater.ts` |
 | Hermes Packet Builder | ✅ Implemented | `lib/hermes/packet-builder.ts` |
-| Hermes Packet Wiring | ⚠️ Phase F | Packets built on-demand, not auto-generated |
+| Hermes Packet Wiring | ✅ Implemented | Packets auto-generated on execution completion (Phase 2) |
+| Hermes Insight Recorder | ✅ Implemented | `lib/hermes/insight-recorder.ts` |
+| Hermes Insight Display | ✅ Implemented | `app/orchestration/components/HermesInsightPanel.tsx` |
 | Roadmap UI | ✅ Implemented | `app/plan/page.tsx` |
 | Workbench UI | ✅ Implemented | `app/workbench/page.tsx` |
 | Orchestration UI | ✅ Implemented | `app/orchestration/page.tsx` |
@@ -103,6 +105,38 @@ graph TD
     R --> N["Next task / QA / Retry / Re-orchestrate"]
 ```
 
+## 4a. Phase 2: Multi-Agent Orchestration Loop
+
+**Result → Next Task Routing (Phase 2 Addition):**
+```text
+Hermes Packet generated
+  ↓
+Result classification (pass/fail/qa_needed/retry_needed/blocked/drift_detected)
+  ↓
+Next task recommendation (classifyExecutionDecision → generateNextTask)
+  → Task type determined: continue_next, fix, qa, retry, manual_review, re-orchestrate
+  → Risk level assigned
+  → Agent routed: Claude Code (auto-run eligible), Codex (QA-only, auto-run DISABLED), Antigravity (manual-only)
+  → Execution mode selected: sequential vs parallel_safe (with file-conflict detection)
+  → File boundary preserved (critical files protected)
+  ↓
+Parallel safety check (parallel-safety-decider.ts)
+  → Conflict detection across pending tasks
+  → Sequential-only enforcement for shared files, high/critical risk
+  ↓
+Hermes Insight recorded (execution patterns, file boundary violations)
+  → Insight severity: info, warning, critical
+  → Surfaced in Orchestration UI
+  ↓
+Next dispatch to agent or approval queue
+```
+
+**Multi-Agent Routing Rules (Phase 2):**
+- **Claude Code** — Architecture, complex reasoning, low-risk auto-run eligible
+- **Codex** — QA, tests, type errors, bounded fixes; auto-run DISABLED by design
+- **Antigravity** — UI/UX; auto-run DISABLED (not CLI agent)
+- **Hermes** — Supervision, insights, recommendations; no code edits
+
 ## 5. Local Runner Boundary
 
 The local runner is for already-authenticated local tools. It must:
@@ -124,7 +158,7 @@ It must not:
 
 See `docs/LOCAL_RUNNER_ARCHITECTURE.md`.
 
-## 6. Hermes Boundary (Phase E Implementation)
+## 6. Hermes Boundary (Phase E/F/2 Implementation)
 
 Hermes is a **Background Execution Supervisor** — not a coding agent.
 
@@ -134,16 +168,25 @@ Hermes is a **Background Execution Supervisor** — not a coding agent.
 - Packet Builder (`packet-builder.ts`) — Generates PM-friendly supervision packets
 - Status Updater (`status-updater.ts`) — Updates roadmap/kanban based on classification
 
+**Phase 2 Addition:**
+- Hermes Insight Recorder (`insight-recorder.ts`) — Captures execution patterns, file boundary violations
+- Hermes Insight Display Panel (`HermesInsightPanel.tsx`) — Shows recommendations in UI
+- Next Task Generator (`next-task-generator.ts`) — Decision-to-task mapping
+- Parallel Safety Decider (`parallel-safety-decider.ts`) — Conflict detection
+- Agent Router Enhancement (`next-task-router.ts`) — Multi-agent capability routing with auto-run restrictions
+
 **Packet Types Supported:**
 - Phase Success Packet (PhaseSuccessPacket)
 - Phase Failure Packet (PhaseFailurePacket)
 - Drift Detection Packet (DriftDetectionPacket)
-- Approval Request Packet (HermesApprovalRequestPacket) — typed but not generated in Phase E
+- Approval Request Packet (HermesApprovalRequestPacket)
 
-**Current State (Phase E):**
-- Packets CAN be generated on-demand via buildHermesPacket()
-- Packets are NOT automatically generated on runner completion (Phase F work)
-- Status updates (roadmap/kanban) happen based on classification results
+**Current State (Phase 2):**
+- ✅ Packets automatically generated on runner completion
+- ✅ Status updates (roadmap/kanban) happen based on classification results
+- ✅ Hermes insights captured and displayed
+- ✅ Next task recommendations routed to appropriate agent with safety restrictions
+- ✅ Parallel execution decisions made with file-conflict detection
 
 **Hermes must never:**
 - Edit code
@@ -197,7 +240,7 @@ See `docs/HERMES_BACKGROUND_WORKER.md`.
 - Approval token validation state
 - Hermes packet builders (buildable, stored on-demand)
 
-## 9. Key Implementation Files (Phase E)
+## 9. Key Implementation Files (Phase E/2)
 
 **Core Flow:**
 - `/api/runner/route.ts` — Local execution endpoint, SSE-streamed logs
@@ -206,13 +249,22 @@ See `docs/HERMES_BACKGROUND_WORKER.md`.
 - `lib/runner/execution-result-normalizer.ts` — Result normalization (pure function)
 - `lib/orchestration/decision-classifier.ts` — Decision logic (rules-based)
 - `lib/orchestration/status-updater.ts` — Roadmap/kanban sync
-- `lib/hermes/packet-builder.ts` — Packet generation (on-demand)
+- `lib/hermes/packet-builder.ts` — Packet generation (auto on completion)
+
+**Phase 2 Multi-Agent Orchestration:**
+- `lib/orchestration/next-task-generator.ts` — Decision-to-task mapping
+- `lib/orchestration/next-task-router.ts` — Agent routing with auto-run restrictions
+- `lib/orchestration/parallel-safety-decider.ts` — Conflict detection
+- `lib/hermes/insight-recorder.ts` — Execution pattern capture
+- `__tests__/e2e/smoke-runner.test.ts` — E2E validation
 
 **UI Display:**
 - `components/workbench/WorkbenchRunPanel.tsx` — Execution panel
 - `components/runner/RunnerLogView.tsx` — Real-time SSE log display
 - `components/runner/ExecutionResultCard.tsx` — Result summary
 - `components/orchestration/AutoDecisionPanel.tsx` — Decision display (with Korean labels)
+- `components/orchestration/HermesInsightPanel.tsx` — Insight display and recommendations
+- `components/orchestration/AgentCapabilityList.tsx` — Agent capabilities and restrictions
 
 ## 10. Backlog Architecture (Not Phase E/F Blockers)
 

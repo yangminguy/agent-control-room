@@ -25,7 +25,23 @@ planning → roadmap → local CLI execution → Hermes supervision → result a
 - Hermes is a Background Execution Supervisor, not a coding agent.
 - Vibe Kanban is a detailed execution workbench, not the product brain.
 - High/critical risk work requires user approval.
-- Telegram full bot, Obsidian filesystem sync, Supabase durable storage, GitHub PR automation, production deployment automation, Discord Webhook, unverified Codex CLI, and unverified Antigravity automation are backlog.
+- Codex auto-run is DISABLED (QA-focused, requires supervision).
+- Antigravity auto-run is DISABLED (UI designer, not CLI agent).
+- Telegram full bot, Obsidian filesystem sync, Supabase durable storage, GitHub PR automation, production deployment automation, and Discord Webhook are backlog.
+
+## Phase 2 Implementation Summary (Completed 2026-05-23)
+
+Agent Control Room now includes full multi-agent orchestration:
+
+- **Next Task Recommendation Engine**: Decision-to-task mapping (pass → next task, fail → fix, qa_needed → QA, etc.)
+- **Agent Router**: Claude Code (arch/reasoning), Codex (QA-only, auto-run disabled), Antigravity (UI-only, manual)
+- **Parallel Safety Decision Engine**: Conflict detection prevents multi-agent file collisions
+- **Hermes Insight Recorder**: Captures execution patterns, file boundary violations, and errors
+- **Orchestration Decision Panel**: PM-friendly recommendations in Korean UI
+- **Agent Capability List**: Explains why each agent was selected and auto-run restrictions
+- **E2E Smoke Test Runner**: Automated validation of main flow (planning → execution → status update)
+
+Safety is preserved through intentional restrictions, not missing features. All restrictions are documented.
 
 ## Required Handoff Contents
 
@@ -205,15 +221,33 @@ Every handoff or Context Pack must include:
 
 ## Recommended Next Handoff
 
-Next useful handoff is to Codex for bounded verification:
+**Phase 3: Documentation & Integration Verification**
+
+Next session: Codex for final documentation consistency and E2E test validation
 
 ```txt
-Read AGENTS.md, CLAUDE.md, docs/CONTROL_TOWER_DIRECTION.md, docs/PRD.md,
-docs/ARCHITECTURE.md, docs/TASKS.md, docs/LOCAL_RUNNER_ARCHITECTURE.md,
-and docs/HERMES_BACKGROUND_WORKER.md.
+Read:
+- AGENTS.md, CLAUDE.md, docs/CONTROL_TOWER_DIRECTION.md, docs/PRD.md
+- docs/ARCHITECTURE.md, docs/TASKS.md, docs/LOCAL_RUNNER_ARCHITECTURE.md
+- docs/HERMES_BACKGROUND_WORKER.md
+- docs/PHASE_2_COMPLETION_REPORT.md (multi-agent orchestration context)
 
-Verify that the main flow is consistently documented as:
-planning → roadmap → local CLI execution → Hermes supervision → result analysis → roadmap update.
+Verify:
+1. Main flow documented as: planning → roadmap → multi-agent task routing → 
+   risk assessment → approval gate → local CLI execution → Hermes supervision → 
+   packet generation → roadmap/kanban status update → next task recommendation
 
-Check that Roadmap is main, Kanban is detail, Hermes is supervisor, and high/critical risk work is approval-gated.
+2. Roadmap is main surface, Kanban is detail, Hermes is supervisor, 
+   approval gates block high/critical work, auto-run restrictions are intentional safety
+
+3. E2E smoke test runner validates the complete main loop:
+   npm run smoke:e2e:dry
+
+4. No contradictions between TASKS.md, AGENT_STATE.md, HANDOFF.md, ARCHITECTURE.md, README.md
+
+Suggested tasks:
+- [ ] Run E2E smoke tests and collect logs
+- [ ] Verify Hermes packet generation on sample execution
+- [ ] Check multi-agent routing works with approval gates
+- [ ] Verify Codex auto-run disable message appears correctly
 ```

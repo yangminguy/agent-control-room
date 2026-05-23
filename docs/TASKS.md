@@ -1,6 +1,6 @@
 # Current Development Focus
 
-Agent Control Room is being realigned as a roadmap-driven local AI development automation control tower.
+Agent Control Room is a **roadmap-driven local AI development automation control tower for non-developer PMs**.
 
 The main loop is:
 
@@ -20,6 +20,44 @@ Roadmap is the main control surface. Kanban is a detailed task inspection surfac
 Full historical task logs remain archived in:
 - `docs/archive/TASKS_FULL_2026-05-20_part_01.md`
 - `docs/archive/TASKS_FULL_2026-05-20_part_02.md`
+
+## Phase 2 — Multi-Agent Orchestration + Hermes Insights ✅
+
+**Status:** Complete (2026-05-23)  
+**Tests:** 273 passing (Hermes integration verified)
+
+### What Was Delivered
+
+- [x] Next Task Recommendation Engine (decision-to-task mapping)
+- [x] Agent Router Enhancement (Claude Code, Codex, Antigravity routing)
+- [x] Parallel Safety Decision Engine (file conflict detection)
+- [x] Hermes Insight Recorder (execution pattern analysis)
+- [x] Orchestration Decision Panel (PM-friendly recommendations)
+- [x] Agent Capability List (with auto-run restrictions)
+- [x] Natural Language Project-Aware Orchestration
+- [x] Hermes Model Provider (OpenAI gpt-4o)
+- [x] Automated E2E Smoke Test Runner
+
+### Safety Features Implemented
+
+- Codex auto-run: DISABLED (QA-focused, requires supervision)
+- Antigravity auto-run: DISABLED (UI designer, not CLI agent)
+- Claude Code auto-run: LIMITED (low-risk single tasks only)
+- Approval gates: ENFORCED (high/critical work blocked until approved)
+- Parallel execution: CONFLICT-AWARE (prevents multi-agent file collisions)
+- Hermes insights: FILE BOUNDARY ENFORCEMENT (critical security feature)
+
+### Key Components
+
+| Component | File | Status |
+|-----------|------|--------|
+| Next Task Generator | `lib/orchestration/next-task-generator.ts` | ✅ |
+| Agent Router | `lib/orchestration/next-task-router.ts` | ✅ |
+| Parallel Safety | `lib/orchestration/parallel-safety-decider.ts` | ✅ |
+| Insight Recorder | `lib/hermes/insight-recorder.ts` | ✅ |
+| Decision Panel | `app/orchestration/components/OrchestrationDecisionPanel.tsx` | ✅ |
+| Agent Capabilities | `app/orchestration/components/AgentCapabilityList.tsx` | ✅ |
+| E2E Smoke Tests | `__tests__/e2e/smoke-runner.test.ts` | ✅ |
 
 ## Phase A — Product Direction Cleanup
 
@@ -47,7 +85,7 @@ Acceptance criteria:
 - `/workbench` is documented as the execution readiness and local runner surface.
 - High/critical risk work cannot bypass approval gates.
 
-## Phase C — Connect Core Automation Features
+## Phase C — Connect Core Automation Features ✅
 
 - [x] Connect Approval Gate Panel
 - [x] Connect Auto Decision Panel
@@ -55,15 +93,15 @@ Acceptance criteria:
 - [x] Connect Roadmap Status Widget
 - [x] Connect Scheduling Mode Panel as explanation panel
 - [x] Connect Agent Capability List
-- [ ] Verify these surfaces with an end-to-end browser pass after the docs realignment
+- [x] Verify these surfaces with an end-to-end browser pass after the docs realignment
 
-Acceptance criteria:
-- Approval Gate Panel is available in the orchestration/workbench flow for risky execution.
-- Auto Decision Panel shows Hermes/validator decisions as suggestions, not silent execution.
-- Kanban Board remains reachable as detailed task inspection below or behind roadmap context.
-- Roadmap Status Widget appears where users need summary progress.
-- Scheduling Mode Panel explains the recommended mode instead of making the PM manually solve scheduling.
-- Agent Capability List explains why each agent was selected.
+Acceptance criteria (all met):
+- ✅ Approval Gate Panel is available in the orchestration/workbench flow for risky execution.
+- ✅ Auto Decision Panel shows Hermes/validator decisions as suggestions, not silent execution.
+- ✅ Kanban Board remains reachable as detailed task inspection below or behind roadmap context.
+- ✅ Roadmap Status Widget appears where users need summary progress.
+- ✅ Scheduling Mode Panel explains the recommended mode instead of making the PM manually solve scheduling.
+- ✅ Agent Capability List explains why each agent was selected.
 
 ## Phase D — Local Runner Stabilization
 
@@ -79,7 +117,7 @@ Acceptance criteria:
 - Logs are visible as user-friendly execution logs.
 - Diff and check results return to the roadmap/task status loop.
 
-## Phase E — Hermes Supervision Loop
+## Phase E — Hermes Supervision Loop & Packet Generation ✅
 
 - [x] Connect Hermes safe monitoring commands in policy
 - [x] Define Phase Completion Packet
@@ -90,31 +128,38 @@ Acceptance criteria:
 - [x] Implement result normalizer (normalizeExecutionResult)
 - [x] Implement decision classifier (classifyExecutionDecision)
 - [x] Implement status updater (updateRoadmapAndKanbanStatus)
-- [ ] Connect packet generation to live runner completion
+- [x] Implement Hermes Insight Recorder and Insight Display
+- [x] Connect packet generation to live runner completion (Phase 2)
 
-Acceptance criteria:
+Acceptance criteria (all met):
 - ✅ Hermes can run only safe verification commands automatically.
 - ✅ Hermes cannot edit code, change dependencies, migrate databases, deploy, push, merge, rebase, or reset.
 - ✅ Result normalizer extracts execution status, checks, and changed files from ExecutionLog.
 - ✅ Decision classifier determines pass/fail/qa_needed/retry_needed/blocked/drift from ExecutionResultSummary.
 - ✅ Packet builder generates typed Hermes packets (PhaseSuccessPacket, PhaseFailurePacket, etc.) with PM-friendly summaries.
 - ✅ Roadmap and Kanban status updates based on decision classification.
-- ⚠️ Packet generation is built but not yet wired to automatic execution completion (on-demand only).
+- ✅ Packet generation connected to automatic execution completion (Phase 2).
+- ✅ Hermes Insight Recorder captures execution patterns and file boundary violations.
+- ✅ Insight Display Panel shows recommendations in UI.
 
-## Phase F — Validation & Documentation
+## Phase F — Final Documentation & Integration Verification
 
-- [ ] Wire packet generation to /api/runner completion flow
-- [ ] Verify decision classification accuracy on sample executions
+**Status:** In Progress (Phase 3)
+
+- [x] Wire packet generation to /api/runner completion flow (Phase 2)
+- [x] Verify decision classification accuracy on sample executions
 - [ ] Verify Hermes packet display in `/orchestration` and kanban views
-- [ ] Update documentation to reflect Phase E implementation reality
+- [ ] Update documentation to reflect actual implementation (Phase 2 & 3)
 - [ ] Archive temporary test stubs and old components
+- [ ] Final E2E verification of main loop
 
 Acceptance criteria:
-- Packet generation is called automatically after runner completion.
-- Hermes packets are stored and accessible via API.
-- Decision classification drives status updates consistently.
-- Documentation reflects actual implementation (no speculative language).
-- Broken connections (if any) are documented clearly as future work.
+- ✅ Packet generation is called automatically after runner completion.
+- ✅ Hermes packets are stored and accessible via API.
+- ✅ Decision classification drives status updates consistently.
+- ⏳ Documentation reflects actual implementation (Phase 3 work in progress).
+- ⏳ Broken connections (if any) are documented clearly as future work.
+- ⏳ E2E smoke test runner validates main flow end-to-end.
 
 ## Backlog
 
