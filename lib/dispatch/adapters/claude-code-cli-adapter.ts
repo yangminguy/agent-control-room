@@ -56,8 +56,8 @@ export class ClaudeCodeCliAdapter implements AgentAdapter {
         dispatchJobId: job.id,
         taskId: job.taskId,
         agentId: "claude-code",
-        rawOutput: `[MOCK] Claude Code job ${job.id} completed`,
-        resultStatus: "pass",
+        rawOutput: `[MOCK] Claude Code job ${job.id} — 모의 실행 완료. 실제 파일 변경은 없습니다. Workbench에서 실제 실행하세요.`,
+        resultStatus: "blocked",
         timestamp: new Date().toISOString(),
       };
     }

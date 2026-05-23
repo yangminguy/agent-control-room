@@ -176,6 +176,7 @@ export async function executeControlRoomPlan(
   }
 
   const now = new Date().toISOString();
+  const runId = id("control-run");
   const featurePlanInput: Omit<FeaturePlan, "id" | "createdAt" | "updatedAt"> = {
     projectId: plan.projectId ?? "agent-control-room",
     title: firstPhase.title,
@@ -198,6 +199,8 @@ export async function executeControlRoomPlan(
         userRequest: firstPhase.goal,
         taskTitle: task.title,
         acceptanceCriteria: task.acceptanceCriteria,
+        allowedFiles: task.allowedFiles && task.allowedFiles.length > 0 ? task.allowedFiles : undefined,
+        doNotTouchFiles: task.doNotTouchFiles && task.doNotTouchFiles.length > 0 ? task.doNotTouchFiles : undefined,
         preferredAgent: task.assignedAgent,
       });
       compiledPrompt = compiled.generatedPromptMarkdown;
@@ -209,9 +212,14 @@ export async function executeControlRoomPlan(
     const job: DispatchJob = {
       id: id("dispatch-job"),
       taskId: task.id,
+      planId: plan.id,
+      runId,
+      phaseId: firstPhase.id,
+      featurePlanId: featurePlan.id,
       agentId: task.assignedAgent,
       riskLevel: task.riskLevel,
       status: isHighRisk(task.riskLevel) ? "skipped_due_to_risk" : "queued",
+      executionSurface: "local_runner",
       createdAt: now,
       retryCount: 0,
       maxRetries: 2,
@@ -265,12 +273,13 @@ export async function executeControlRoomPlan(
 
   const hermesPacket = buildMonitorPacket(plan, startedJobs, schedulingRecommendation);
   const run: ControlRoomExecutionRun = {
-    id: id("control-run"),
+    id: runId,
     planId: plan.id,
+    featurePlanId: featurePlan.id,
     status: "queued",
     startedAt: now,
     message:
-      "Execution plan was approved and queued. Agent runner execution has not started automatically; use the workbench approval gate for each task.",
+      "Execution plan was approved and queued for the local runner/workbench bridge. Vercel is the Control Tower; your local Mac runner should claim these jobs and submit results back.",
     startedTasks: startedJobs,
     vibeIssues,
     hermesPacket,

@@ -23,7 +23,7 @@ export function AgentStatusPanel({ agents }: AgentStatusPanelProps) {
             <Server className="w-5 h-5 text-text-secondary" />
           </div>
           <div>
-            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider">Total Systems</p>
+            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider">총 시스템 수</p>
             <p className="text-xl font-bold text-text-primary leading-none mt-1">{totalAgents}</p>
           </div>
         </div>
@@ -34,7 +34,7 @@ export function AgentStatusPanel({ agents }: AgentStatusPanelProps) {
             <Activity className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider">Ready / Active</p>
+            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider">대기 / 실행 중</p>
             <p className="text-xl font-bold text-text-primary leading-none mt-1">{availableCount + workingCount}</p>
           </div>
         </div>
@@ -45,7 +45,7 @@ export function AgentStatusPanel({ agents }: AgentStatusPanelProps) {
             <Cpu className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider">Awaiting Approval</p>
+            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider">승인 대기 중</p>
             <p className="text-xl font-bold text-text-primary leading-none mt-1">{approvalCount}</p>
           </div>
         </div>
@@ -56,7 +56,7 @@ export function AgentStatusPanel({ agents }: AgentStatusPanelProps) {
             <AlertTriangle className="w-5 h-5 text-red-400" />
           </div>
           <div>
-            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider">Blocked / Limited</p>
+            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider">막힌 작업</p>
             <p className="text-xl font-bold text-text-primary leading-none mt-1">{blockedCount}</p>
           </div>
         </div>

@@ -38,11 +38,11 @@ export function CommandCenterHero({
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-primary/10 text-pink-primary border border-pink-primary/20">
               <Radio className="w-3.5 h-3.5 animate-status-ping" />
-              Control Tower Active
+              컨트롤 타워 활성화됨
             </span>
             {activePhaseNumber && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-2 text-text-secondary border border-border">
-                Active: Phase {activePhaseNumber}
+                현재 진행 중: 단계 {activePhaseNumber}
               </span>
             )}
           </div>
@@ -72,7 +72,7 @@ export function CommandCenterHero({
         {/* Progress & Live status panel */}
         <div className="shrink-0 flex flex-col items-start md:items-end gap-3 min-w-[200px]">
           <div className="w-full flex items-center justify-between md:justify-end md:gap-4 text-sm font-semibold">
-            <span className="text-text-secondary">Overall Progress</span>
+            <span className="text-text-secondary">전체 진행률</span>
             <span className="text-xl font-bold text-pink-primary">{overallProgress}%</span>
           </div>
 
@@ -85,7 +85,7 @@ export function CommandCenterHero({
 
           {activePhaseTitle && (
             <p className="text-xs text-text-secondary/70">
-              Target: <span className="font-semibold text-text-primary">{activePhaseTitle}</span>
+              목표: <span className="font-semibold text-text-primary">{activePhaseTitle}</span>
             </p>
           )}
         </div>

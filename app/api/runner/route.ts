@@ -8,6 +8,9 @@ import {
   collectChangedFiles,
   extractFileBoundariesFromPrompt,
 } from "@/lib/runner/file-boundary";
+import { getAgentRuntime } from "@/lib/agents/runtime-registry";
+import { parseQuotaError, applyQuotaParseResult } from "@/lib/agents/quota-parser";
+import { updateRuntimeDecisionStatus } from "@/lib/storage/runtime-decision-store";
 
 /**
  * /api/runner — Internal Local Runner Endpoint
@@ -98,6 +101,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // MULTI-AGENT RUNTIME: Check agent quota status
+    const agentProfile = getAgentRuntime(agent as "claude-code" | "codex" | "antigravity");
+    if (agentProfile && (agentProfile.status === "rate_limited" || agentProfile.status === "token_exhausted")) {
+      return new Response(
+        textEncoder.encode(`data: ${JSON.stringify({ log: `[ERROR] Agent ${agent} is ${agentProfile.status}. ${agentProfile.lastFailureReason || "Not available for execution."} Retry time: ${agentProfile.nextRetryAt || "unknown"}`, type: "system" })}\n\n`),
+        { status: 503, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
+
     // planTask 조회
     const plan = await getFeaturePlanById(planId);
     if (!plan) {
@@ -185,6 +197,14 @@ export async function POST(request: Request) {
               },
               onComplete: async (exitCode: number) => {
                 try {
+                  // MULTI-AGENT RUNTIME: Check for quota errors in output
+                  const fullLog = logBuffer.join("\n");
+                  const quotaError = parseQuotaError(fullLog);
+                  if (quotaError) {
+                    applyQuotaParseResult(quotaError);
+                    controller.enqueue(encode(`[QUOTA] ${quotaError.reason}. Retry time: ${quotaError.nextRetryAt || "unknown"}`, "system"));
+                  }
+
                   const promptBoundaries = extractFileBoundariesFromPrompt(planTask.generatedPrompt || prompt);
                   const boundaryCheck = checkFileBoundaries(collectChangedFiles(cwd), {
                     allowedFiles: planTask.allowedFiles ?? promptBoundaries.allowedFiles,

@@ -308,6 +308,8 @@ export async function createControlRoomPlan(
       "Your job is to finish planning through conversation before execution.",
       "Never claim that execution has started. Chat/finalize planning is planning-only.",
       "Generate phase-level plans, concrete tasks, agent assignments, prompts, acceptance criteria, risk level, and missing decisions.",
+      "CRITICAL: For the first executable task, preserve the exact user goal as the task title. If the user says 'create docs/smoke-test.md', the first task title MUST be 'Create docs/smoke-test.md', not a rewritten version.",
+      "For multi-step goals, break them into concrete executable tasks that directly address user intent.",
       "Execution starts only after the user clicks an explicit execute button in the app.",
       "Agent routing: Claude Code for architecture/complex implementation, Codex for tests/type errors/QA, Antigravity for UI/visual work, Hermes for monitoring/memory/approval packets only.",
       "High-risk actions such as push, merge, rebase, reset, package changes, migrations, production deploy, or env changes must require a later approval gate.",

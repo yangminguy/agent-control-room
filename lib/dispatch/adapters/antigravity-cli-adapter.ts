@@ -39,7 +39,7 @@ export class AntigravityCliAdapter implements AgentAdapter {
     const prompt = job.prompt ?? "(no prompt)";
     if (this.mockMode) {
       console.log(`Dispatching to Antigravity (MOCK): ${prompt}`);
-      return makeResult(job, `[MOCK] Antigravity job ${job.id} queued`, "pass");
+      return makeResult(job, `[MOCK] Antigravity job ${job.id} — 모의 실행 완료. 실제 파일 변경은 없습니다. Workbench에서 실제 실행하세요.`, "blocked");
     }
 
     logOrchestrationEvent({

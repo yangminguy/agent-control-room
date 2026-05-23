@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { AlertTriangle, Info } from "lucide-react";
 import type {
   SchedulingMode,
@@ -37,21 +36,15 @@ export function SchedulingModePanel({
   decision,
   onModeChange,
 }: SchedulingModePanelProps) {
-  const [selectedMode, setSelectedMode] = useState<SchedulingMode>(decision.mode);
-
-  function handleModeSelect(mode: SchedulingMode) {
-    setSelectedMode(mode);
-    onModeChange?.(mode);
-  }
-
   const hasConflictWarnings =
     decision.conflictWarnings && decision.conflictWarnings.length > 0;
+  const isOverrideEnabled = Boolean(onModeChange);
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
       {/* Header */}
       <div className="border-b border-gray-200 px-5 py-4">
-        <h2 className="text-base font-semibold text-gray-900">스케줄링 모드 선택</h2>
+        <h2 className="text-base font-semibold text-gray-900">추천 실행 방식</h2>
         <p className="mt-0.5 text-sm text-gray-500 truncate" title={taskTitle}>
           {taskTitle}
         </p>
@@ -73,30 +66,22 @@ export function SchedulingModePanel({
         </div>
       </div>
 
-      {/* Mode radio list */}
+      {/* Mode explanation list */}
       <div className="px-5 py-4 space-y-3">
         {ALL_MODES.map((mode) => {
           const desc = getSchedulingModeDescription(mode);
           const isRecommended = mode === decision.mode;
-          const isSelected = mode === selectedMode;
 
           return (
-            <label
+            <div
               key={mode}
-              className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-                isSelected
+              className={`flex gap-3 rounded-lg border p-3 transition-colors ${
+                isRecommended
                   ? `${MODE_RADIO_BORDER[mode]} bg-gray-50`
                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
               }`}
             >
-              <input
-                type="radio"
-                name={`scheduling-mode-${taskId}`}
-                value={mode}
-                checked={isSelected}
-                onChange={() => handleModeSelect(mode)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-gray-700"
-              />
+              <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-gray-400" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-800">
@@ -110,7 +95,7 @@ export function SchedulingModePanel({
                 </div>
                 <p className="mt-0.5 text-xs text-gray-500">{desc.pmDescription}</p>
               </div>
-            </label>
+            </div>
           );
         })}
       </div>
@@ -136,23 +121,17 @@ export function SchedulingModePanel({
         </div>
       )}
 
-      {/* Footer actions */}
-      <div className="flex justify-end gap-2 border-t border-gray-200 px-5 py-4">
-        <button
-          type="button"
-          className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-          onClick={() => setSelectedMode(decision.mode)}
-        >
-          취소
-        </button>
-        <button
-          type="button"
-          className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
-          onClick={() => onModeChange?.(selectedMode)}
-        >
-          승인
-        </button>
-      </div>
+      {isOverrideEnabled && (
+        <div className="flex justify-end gap-2 border-t border-gray-200 px-5 py-4">
+          <button
+            type="button"
+            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+            onClick={() => onModeChange?.(decision.mode)}
+          >
+            추천 방식 확인
+          </button>
+        </div>
+      )}
     </div>
   );
 }

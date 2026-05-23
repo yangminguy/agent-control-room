@@ -128,7 +128,7 @@
             "summary": "components/runner/RunnerLogView.tsx 구현 완료 (터미널 스타일 로그, 실시간 SSE 스트리밍)"
           }
         ],
-        "generatedPrompt": null,
+        "generatedPrompt": "lib/runner/git-utils.ts, lib/runner/spawn-runner.ts, app/api/runner/route.ts, components/runner/RunnerLogView.tsx, lib/storage/execution-log-store.ts를 검토하고, Claude Code CLI 실행과 SSE 로그 스트리밍이 올바르게 작동하는지 확인하세요.",
         "changedFiles": [
           "lib/runner/git-utils.ts",
           "lib/runner/spawn-runner.ts",
@@ -148,5 +148,42 @@
     ],
     "createdAt": "2026-05-20T12:00:00.000Z",
     "updatedAt": "2026-05-20T12:19:00.000Z"
+  },
+  {
+    "id": "smoke-e2e-feature-plan",
+    "projectId": "agent-control-room",
+    "title": "Agent Control Room Smoke Test",
+    "userGoal": "Verify E2E execution flow with safe smoke test",
+    "status": "running",
+    "tasks": [
+      {
+        "id": "smoke-e2e-task",
+        "planId": "smoke-e2e-feature-plan",
+        "title": "Create docs/smoke-test.md",
+        "description": "Create a marker file for E2E smoke test verification",
+        "status": "pending",
+        "assignedAgent": "claude-code",
+        "priority": "P0",
+        "acceptanceCriteria": [
+          "File docs/smoke-test.md exists with smoke test content"
+        ],
+        "generatedPrompt": "Create docs/smoke-test.md with the following content:\n\nAgent Control Room E2E smoke test passed.\n",
+        "riskLevel": "safe",
+        "allowedFiles": [
+          "docs/smoke-test.md"
+        ],
+        "doNotTouchFiles": [
+          ".env",
+          ".env.local",
+          "package.json",
+          "app/**",
+          "components/**",
+          "lib/**",
+          "data/**"
+        ]
+      }
+    ],
+    "createdAt": "2026-05-23T08:38:32.191Z",
+    "updatedAt": "2026-05-23T08:38:32.220Z"
   }
 ]

@@ -1,230 +1,281 @@
 # ARCHITECTURE.md — Agent Control Room
 
 ## 1. Architecture Goal
-Agent Control Room is an **AI Development Control Tower for non-developer PMs**.
-It is not merely a CLI execution wrapper or prompt generator. It is an operational control tower where a PM or non-developer inputs an idea or product direction, and the system translates it into requirements, generates a visual roadmap, delegates tasks to appropriate AI coding agents or workbenches (Claude Code, Codex, Antigravity, optional Hermes, Vibe Kanban), tracks execution, analyzes results/diffs, preserves knowledge, and orchestrates the transition to the next step.
 
-The target architecture is **orchestrator plus workbench**:
-- Agent Control Room is the brain: intent, planning, routing, prompts, approvals, handoffs, and next-step reasoning.
-- Vibe Kanban is the workbench: issue cards, workspace/session execution, git worktrees, diff/review UI, and previews.
-- The app should not spend MVP effort rebuilding Vibe Kanban's strongest surfaces. It should bridge to them and reserve its own UI for control, context, and decisions.
+Agent Control Room is a **roadmap-driven local AI development automation control tower for non-developer PMs**.
 
-## 2. System Overview
-### 2.1 Core Loop
-The orchestration follows a continuous iterative loop:
-```txt
-Idea / Product Direction
-        ↓
-Senior Dev Translator
-        ↓
-Roadmap Generator
-        ↓
-Visual Development Roadmap Control Panel
-        ↓
-Task Decomposer & Agent Router
-        ↓
-Senior Dev Prompt Compiler
-        ↓
-Human Approval
-        ↓
-Agent Execution or Vibe Kanban Workbench
-        ↓
-Git Diff & Outcome Analyzer
-        ↓
-Roadmap Updater, Insight Memory & Next Prompt Generator
+The target architecture is not "prompt generator plus handoff notes." It is:
+
+```text
+roadmap brain + local runner + Hermes supervisor + detailed workbench bridge
 ```
 
-### 2.2 Target Architecture Layers
+Agent Control Room owns product intent, roadmap, task decomposition, routing, risk, approvals, result interpretation, and re-orchestration.
+
+Vibe Kanban owns or inspires detailed cards, workspaces, agent sessions, diffs, and previews.
+
+Hermes supervises execution. Hermes does not code.
+
+## 2. Core Loop (Phase E Implementation)
+
+**Planning → Execution:**
+```text
+Planning intent
+  ↓
+Roadmap generator (/plan)
+  ↓
+Task decomposer with acceptance criteria
+  ↓
+Agent router + capability explanation
+  ↓
+Risk classifier + scheduling selector
+  ↓
+Approval gate (blocks high/critical)
+  ↓
+Local runner (/api/runner) or workbench
+```
+
+**Execution → Result:**
+```text
+Local runner or workbench executes
+  ↓
+ExecutionLog persisted (status: done/failed/boundary_violation)
+  ↓
+Result normalization: normalizeExecutionResult()
+  → ExecutionResultSummary with status, checks, changedFiles
+  ↓
+Decision classification: classifyExecutionDecision()
+  → DecisionClassification with decision, reason, nextAction
+  ↓
+Status update: updateRoadmapAndKanbanStatus()
+  → PlanTask status changed to: done/blocked/needs_review/ready
+  ↓
+(Phase F) Packet generation: buildHermesPacket()
+  → HermesPacket (typed supervision result) — currently on-demand only
+  ↓
+Result display and next-action recommendation
+  ↓
+Next task, retry, QA, pause, or re-orchestration
+```
+
+## 3. Architecture Layers (Phase E Status)
+
+| Layer | Status | File(s) |
+|---|---|---|
+| Roadmap Generator | ✅ Implemented | `lib/storage/feature-plan-store.ts` |
+| Task Decomposer | ✅ Implemented | `lib/types.ts` (PlanTask) |
+| Agent Router | ✅ Implemented | Risk-based in task definition |
+| Risk Classifier | ✅ Implemented | `lib/control-room/risk-classifier.ts` |
+| Scheduling Selector | ✅ Implemented | `lib/orchestration/scheduling-mode-selector.ts` |
+| Approval Gate | ✅ Implemented | `app/api/workbench/approval/route.ts` |
+| Local Runner Bridge | ✅ Implemented | `app/api/runner/route.ts` |
+| Execution Log | ✅ Implemented | `lib/storage/execution-log-store.ts` |
+| Result Normalizer | ✅ Implemented | `lib/runner/execution-result-normalizer.ts` |
+| Decision Classifier | ✅ Implemented | `lib/orchestration/decision-classifier.ts` |
+| Status Updater | ✅ Implemented | `lib/orchestration/status-updater.ts` |
+| Hermes Packet Builder | ✅ Implemented | `lib/hermes/packet-builder.ts` |
+| Hermes Packet Wiring | ✅ Implemented | Packets auto-generated on execution completion (Phase 2) |
+| Hermes Insight Recorder | ✅ Implemented | `lib/hermes/insight-recorder.ts` |
+| Hermes Insight Display | ✅ Implemented | `app/orchestration/components/HermesInsightPanel.tsx` |
+| Roadmap UI | ✅ Implemented | `app/plan/page.tsx` |
+| Workbench UI | ✅ Implemented | `app/workbench/page.tsx` |
+| Orchestration UI | ✅ Implemented | `app/orchestration/page.tsx` |
+| Vibe Kanban Bridge | ✅ Implemented | `lib/orchestration/project-store.ts` |
+
+## 4. Mermaid Overview
 
 ```mermaid
 graph TD
-    A[PM/User Idea] --> B[Intent Analyzer]
-    B --> C[Senior Dev Translator]
-    C --> D[Roadmap Generator]
-    D --> E[Execution Planner]
-    E --> P[Senior Dev Prompt Compiler]
-    P --> Q[Human Approval Gate]
-    Q --> R[Agent Router]
-
-    R --> LR[Local Runner Bridge]
-    
-    LR --> F[Claude Code<br/>Coding Agent]
-    LR --> G[Codex<br/>QA & Testing]
-    LR --> H[Antigravity<br/>UI & Design]
-    LR --> O[Hermes<br/>Approval-Based<br/>Execution Worker]
-    LR --> M[Vibe Kanban<br/>Execution Workbench]
-
-    F --> I[Execution Result]
-    G --> I
-    H --> I
-    O --> I
-    M --> I
-
-    I --> J[Git Diff Analyzer]
-    J --> K[Roadmap Progress Updater]
-    K --> L[Visual Roadmap Control Panel]
-    K --> N[Session Report]
-    K --> S[Obsidian Insight Memory]
-
-    N --> E
+    A["PM direction"] --> B["Senior-dev translation"]
+    B --> C["Roadmap generator"]
+    C --> D["Task decomposition"]
+    D --> E["Agent routing"]
+    E --> F["Risk + scheduling"]
+    F --> G["Approval gate"]
+    G --> H["Local runner bridge"]
+    G --> VK["Vibe Kanban workbench"]
+    H --> CC["Claude Code CLI"]
+    H --> CX["Codex CLI if verified"]
+    H --> AG["Antigravity if verified"]
+    H --> L["Logs + diff + checks"]
+    VK --> L
+    L --> HS["Hermes supervisor"]
+    HS --> P["Completion / Failure / Drift / Approval packet"]
+    P --> R["Roadmap + kanban update"]
+    R --> N["Next task / QA / Retry / Re-orchestrate"]
 ```
 
-| Layer | Responsibility |
+## 4a. Phase 2: Multi-Agent Orchestration Loop
+
+**Result → Next Task Routing (Phase 2 Addition):**
+```text
+Hermes Packet generated
+  ↓
+Result classification (pass/fail/qa_needed/retry_needed/blocked/drift_detected)
+  ↓
+Next task recommendation (classifyExecutionDecision → generateNextTask)
+  → Task type determined: continue_next, fix, qa, retry, manual_review, re-orchestrate
+  → Risk level assigned
+  → Agent routed: Claude Code (auto-run eligible), Codex (QA-only, auto-run DISABLED), Antigravity (manual-only)
+  → Execution mode selected: sequential vs parallel_safe (with file-conflict detection)
+  → File boundary preserved (critical files protected)
+  ↓
+Parallel safety check (parallel-safety-decider.ts)
+  → Conflict detection across pending tasks
+  → Sequential-only enforcement for shared files, high/critical risk
+  ↓
+Hermes Insight recorded (execution patterns, file boundary violations)
+  → Insight severity: info, warning, critical
+  → Surfaced in Orchestration UI
+  ↓
+Next dispatch to agent or approval queue
+```
+
+**Multi-Agent Routing Rules (Phase 2):**
+- **Claude Code** — Architecture, complex reasoning, low-risk auto-run eligible
+- **Codex** — QA, tests, type errors, bounded fixes; auto-run DISABLED by design
+- **Antigravity** — UI/UX; auto-run DISABLED (not CLI agent)
+- **Hermes** — Supervision, insights, recommendations; no code edits
+
+## 5. Local Runner Boundary
+
+The local runner is for already-authenticated local tools. It must:
+- require server-issued, context-bound approval tokens where execution is risky
+- validate cwd and agent allowlists
+- create or use safe branches/workspaces
+- stream logs
+- capture exit status
+- capture git diff
+- run/check validation commands when configured
+- return results to Agent Control Room
+
+It must not:
+- bypass approval gates
+- run production deploys
+- run DB migrations
+- push, merge, rebase, reset, or clean git state without explicit future policy
+- modify secrets
+
+See `docs/LOCAL_RUNNER_ARCHITECTURE.md`.
+
+## 6. Hermes Boundary (Phase E/F/2 Implementation)
+
+Hermes is a **Background Execution Supervisor** — not a coding agent.
+
+**Phase E Implementation:**
+- Result Normalizer (`execution-result-normalizer.ts`) — Pure function, no shell
+- Decision Classifier (`decision-classifier.ts`) — Rules-based, 8-rule priority order
+- Packet Builder (`packet-builder.ts`) — Generates PM-friendly supervision packets
+- Status Updater (`status-updater.ts`) — Updates roadmap/kanban based on classification
+
+**Phase 2 Addition:**
+- Hermes Insight Recorder (`insight-recorder.ts`) — Captures execution patterns, file boundary violations
+- Hermes Insight Display Panel (`HermesInsightPanel.tsx`) — Shows recommendations in UI
+- Next Task Generator (`next-task-generator.ts`) — Decision-to-task mapping
+- Parallel Safety Decider (`parallel-safety-decider.ts`) — Conflict detection
+- Agent Router Enhancement (`next-task-router.ts`) — Multi-agent capability routing with auto-run restrictions
+
+**Packet Types Supported:**
+- Phase Success Packet (PhaseSuccessPacket)
+- Phase Failure Packet (PhaseFailurePacket)
+- Drift Detection Packet (DriftDetectionPacket)
+- Approval Request Packet (HermesApprovalRequestPacket)
+
+**Current State (Phase 2):**
+- ✅ Packets automatically generated on runner completion
+- ✅ Status updates (roadmap/kanban) happen based on classification results
+- ✅ Hermes insights captured and displayed
+- ✅ Next task recommendations routed to appropriate agent with safety restrictions
+- ✅ Parallel execution decisions made with file-conflict detection
+
+**Hermes must never:**
+- Edit code
+- Run git push/merge/rebase/reset/clean
+- Change dependencies
+- Deploy to production
+- Modify secrets or .env
+- Run database migrations
+- Take over coding-agent work
+
+See `docs/HERMES_BACKGROUND_WORKER.md`.
+
+## 7. UI Architecture
+
+| Route / Component Area | Architecture Role |
 |---|---|
-| **Intent Analyzer** | Parses user's natural language request to identify goals, constraints, and scope. |
-| **Senior Dev Translator** | Converts rough non-developer ideas into product and implementation context. |
-| **Roadmap Generator** | Breaks the goal into roadmap stages that can be visualized and checked off. |
-| **Execution Planner** | Organizes task sequence, dependencies, and execution strategy. |
-| **Senior Dev Prompt Compiler** | Produces precise prompts with goal, context, scope, non-goals, file boundaries, acceptance criteria, checks, and handoff rules. |
-| **Human Approval Gate** | User reviews and approves execution before proceeding. Token issued for one-time execution. |
-| **Agent Router** | Selects the appropriate local tool or workbench (Claude Code, Codex, Antigravity, Hermes, or Vibe Kanban). |
-| **Local Runner Bridge** | Integrates with already-authenticated local tools. No external paid APIs called by default. See `LOCAL_RUNNER_ARCHITECTURE.md`. |
-| **Agent Execution (Local)** | Safely executes local tool (e.g. Claude Code via `child_process.spawn("claude", ...)`) within an isolated git branch. |
-| **Git Diff Analyzer** | Inspects `git diff` to understand what the agent actually changed. |
-| **Roadmap Progress Updater** | Marks stages/tasks as completed, active, waiting, blocked, or user-input-required based on analysis. |
-| **Visual Roadmap Control Panel** | Presents the product roadmap, check marks, current task, next action, responsible agent, blockers, acceptance criteria, and prompts. |
-| **Vibe Kanban Workbench** | Integration with Vibe Kanban for richer board, workspace, agent session, diff/review, and preview surfaces. |
-| **Obsidian Insight Memory** | Exports durable decisions, insights, prompt patterns, handoffs, and agent performance notes as Markdown. |
-| **Session Report** | Documents the outcome of a session, generating the next prompt. |
+| `/plan` | Main roadmap control panel. |
+| `components/roadmap/*` | Roadmap status, timeline, stage cards, summary widgets. |
+| `components/plan/*` | Kanban-style detail view for tasks. |
+| `/workbench` | Execution readiness, approval, scheduling explanation, runner launch. |
+| `/orchestration` | Dispatch queue, approvals, validation, auto-decision suggestions, logs, feedback. |
+| `components/orchestration/*` | Approval Gate, Auto Decision, validation, metrics, monitor views. |
+| `components/agents/*` | Agent capability and status explanation. |
+| Hermes components | Supervision packets, summaries, context packs, reports. |
 
-## 3. Core Modules (Implemented & Future)
+## 8. Storage (Phase E Implementation)
 
-### 3.1 Project Registry & Reader
-Stores projects and reads context from `AGENT_STATE.md`, `TASKS.md`, `HANDOFF.md`, etc.
+**In-Session JSON Storage:**
+- `data/feature-plans.json` — Roadmap and task state
+- `data/execution-logs.json` — ExecutionLog records
+- `data/approval-tokens.json` — Approval token state (short-lived)
 
-### 3.2 Technical Translator & Decomposer
-Converts product direction into small executable tasks. (Currently mapped to Direction to Prompt & Advisor Mode).
+**Data Structures:**
+- FeaturePlan, PlanTask, PlanPhase (roadmap)
+- ExecutionLog (logs, status, changed files)
+- ExecutionResultSummary (normalized result)
+- DecisionClassification (decision logic output)
+- HermesPacket union (typed supervision result)
 
-### 3.3 Advisor Mode (T015)
-When execution is blocked or ambiguous, this module provides interpretation, options, recommendations, and generates a copy-ready prompt for the next step.
+**Persistence Strategy:**
+- ✅ Transactional JSON updates (read → modify → write)
+- ✅ Plan/task status synced immediately
+- ✅ Execution logs persisted at start and completion
+- ⚠️ No multi-user locking (single-user MVP)
+- ⚠️ Supabase durable storage is Phase F+ backlog
 
-### 3.4 Control Panel & Plan View (T017)
-Visualizes the product roadmap and task statuses. The next direction is to make `/plan` a Visual Development Roadmap Control Panel: completed stages show check marks, active stages show current task and responsible agent, waiting stages show start conditions, and blocked/user-input-required stages show the exact decision needed. It may show lightweight kanban elements, but it should not grow into a duplicate of Vibe Kanban's full execution board.
+**What's Stored:**
+- Project and roadmap state
+- Task state and assignment
+- Execution logs and results
+- Approval token validation state
+- Hermes packet builders (buildable, stored on-demand)
 
-### 3.5 Local Runner Bridge
-The integration layer between Agent Control Room and already-authenticated local tools.
+## 9. Key Implementation Files (Phase E/2)
 
-**Does NOT call external paid APIs by default.**
+**Core Flow:**
+- `/api/runner/route.ts` — Local execution endpoint, SSE-streamed logs
+- `/api/runner/result-summary/route.ts` — Normalized result lookup
+- `/api/workbench/approval/route.ts` — Approval token generation
+- `lib/runner/execution-result-normalizer.ts` — Result normalization (pure function)
+- `lib/orchestration/decision-classifier.ts` — Decision logic (rules-based)
+- `lib/orchestration/status-updater.ts` — Roadmap/kanban sync
+- `lib/hermes/packet-builder.ts` — Packet generation (auto on completion)
 
-Instead, it:
-- Routes to appropriate local tool adapter (Claude Code CLI, Codex, Antigravity, Vibe Kanban)
-- Manages approval tokens (server-issued, context-bound, one-time use)
-- Validates execution context (project path, agent allowlist, uncommitted changes)
-- Creates isolated git branches for execution
-- Spawns local tool processes
-- Captures logs and results
-- Analyzes diffs
+**Phase 2 Multi-Agent Orchestration:**
+- `lib/orchestration/next-task-generator.ts` — Decision-to-task mapping
+- `lib/orchestration/next-task-router.ts` — Agent routing with auto-run restrictions
+- `lib/orchestration/parallel-safety-decider.ts` — Conflict detection
+- `lib/hermes/insight-recorder.ts` — Execution pattern capture
+- `__tests__/e2e/smoke-runner.test.ts` — E2E validation
 
-See `LOCAL_RUNNER_ARCHITECTURE.md` for full details on execution adapters and safety boundaries.
+**UI Display:**
+- `components/workbench/WorkbenchRunPanel.tsx` — Execution panel
+- `components/runner/RunnerLogView.tsx` — Real-time SSE log display
+- `components/runner/ExecutionResultCard.tsx` — Result summary
+- `components/orchestration/AutoDecisionPanel.tsx` — Decision display (with Korean labels)
+- `components/orchestration/HermesInsightPanel.tsx` — Insight display and recommendations
+- `components/orchestration/AgentCapabilityList.tsx` — Agent capabilities and restrictions
 
-### 3.6 Agent Execution Runner (T018)
-The local tool adapter that invokes Claude Code or other local tools. It manages:
-- Creating safe git worktrees/branches.
-- Spawning the local tool CLI process (e.g. `claude -p "..."`, not external API).
-- Streaming stdout/stderr logs via SSE.
-- Capturing the exit code.
-- No external paid API calls.
+## 10. Backlog Architecture (Not Phase E/F Blockers)
 
-### 3.7 Diff & Outcome Analyzer (T019)
-Replaces manual session reporting. It reads `git diff --name-only` and `git diff`, sends it to an LLM, and automatically determines which tasks were completed and what files were modified.
-
-### 3.8 Agent Availability Manager
-Tracks agent availability manually in MVP. Supported statuses are `available`, `cooling_down`, `token_limited`, `blocked`, `context_overloaded`, `manual_only`, and `experimental`. If an agent is unavailable, the system generates a fallback handoff or Context Pack instead of pretending execution can continue normally.
-
-### 3.9 Context Reset Protocol
-When context is too long, token-limited, blocked, or ready for a new agent/session, generate a Context Pack with current goal, completed work, changed files, decisions, blockers, remaining work, next task, acceptance criteria, do-not-do rules, and the next prompt. Do not depend on literal `/clear` automation.
-
-### 3.10 Obsidian Knowledge Memory
-Future module for exporting development insights, decisions, failed attempts, successful prompt patterns, agent performance notes, handoffs, and checklists as Obsidian-compatible Markdown.
-
-### 3.11 Hermes Approval-Based Execution Worker
-Hermes is the **operational monitoring, packet, and approval-support worker**. It is NOT a secondary coding agent.
-
-**Hermes responsibilities**:
-- Terminal/status checks and operational summaries where explicitly approved
-- Operational automation (log summaries, failure analysis, monitoring)
-- Approval workflows (Telegram request formatting/client support for high-risk operations)
-- Result collection (analyzing Phase completion, summarizing agent outcomes)
-- Memory and reporting (Obsidian notes, Orchestration Packets, Session summaries)
-
-**Hermes constraints**:
-- Cannot modify code files during agent execution
-- High-risk work such as git push, production deployment, dependency changes, and DB migrations requires explicit approval; Telegram response intake can persist responses and update matching in-memory dispatch jobs, but durable multi-process approval synchronization is still pending
-- Always returns major results to Agent Control Room (not autonomous endpoint)
-- Uses Gemini API initially, with OpenAI API fallback
-
-See [[docs/HERMES_BACKGROUND_WORKER.md]] and related policy docs for complete Hermes role definition.
-
-## 4. Open-Source Integration (Vibe Kanban)
-Agent Control Room integrates with **Vibe Kanban** (open-source) as an execution workbench and issue/workspace surface.
-
-### 4.1 Vibe Kanban Bridge
-- **Purpose**: Send prepared feature plan tasks → Vibe Kanban issues/workspaces for execution visibility and richer agent-session workflows
-- **API Mode**: HTTP API to `/api/remote/issues` (real-time issue creation)
-- **Mock Mode**: Fallback when `VIBE_KANBAN_URL` is not set (development mode)
-- **Project Selection**: Dialog-based UI in `SendToVibeKanbanButton.tsx`
-  - User selects organization ID (env var or manual input)
-  - Fetches project list from Vibe Kanban → `/api/vibe-kanban/projects`
-  - Fetches status list from selected project → `/api/vibe-kanban/statuses`
-  - Creates issue with selected project_id + status_id
-
-### 4.2 Brain vs Workbench Boundary
-- Agent Control Room drives orchestration decisions.
-- Vibe Kanban handles detailed execution-board/workspace surfaces.
-- One-way sync is acceptable for issue creation, but the next bridge should support result readback: Vibe Kanban execution outcome → Agent Control Room session report / diff summary / next prompt.
-- Do not deep-fork Vibe Kanban before the API/MCP bridge proves durable.
-
-### 4.3 UI Boundary
-- `/plan` should act as the Visual Development Roadmap Control Panel.
-- Vibe Kanban should be opened, linked, embedded, or synchronized for detailed board/workspace work.
-- Avoid building duplicate internal card/session/diff UI when Vibe Kanban already provides a better version and a stable bridge exists.
-
-## 5. Storage Layer (Dual-Mode)
-
-Agent Control Room uses a **fallback pattern** for data persistence:
-
-### 5.1 Primary: Supabase PostgreSQL
-When `NEXT_PUBLIC_SUPABASE_URL` is configured:
-- **Tables**: 7 core tables (projects, tasks, handoffs, session_reports, feature_plans, execution_logs, agent_statuses)
-- **RLS**: Row-level security enabled (allow-all for single-user personal tool)
-- **Fallback**: If query fails, automatically switches to local JSON
-
-### 5.2 Fallback: Local JSON Files
-When Supabase is not configured or unavailable:
-- **Files**: `data/projects.json`, `data/tasks.json`, `data/feature-plans.json`, `data/session-reports.json`, `data/handoffs.json`, `data/execution-logs.json`, `data/agent-statuses.json`
-- **Benefits**: Zero-dependency local development, offline support
-- **No Schema Sync**: JSON format is maintained; Supabase schema is optional
-
-### 5.3 Storage Adapters
-All storage operations go through `lib/storage/*.ts`:
-- `json-store.ts` — Projects, session reports
-- `feature-plan-store.ts` — Feature plans, Kanban updates
-- `execution-log-store.ts` — Execution logs
-- `agent-status-store.ts` — Agent status tracking
-
-Each adapter checks `getSupabaseClient()` first, falls back to JSON if unavailable.
-
-## 6. Development Phases
-
-- **Phase 1-8 (DONE)**: Manual orchestration, planning, execution, routing, autonomous loop, security hardening.
-- **Phase 9 (DONE)**: Roadmap-first Control Tower UX, visual development panel, agent status manager.
-- **Phase 10-11 (DONE)**: Vibe Kanban workbench integration, prompt compilation, deployment readiness.
-- **Phase 12-16 (DONE)**: Core autonomous orchestration loop, task scheduling, result classification, Hermes monitoring.
-- **Phase 17-22 (DONE)**: Orchestration adapters, control panel UX, logs API, Hermes insight panel.
-- **Phase 28-32 (DONE)**: Real CLI integration, Vibe Kanban HTTP API, destructive pattern detector, context budget management.
-- **Phase 33-34 (DONE)**: Production hardening, error recovery, LLM-assisted validation, auto-decision layer.
-- **Phase 35-36 (DONE)**: Multi-project orchestration, concurrent queue management, real-time dashboard.
-- **Phase 37-39 (DONE)**: Hermes Telegram integration, OrchestrationPacket formalization, risk classification engine.
-- **Phase 40 (DONE)**: Planning→Orchestration auto-connection via localStorage bridge pattern.
-- **Phase 41 (DONE)**: Natural language project-aware orchestration — project analyzer, context store, LLM decision engine, CLI patch tool.
-  - Project file analysis and framework detection
-  - Automatic project context injection into planning chat
-  - `gpt-5-mini` based natural language orchestration decisions
-  - Decision source transparency (LLM vs rule-based tracking)
-  - CLI tool for AI-suggested file modifications
-  - Deployed to Vercel with 0 TypeScript errors
-
-**Next Phases**:
-- **Phase 42+**: Supabase durable storage, real Telegram bot integration, Obsidian memory loop, production monitoring.
-
-*(For detailed Task and Data Models, see `TASK_MODEL.md` and `ROADMAP.md`)*
+The following are deferred until explicit requirements:
+- Telegram full approval bot integration
+- Obsidian filesystem sync
+- Supabase durable storage (unless multi-user collaboration needed)
+- Codex CLI automation (backlog until verified)
+- Antigravity IDE automation (backlog until verified safe)
+- GitHub PR automation
+- Production deployment automation (requires dedicated approval+rollback design)
+- Multi-user collaboration (requires durable storage + locking)
+- Discord Webhook
+- Automatic packet delivery to external services

@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Control Room 아키텍처 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-btn {
+            @apply px-4 py-2 rounded-t-lg border-b-2 cursor-pointer transition;
+        }
+
+        .tab-btn.active {
+            @apply bg-blue-500 text-white border-blue-600;
+        }
+
+        .tab-btn.inactive {
+            @apply bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300;
+        }
+
+        .automation-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .automation-manual {
+            @apply bg-red-100 text-red-800;
+        }
+
+        .automation-semi {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+
+        .automation-auto {
+            @apply bg-green-100 text-green-800;
+        }
+
+        .automation-inactive {
+            @apply bg-gray-100 text-gray-800;
+        }
+
+        .workflow-step {
+            @apply p-4 bg-white rounded-lg border-2 shadow-sm;
+        }
+
+        .workflow-step.manual {
+            @apply border-red-300;
+        }
+
+        .workflow-step.semi {
+            @apply border-yellow-300;
+        }
+
+        .workflow-step.auto {
+            @apply border-green-300;
+        }
+
+        .feature-card {
+            @apply p-4 bg-gray-50 rounded-lg border-l-4;
+        }
+
+        .feature-card.unused {
+            @apply border-red-400;
+        }
+
+        .feature-card.replacement {
+            @apply border-yellow-400;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+    <div class="min-h-screen">
+        <!-- 헤더 -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 px-6">
+            <div class="max-w-6xl mx-auto">
+                <h1 class="text-4xl font-bold mb-2">Agent Control Room</h1>
+                <p class="text-lg opacity-90">AI 개발 제어실 - 아키텍처 가이드</p>
+            </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="bg-white border-b sticky top-0 z-50 shadow-sm">
+            <div class="max-w-6xl mx-auto px-6 flex gap-2">
+                <button class="tab-btn active" onclick="switchTab('overview')">📊 시스템 개요</button>
+                <button class="tab-btn inactive" onclick="switchTab('workflow')">🔄 워크플로우</button>
+                <button class="tab-btn inactive" onclick="switchTab('pages')">📄 사용 가이드</button>
+                <button class="tab-btn inactive" onclick="switchTab('dormant')">⚠️ 미활성 기능</button>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto px-6 py-8">
+
+            <!-- TAB 1: 시스템 개요 -->
+            <div id="overview" class="tab-content active">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-4">시스템 개요</h2>
+                    <p class="text-lg mb-6 text-gray-600">
+                        Agent Control Room은 PM이나 비개발자가 개발자 없이 AI 도움말로 상품을 만들 수 있도록 돕는 시스템입니다.
+                        아이디어를 입력하면 → 자동으로 로드맵이 생기고 → 작업이 분해되고 → 적합한 AI 도구에 보내서 → 결과를 받아서 → 다음 단계를 추천받습니다.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- 핵심 기능 -->
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span>🎯</span> 핵심 기능
+                        </h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li>✅ 아이디어를 개발 로드맵으로 자동 변환</li>
+                            <li>✅ 큰 작업을 작은 단계로 분해</li>
+                            <li>✅ 각 단계에 맞는 AI 도구 자동 추천</li>
+                            <li>✅ AI 도구 결과 자동 검증</li>
+                            <li>✅ 위험한 작업 자동 감지 및 승인 요청</li>
+                            <li>✅ 다음 단계 자동 추천</li>
+                        </ul>
+                    </div>
+
+                    <!-- 기술 스택 -->
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span>⚙️</span> 기술 스택
+                        </h3>
+                        <div class="space-y-2 text-gray-700 text-sm">
+                            <p><strong>프론트엔드:</strong> Next.js + TypeScript + Tailwind CSS</p>
+                            <p><strong>백엔드:</strong> Next.js API Routes</p>
+                            <p><strong>저장소:</strong> JSON 파일 (+ Supabase 선택사항)</p>
+                            <p><strong>AI 서비스:</strong> OpenAI (GPT-4), Telegram Bot</p>
+                            <p><strong>연동 도구:</strong> Claude Code, Codex, Vibe Kanban</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 페이지 맵 -->
+                <div class="bg-white rounded-lg p-6 shadow mb-8">
+                    <h3 class="text-xl font-bold mb-4">📍 15개 페이지 구조</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <h4 class="font-bold mb-2 text-blue-600">핵심 도구</h4>
+                            <ul class="space-y-1 text-gray-700">
+                                <li>🏠 기획 채팅 (/)</li>
+                                <li>🗺️ 로드맵 제어실 (/plan)</li>
+                                <li>📊 통합 대시보드 (/dashboard)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2 text-blue-600">관리 도구</h4>
+                            <ul class="space-y-1 text-gray-700">
+                                <li>📁 프로젝트 관리</li>
+                                <li>🤖 에이전트 상태 설정</li>
+                                <li>✅ 결과 검증</li>
+                                <li>📋 작업 리포트</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2 text-blue-600">고급 도구</h4>
+                            <ul class="space-y-1 text-gray-700">
+                                <li>🧠 Hermes 패킷</li>
+                                <li>🔄 오케스트레이션</li>
+                                <li>📝 핸드오프</li>
+                                <li>🛠️ 프롬프트 컴파일러</li>
+                                <li>💾 메모리</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 자동화 레벨 범례 -->
+                <div class="bg-white rounded-lg p-6 shadow">
+                    <h3 class="text-xl font-bold mb-4">🎚️ 자동화 레벨</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex gap-3 items-start">
+                            <span class="automation-badge automation-manual">🔴 수동</span>
+                            <p class="text-sm text-gray-700">사용자가 직접 버튼을 눌러야 진행되는 단계</p>
+                        </div>
+                        <div class="flex gap-3 items-start">
+                            <span class="automation-badge automation-semi">🟡 반자동</span>
+                            <p class="text-sm text-gray-700">한 번의 버튼으로 여러 작업이 순차 처리됨</p>
+                        </div>
+                        <div class="flex gap-3 items-start">
+                            <span class="automation-badge automation-auto">🟢 자동</span>
+                            <p class="text-sm text-gray-700">사용자 입력 후 시스템이 자동으로 처리함</p>
+                        </div>
+                        <div class="flex gap-3 items-start">
+                            <span class="automation-badge automation-inactive">⚫ 미활성</span>
+                            <p class="text-sm text-gray-700">코드는 있지만 실제로는 작동하지 않음</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: 워크플로우 -->
+            <div id="workflow" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-2">작업 흐름 (Workflow)</h2>
+                    <p class="text-gray-600 mb-6">아이디어부터 완성까지 어떻게 진행되는지</p>
+                </div>
+
+                <!-- 단계별 워크플로우 -->
+                <div class="space-y-6 mb-10">
+                    <!-- 단계 1 -->
+                    <div class="workflow-step manual">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold">1️⃣ 기획 채팅</h3>
+                                <p class="text-sm text-gray-600 mt-1">페이지: <strong>/</strong> (홈)</p>
+                            </div>
+                            <span class="automation-badge automation-manual">수동</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            개발하고 싶은 기능이나 상품에 대해 자유롭게 설명합니다. 예: "사용자가 사진을 업로드하고 태그할 수 있는 갤러리 앱 만들고 싶어"
+                        </p>
+                        <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm">
+                            💡 <strong>여기서:</strong> 메시지 입력 → AI가 이해함 → "이 기능들이 필요해" 라고 응답
+                        </div>
+                    </div>
+
+                    <!-- 단계 2 -->
+                    <div class="workflow-step manual">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold">2️⃣ 계획 고정</h3>
+                                <p class="text-sm text-gray-600 mt-1">페이지: <strong>/</strong> (홈)</p>
+                            </div>
+                            <span class="automation-badge automation-manual">수동</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            AI가 제안한 로드맵과 작업 분해가 마음에 들면 "계획 고정" 버튼을 클릭합니다. 이 단계에서는 아직 아무것도 실행되지 않습니다.
+                        </p>
+                        <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm">
+                            💡 <strong>여기서:</strong> 계획이 이상해 보이면 채팅으로 다시 물어볼 수 있음
+                        </div>
+                    </div>
+
+                    <!-- 단계 3 -->
+                    <div class="workflow-step manual">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold">3️⃣ 실제 실행 시작</h3>
+                                <p class="text-sm text-gray-600 mt-1">페이지: <strong>/</strong> (홈)</p>
+                            </div>
+                            <span class="automation-badge automation-manual">수동</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            "실제 실행 시작" 버튼을 누르는 순간 AI 도구들이 실제로 코드를 작성하기 시작합니다. 이 버튼을 누르기 전까지는 100% 안전합니다.
+                        </p>
+                        <div class="bg-red-50 p-3 rounded border border-red-200 text-sm">
+                            ⚠️ <strong>주의:</strong> 이 버튼을 누르면 AI가 실제로 작업을 시작합니다. 계획을 한 번 더 확인하세요.
+                        </div>
+                    </div>
+
+                    <!-- 단계 4 -->
+                    <div class="workflow-step auto">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold">4️⃣ AI 도구 자동 실행</h3>
+                                <p class="text-sm text-gray-600 mt-1">백그라운드 자동 진행</p>
+                            </div>
+                            <span class="automation-badge automation-auto">자동</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            시스템이 로드맵에 있는 작업들을 하나씩 Claude Code, Codex 같은 AI 도구들로 보냅니다. 각 작업에 맞는 도구를 자동으로 선택합니다.
+                        </p>
+                        <ul class="text-sm text-gray-600 space-y-1 ml-4">
+                            <li>• 복잡한 설계 → Claude Code (강함)</li>
+                            <li>• 버그 수정, 타입 에러 → Codex (빠름)</li>
+                            <li>• UI 디자인 → Antigravity (시각적)</li>
+                        </ul>
+                    </div>
+
+                    <!-- 단계 5 -->
+                    <div class="workflow-step semi">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold">5️⃣ 위험 작업 자동 감지 및 승인</h3>
+                                <p class="text-sm text-gray-600 mt-1">페이지: <strong>/orchestration</strong> (오케스트레이션)</p>
+                            </div>
+                            <span class="automation-badge automation-semi">반자동</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            안전한 작업은 자동으로 진행되지만, 위험한 작업(서버 배포, DB 수정, 파일 삭제 등)이 감지되면 먼저 당신에게 승인을 요청합니다.
+                        </p>
+                        <div class="bg-yellow-50 p-3 rounded border border-yellow-200 text-sm">
+                            💡 <strong>예시:</strong> "git push 하려고 합니다. 승인하시겠습니까?" → 버튼 클릭 → 실행
+                        </div>
+                    </div>
+
+                    <!-- 단계 6 -->
+                    <div class="workflow-step manual">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold">6️⃣ 결과 검증</h3>
+                                <p class="text-sm text-gray-600 mt-1">페이지: <strong>/result-review</strong></p>
+                            </div>
+                            <span class="automation-badge automation-manual">수동</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            각 AI 도구의 작업 결과가 나오면, 코드가 제대로 작성되었는지 당신이 검증합니다. "통과", "수정 필요", "차단", "QA" 등으로 표시할 수 있습니다.
+                        </p>
+                        <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm">
+                            💡 <strong>여기서:</strong> 결과가 마음에 안 들면 피드백 입력 → AI가 수정 작업 자동 시작
+                        </div>
+                    </div>
+
+                    <!-- 단계 7 -->
+                    <div class="workflow-step auto">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold">7️⃣ 다음 단계 자동 추천 및 진행</h3>
+                                <p class="text-sm text-gray-600 mt-1">페이지: <strong>/plan</strong> (로드맵)</p>
+                            </div>
+                            <span class="automation-badge automation-auto">자동</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            시스템이 자동으로 로드맵을 업데이트하고 "다음으로 이 작업을 해야 할 것 같습니다" 라고 추천합니다. 로드맵은 실시간으로 업데이트됩니다.
+                        </p>
+                    </div>
+
+                    <!-- 단계 8 -->
+                    <div class="workflow-step manual">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold">8️⃣ 완료</h3>
+                                <p class="text-sm text-gray-600 mt-1">페이지: <strong>/plan</strong> (로드맵)</p>
+                            </div>
+                            <span class="automation-badge automation-manual">수동</span>
+                        </div>
+                        <p class="text-gray-700 mb-3">
+                            로드맵의 모든 단계가 "완료"로 표시되면, 기본 개발은 완료되는 것입니다. 이 결과를 GitHub에 푸시하거나, Obsidian 메모리에 학습 내용을 저장할 수
+                            있습니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 자동화 비율 -->
+                <div class="bg-white rounded-lg p-6 shadow">
+                    <h3 class="text-lg font-bold mb-4">📈 자동화 비율</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium">완전 자동 (관찰만 함)</span>
+                                <span class="text-sm font-bold">약 40%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-green-500 h-3 rounded-full" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium">반자동 (버튼 1~2번)</span>
+                                <span class="text-sm font-bold">약 30%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-yellow-500 h-3 rounded-full" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium">수동 (판단/승인 필요)</span>
+                                <span class="text-sm font-bold">약 30%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-red-500 h-3 rounded-full" style="width: 30%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: 페이지 사용 가이드 -->
+            <div id="pages" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-2">각 페이지 사용 가이드</h2>
+                    <p class="text-gray-600 mb-6">15개 페이지를 언제, 어떻게 사용하는지</p>
+                </div>
+
+                <!-- 페이지 카드 -->
+                <div class="space-y-6">
+                    <!-- 페이지 1 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-blue-500">
+                        <h3 class="text-lg font-bold mb-2">🏠 기획 채팅 <span class="text-sm font-normal text-gray-500">/
+                                (홈)</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 새로운 프로젝트를 시작할 때, 또는 현재 계획을 수정하고 싶을 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 아이디어를 텍스트로 설명 → AI가 로드맵을 자동으로 생성 → "계획 고정" → "실제 실행 시작" 버튼으로 진행
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>주요 버튼:</strong> "메시지 전송" → "계획 고정" → "실제 실행 시작"
+                        </p>
+                    </div>
+
+                    <!-- 페이지 2 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-green-500">
+                        <h3 class="text-lg font-bold mb-2">🗺️ 로드맵 제어실 <span
+                                class="text-sm font-normal text-gray-500">/plan</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 현재 진행 상황을 확인하고 싶을 때, 다음 할 일을 알고 싶을 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 전체 로드맵을 한 눈에 보기 → 각 단계의 진행률 확인 → 현재 AI 도구의 상태 확인 → 다음 추천 작업 확인
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>핵심 정보:</strong> Phase별 진행률, 다음 작업 추천, 에이전트 상태, 위험도 레이더
+                        </p>
+                    </div>
+
+                    <!-- 페이지 3 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-purple-500">
+                        <h3 class="text-lg font-bold mb-2">📊 통합 대시보드 <span
+                                class="text-sm font-normal text-gray-500">/dashboard</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 여러 프로젝트를 진행할 때, 전체 진행 상황을 한눈에 보고 싶을 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 모든 프로젝트의 KPI(성공률, 작업 수 등) 한눈에 보기 → 최근 활동 확인 → 프로젝트별 필터링
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>자동 갱신:</strong> 30초마다 자동으로 최신 정보로 업데이트됨
+                        </p>
+                    </div>
+
+                    <!-- 페이지 4 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-indigo-500">
+                        <h3 class="text-lg font-bold mb-2">🔄 오케스트레이션 <span
+                                class="text-sm font-normal text-gray-500">/orchestration</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 자세한 작업 승인, 위험 작업 검토, 실시간 모니터링이 필요할 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 대기 중인 작업 목록 보기 → 위험 작업 승인/거부 → "안전한 작업 자동 실행" 버튼으로 일괄 처리 → 로그 모니터링
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>주요 탭:</strong> 결정, 큐, 결과, 승인, 진행상황, 피드백, 모니터, 로그, 지표
+                        </p>
+                    </div>
+
+                    <!-- 페이지 5 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-cyan-500">
+                        <h3 class="text-lg font-bold mb-2">📁 프로젝트 관리 <span
+                                class="text-sm font-normal text-gray-500">/projects</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 새 프로젝트를 등록하거나, 기존 프로젝트 정보를 수정할 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 프로젝트 이름, 설명, 기술 스택 입력 → "프로젝트 생성" → 이후 기획 채팅에서 사용 가능
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>저장되는 정보:</strong> 프로젝트명, 설명, GitHub 링크, 기술 스택
+                        </p>
+                    </div>
+
+                    <!-- 페이지 6 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-teal-500">
+                        <h3 class="text-lg font-bold mb-2">🤖 에이전트 상태 설정 <span
+                                class="text-sm font-normal text-gray-500">/agent-status</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> Claude나 Codex가 사용 불가능할 때, 또는 토큰이 부족할 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 각 AI 도구(Claude Code, Codex, Antigravity)의 상태를 "가능", "토큰 부족", "쉬는 중",
+                            "차단" 등으로 표시
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>영향:</strong> 이 설정에 따라 다음 작업을 할 AI 도구가 자동으로 선택됨
+                        </p>
+                    </div>
+
+                    <!-- 페이지 7 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-red-500">
+                        <h3 class="text-lg font-bold mb-2">✅ 결과 검증 <span
+                                class="text-sm font-normal text-gray-500">/result-review</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> AI 도구의 작업 결과가 나왔을 때, 그 결과가 좋은지 나쁜지 판단해야 할 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> AI 결과 붙여넣기 → "통과", "수정 필요", "차단", "QA 요청" 중 선택 → 피드백 입력 → 저장
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>중요:</strong> 당신의 판단이 다음 작업 추천에 반영됨
+                        </p>
+                    </div>
+
+                    <!-- 페이지 8 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-orange-500">
+                        <h3 class="text-lg font-bold mb-2">🧠 Hermes 패킷 <span
+                                class="text-sm font-normal text-gray-500">/hermes-packets</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 작업을 위임하고 싶을 때, 또는 시스템의 추천을 자세히 읽고 싶을 때 (실행은 안 됨)
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 자동으로 생성된 작업 패킷 종류 선택 → 마크다운으로 된 상세 설명 읽기 → 필요하면 복사해서 다른 곳에 사용
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>주의:</strong> ⚠️ "Hermes는 실행되지 않습니다" - 이것은 조언만 제공합니다
+                        </p>
+                    </div>
+
+                    <!-- 페이지 9 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-pink-500">
+                        <h3 class="text-lg font-bold mb-2">📝 핸드오프 <span
+                                class="text-sm font-normal text-gray-500">/handoffs</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> AI 도구 간에 작업을 넘길 때, 또는 다른 사람에게 상황을 설명해야 할 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 시스템이 자동 생성한 핸드오프 문서 확인 → 필요하면 복사해서 다음 도구에 전달
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>내용:</strong> 지금까지 한 일, 바뀐 파일, 다음 할 일, 주의사항
+                        </p>
+                    </div>
+
+                    <!-- 페이지 10 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-blue-400">
+                        <h3 class="text-lg font-bold mb-2">📋 작업 리포트 <span
+                                class="text-sm font-normal text-gray-500">/reports</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> AI 도구가 작업을 완료했을 때, 그 결과를 기록으로 남기고 싶을 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 작업 이름, 결과, 소요 시간, 이슈 등을 입력 → 저장 → 나중에 조회 가능
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>활용:</strong> 작업 이력 추적, 패턴 분석, 성과 평가
+                        </p>
+                    </div>
+
+                    <!-- 페이지 11 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-green-400">
+                        <h3 class="text-lg font-bold mb-2">🚀 실행 워크벤치 <span
+                                class="text-sm font-normal text-gray-500">/workbench</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 특정 작업을 지금 바로 실행하고 싶을 때 (고급 사용자)
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 체크리스트 완료 → "승인" 버튼 → AI가 즉시 코드 작성 시작 → 실시간 로그 보기
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>매우 위험:</strong> 이 페이지는 고급 사용자용입니다
+                        </p>
+                    </div>
+
+                    <!-- 페이지 12 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-indigo-400">
+                        <h3 class="text-lg font-bold mb-2">📦 Context Pack <span
+                                class="text-sm font-normal text-gray-500">/context-pack</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 세션이 길어져서 토큰이 부족할 때, 또는 새 AI 도구로 전환할 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> "Context Pack 생성" 버튼 → 지금까지의 모든 정보가 정렬된 문서 생성 → 다음 도구에 붙여넣기
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>포함:</strong> 지금까지 한 일, 바뀐 파일, 주의사항, 다음 할 일
+                        </p>
+                    </div>
+
+                    <!-- 페이지 13 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-purple-400">
+                        <h3 class="text-lg font-bold mb-2">💾 메모리 & 인사이트 <span
+                                class="text-sm font-normal text-gray-500">/memory</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> 배운 점을 기록하고 싶을 때, 또는 다음 프로젝트에서 참고하고 싶을 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 인사이트 입력 → 유형 선택(결정, 실패 사례, 프롬프트 팁 등) → Obsidian 포맷으로 저장
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>활용:</strong> Obsidian 데스크탑 앱과 동기화 가능
+                        </p>
+                    </div>
+
+                    <!-- 페이지 14 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-cyan-400">
+                        <h3 class="text-lg font-bold mb-2">🔧 기술 어드바이저 <span
+                                class="text-sm font-normal text-gray-500">/advisor</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> "이 기술을 쓸까 저 기술을 쓸까?" 같은 기술 질문이 있을 때 (실행 안 함)
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 기술 질문 입력 → AI가 상황에 맞는 조언 제공 → 읽고 참고하기 (아무것도 실행 안 됨)
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>목적:</strong> 의사결정 앞에 빠르게 조언 얻기
+                        </p>
+                    </div>
+
+                    <!-- 페이지 15 -->
+                    <div class="bg-white rounded-lg p-6 shadow border-l-4 border-amber-500">
+                        <h3 class="text-lg font-bold mb-2">📄 프롬프트 컴파일러 <span
+                                class="text-sm font-normal text-gray-500">/prompt-compiler</span></h3>
+                        <p class="text-gray-700 mb-3">
+                            <strong>언제 쓰나:</strong> AI 도구에 줄 프롬프트를 수동으로 작성하고 싶을 때
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>뭘 하나:</strong> 작업 설명 입력 → 시스템이 "이런 AI 도구를 쓰세요, 이런 리스크가 있으니 주의하세요" 라고 조언 → 복사해서 사용
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>활용:</strong> 자동 실행 말고 수동으로 더 세밀하게 제어하고 싶을 때
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: 미활성 기능 -->
+            <div id="dormant" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-2">⚠️ 구현됐지만 사용되지 않는 기능</h2>
+                    <p class="text-gray-600 mb-6">코드는 있지만 실제로 쓰이지 않고 있는 부분들</p>
+                </div>
+
+                <!-- 미연결 UI 화면들 -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">🔴 워크플로우에 연결 안 된 화면들</h3>
+                    <p class="text-gray-600 mb-4">이 화면들은 만들어져 있지만 어디서도 이 화면으로 들어갈 수 있는 버튼이 없습니다.</p>
+                    <div class="space-y-4">
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">1. 승인 게이트 (Approval Gate Panel)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 위험한 작업(운영 서버에 배포, 데이터베이스 수정 등)을 실행하기 전에 체크리스트로 다시 한 번 확인하는 화면
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>어디서 쓰려고 했나:</strong> 오케스트레이션 페이지의 탭 중 하나
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ 체크리스트 UI와 승인 로직 다 만들어져 있지만, 오케스트레이션 페이지에 탭으로 붙지 않았음
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">2. 자동 결정 패널 (Auto Decision Panel)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> AI가 작업 결과를 보고 자동으로 "이건 통과입니다", "이건 실패하려고 합니다" 같이 판단하는 화면에서 그
+                                판단 내용을 보기
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>어디서 쓰려고 했나:</strong> 오케스트레이션 페이지 → 검증 탭
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ AI 판단 로직은 작동하지만, UI에서 보는 화면이 없음
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">3. 칸반 보드 (Kanban Board)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 작업 카드를 드래그 드롭해서 "대기중" → "진행중" → "완료" 로 옮기는 시각적인 보드
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>어디서 쓰려고 했나:</strong> 로드맵 페이지 또는 별도 페이지에서 칸반 보드로 작업 관리
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ⚠️ 개별 카드 컴포넌트는 쓰이고 있지만, 전체 보드를 볼 수 있는 페이지가 없음
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">4. 모니터 패널 (Monitor Panel - 구버전)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> Hermes AI가 현재 작업 상황을 모니터링하고 조언하는 화면 (예: "지금 여기 위험 신호 있으니까
+                                주의하세요")
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>어디서 쓰려고 했나:</strong> 별도의 모니터링 페이지
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> 🔄 이 기능은 새로운 버전(오케스트레이션 페이지 내 "모니터" 탭)으로 대체됨. 구버전은 사용 안 함
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">5. 프로젝트 상태 카드 (Project Status Card)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 프로젝트 목록에서 각 프로젝트의 진행률, 마지막 업데이트 시간, AI 도구 상태 등을 한 카드에 보여주기
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>어디서 쓰려고 했나:</strong> /projects 페이지 → 프로젝트 목록
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ 카드 컴포넌트 만들어짐 → 하지만 프로젝트 페이지에는 로드되지 않음
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">6. 로드맵 상태 위젯 (Roadmap Status Widget)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 대시보드의 작은 영역에 현재 로드맵 진행률을 시각적으로 보여주는 위젯
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>어디서 쓰려고 했나:</strong> /dashboard 페이지의 상단
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ 위젯 코드 있음 → 대시보드에 배치 안 됨
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">7. 스케줄링 모드 선택 (Scheduling Mode Panel)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 여러 작업을 어떻게 실행할지 선택하는 화면
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>옵션:</strong>
+                            <ul class="ml-4 mt-1 space-y-1">
+                                <li>• "한 번에 하나씩" (순서대로)</li>
+                                <li>• "동시에 여럿" (병렬 실행)</li>
+                                <li>• "릴레이 방식" (A 끝나면 B 시작)</li>
+                            </ul>
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ 로직이 다 구현되었지만, 워크벤치 페이지에 UI가 붙지 않음
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">8. 에이전트 능력 목록 (Agent Capability List)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 각 AI 도구(Claude, Codex, Antigravity)가 어떤 작업에 강한지 보여주는 목록
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>어디서 쓰려고 했나:</strong> /agent-status 페이지에서 에이전트를 선택할 때, "이 AI는 UI 디자인에 강합니다" 같은 설명
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ 능력 정보 다 정의되었지만, 페이지에 표시 안 됨
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">9. 방향성 오케스트레이터 (Direction Orchestrator - 구버전)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 초기 버전에서 아이디어를 입력하면 작업으로 변환하는 화면
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>현재 상태:</strong> 🔄 이 기능은 "기획 채팅" 으로 완전히 대체되어 더 이상 쓰이지 않음
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">10. 모니터 컴포넌트 폴더 전체</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> Context Pack 빌더, 핸드오프 빌더, Obsidian 메모리 등을 모니터링하는 UI
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>현재 상태:</strong> 🔄 이 기능들이 "Hermes" 폴더로 이동되고 통합됨. 구 버전은 불필요
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 실제로 동작하지 않는 자동화 기능들 -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">⚫ 코드는 있지만 작동하지 않는 기능들</h3>
+                    <p class="text-gray-600 mb-4">이 기능들은 구현이 완료되었지만, 필요한 외부 설정이나 활성화가 되지 않아 실제로는 작동하지 않습니다.</p>
+                    <div class="space-y-4">
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">1. 텔레그램 승인 알림 (Telegram Approval Bot)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 위험한 작업(서버 배포, DB 삭제 등)이 생기면 자동으로 당신의 텔레그램으로 "이 작업 승인하시겠습니까?"
+                                라는 메시지를 보내기
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>예시:</strong> 텔레그램에 "⚠️ git push 하려고 합니다. 승인/거부" 버튼이 달린 메시지 → 클릭 → 즉시 작업 실행 또는 차단
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ 텔레그램 API 연동 코드는 완전히 구현되었지만, 실제 텔레그램 봇 토큰이 설정되지 않아 발송이 안 됨
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">2. 디스코드 웹훅 알림 (Discord Webhook)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> 위험한 작업이 생기면 디스코드 채널에 "📋 작업 승인 카드" 를 보내기
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>목적:</strong> 팀 채널에서 실시간으로 승인 요청을 받고 빠르게 응답하기
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ 코드는 완성 → 실제 Discord 채널 설정이 없어서 mock (가짜) 상태. 실제 발송 안 됨
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">3. Hermes CLI 자동 실행 (Hermes Auto-Execution)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> Hermes 패킷 화면에서 보이는 작업들을 실제로 자동 실행하기
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>예시:</strong> "실패한 테스트 다시 실행" 패킷을 보고 있을 때 "이거 자동으로 실행해줄까?" 버튼이 있었음
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ Hermes CLI 연동 코드는 만들어졌지만, 안전상 이유로 UI에는 "⚠️ 실행되지 않습니다" 라고 표시.
+                                실제 실행 불가
+                            </p>
+                        </div>
+
+                        <div class="feature-card unused">
+                            <h4 class="font-bold mb-2">4. 에이전트 가용성 자동 감지 (Agent Capability Auto-Detection)</h4>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>뭘 하려고 했나:</strong> Claude, Codex가 현재 설치되어 있고 사용 가능한지 자동으로 체크하기
+                            </p>
+                            <p class="text-sm text-gray-700 mb-2">
+                                <strong>목적:</strong> 당신이 매번 "Claude는 토큰이 부족합니다" 라고 수동으로 입력할 필요 없이 자동으로 감지
+                            </p>
+                            <p class="text-sm text-gray-700">
+                                <strong>현재 상태:</strong> ✅ 자동 감지 함수는 구현되었지만, 실제로는 사용자가 /agent-status 페이지에서 수동으로 상태를 설정해야
+                                함
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 정리 요약 -->
+                <div class="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500 mt-8">
+                    <h3 class="text-lg font-bold mb-3">📌 정리</h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li><strong>⚠️ 미연결 화면 10개:</strong> UI는 다 만들어졌지만 어디서도 갈 수 있는 버튼이 없음. "페이지 사용 가이드" 탭에 나오는 15개
+                            페이지만 실제로 쓰임.</li>
+                        <li><strong>⚫ 미활성 자동화 4개:</strong> 코드와 API 엔드포인트는 완전히 구현되었지만, 외부 설정(텔레그램 토큰, 디스코드 웹훅, Hermes 활성화
+                            등)이 없어서 실제로 작동하지 않음.</li>
+                        <li><strong>🔄 대체된 기능들:</strong> 일부 구 버전 기능들은 새로운 버전으로 완전히 통합됨 (예: 구 모니터 → 오케스트레이션 탭)</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // 모든 탭 숨기기
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('inactive');
+            });
+
+            // 선택된 탭 보이기
+            document.getElementById(tabName).classList.add('active');
+
+            // 선택된 버튼 활성화
+            event.target.classList.remove('inactive');
+            event.target.classList.add('active');
+
+            // 상단으로 스크롤
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

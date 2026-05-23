@@ -166,11 +166,11 @@ export default function RoadmapStatusWidget({
               {activeStage.status === "completed" && (
                 <CheckCircle2 className="inline w-4 h-4 mr-1.5 align-[-2px] text-emerald-500" />
               )}
-              Phase {activeStage.number} {statusLabel} — {activeStage.title}
+              단계 {activeStage.number} {statusLabel} — {activeStage.title}
             </span>
           </div>
         ) : (
-          <p className="text-sm text-gray-400">활성 Phase 없음</p>
+          <p className="text-sm text-gray-400">활성화된 단계 없음</p>
         )}
 
         {/* Progress bar */}

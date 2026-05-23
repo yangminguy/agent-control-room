@@ -535,19 +535,25 @@ export async function compileSeniorDevPrompt(
   ];
 
   // Step 7: Build file boundaries
-  const allowedFiles = input.acceptanceCriteria?.length
-    ? ["lib/**/*", "app/**/*", "components/**/*", "data/**/*"]
-    : ["Only files directly relevant to this task"];
+  // If task-specific allowedFiles are provided, use them; otherwise use defaults
+  const allowedFiles = input.allowedFiles && input.allowedFiles.length > 0
+    ? input.allowedFiles
+    : (input.acceptanceCriteria?.length
+      ? ["lib/**/*", "app/**/*", "components/**/*", "data/**/*"]
+      : ["Only files directly relevant to this task"]);
 
-  const doNotTouchFiles = [
-    ".env*",
-    "package.json",
-    "package-lock.json",
-    "tsconfig.json",
-    "next.config.js",
-    "supabase/**",
-    "database/**",
-  ];
+  // If task-specific doNotTouchFiles are provided, use them; otherwise use defaults
+  const doNotTouchFiles = input.doNotTouchFiles && input.doNotTouchFiles.length > 0
+    ? input.doNotTouchFiles
+    : [
+        ".env*",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "next.config.js",
+        "supabase/**",
+        "database/**",
+      ];
 
   // Step 8: Build required work
   const requiredWork = [

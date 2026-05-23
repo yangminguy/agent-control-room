@@ -1,356 +1,210 @@
-# LOCAL_RUNNER_ARCHITECTURE.md — Local Terminal & IDE Automation
+# LOCAL_RUNNER_ARCHITECTURE.md — Local CLI Automation
 
 ## Overview
 
-Agent Control Room is a **local AI development control tower**.
+Agent Control Room is a **local AI development automation control tower**.
 
-It does NOT call external paid AI APIs by default.
+It automates already-authenticated local tools where execution is verified and approval policy allows it.
 
-Instead, it automates the user's **already-authenticated local tools**:
-- Claude Code CLI (terminal-based execution)
-- Codex (local app or manual handoff)
-- Antigravity IDE (visual QA or IDE automation)
-- Hermes (optional background summaries)
-- Vibe Kanban (execution workbench surface)
-
-## Problem We Solve
-
-Today, the user manually:
-1. Writes a prompt in Agent Control Room
-2. Copies the prompt into Claude Code / Codex / Antigravity
-3. Runs the agent locally
-4. Copies the result back into Agent Control Room
-5. Analyzes the diff manually
-6. Moves to the next task
-
-**Agent Control Room's Local Runner Bridge automates steps 2, 3, 4, and partly 5.**
+Supported/target execution surfaces:
+- Claude Code CLI
+- Codex CLI if verified stable
+- Antigravity IDE automation if verified safe
+- Vibe Kanban workbench for detailed cards/sessions/diffs/previews
+- Hermes as supervisor only
 
 ## Local Runner Bridge
 
-The **Local Runner Bridge** is the integration layer between Agent Control Room and already-authenticated local tools.
+The Local Runner Bridge connects Agent Control Room to local execution.
 
+**Current Flow:**
 ```text
-Agent Control Room
-    ↓
-    approval gate + context binding
-    ↓
-Local Runner Bridge
-    ↓
-    adapter routing
-    ↓
-┌───────────────────────────────────┐
-│ Claude Code Adapter               │ ← runs claude -p "..." locally
-├───────────────────────────────────┤
-│ Codex Adapter                     │ ← manual handoff or CLI if available
-├───────────────────────────────────┤
-│ Antigravity Adapter               │ ← manual handoff or IDE automation
-├───────────────────────────────────┤
-│ Vibe Kanban Bridge                │ ← issue export + result import
-├───────────────────────────────────┤
-│ Hermes Background Worker          │ ← status summaries, context packs
-└───────────────────────────────────┘
-    ↓
-    local project execution
-    ↓
-    logs + stdout/stderr capture
-    ↓
-    return to Agent Control Room
+roadmap task
+→ risk classification
+→ scheduling recommendation
+→ approval gate
+→ local runner token/context binding (POST /api/workbench/approval)
+→ agent adapter (spawn local CLI)
+→ local CLI process (/api/runner)
+→ ExecutionLog created & persisted
+→ logs streamed as SSE
+→ exit status recorded
+→ git diff + boundary check recorded
+→ ExecutionLog status: "done", "failed", or "boundary_violation"
+→ Result normalization: normalizeExecutionResult() → ExecutionResultSummary
+→ Decision classification: classifyExecutionDecision() → DecisionClassification
+→ Status update: updateRoadmapAndKanbanStatus()
+→ (Phase F) Packet generation: buildHermesPacket() [currently on-demand only]
+→ roadmap & kanban status update
 ```
 
-### Execution Path for Claude Code (MVP)
+**Endpoints:**
+- `POST /api/runner` — Main execution endpoint, SSE-streamed logs
+- `GET /api/runner/result-summary?planId=...&taskId=...` — Normalized result lookup
+- `POST /api/workbench/approval` — Request approval token
+- `POST /api/orchestration/queue` — Queue task
+- `POST /api/orchestration/dispatch` — Dispatch to runner
 
-```text
-1. User completes approval checklist in /workbench
-2. /workbench requests approval token from /api/workbench/approval
-3. Token is server-issued, context-bound, 5-min TTL, one-time use
-4. RunnerLogView renders with token
-5. User clicks "승인 후 에이전트 실행"
-6. fetch("/api/runner", { approvalToken, planId, taskId, agent, cwd, prompt })
-7. /api/runner validates token, cwd, agent allowlist
-8. /api/runner spawns: child_process.spawn("claude", ["-p", prompt], { cwd })
-9. stdout/stderr stream back to UI as SSE
-10. Exit code captured
-11. Git diff analyzed automatically
-12. Task status updated
-13. Next prompt suggested
-```
+## Runner Requirements
 
-**No external paid API is called in this flow.**
+The runner must:
+- validate project path safety
+- validate agent allowlist
+- require approval tokens for risky execution
+- bind approvals to plan/task/agent/cwd
+- prevent token reuse
+- stream logs in a user-friendly way
+- capture exit code
+- capture git diff
+- capture typecheck/lint/test/build results where available
+- return a result packet to the orchestration loop
 
-### Execution Path for Codex (Future)
+## Approval Boundary
 
-For now, Codex is a manual handoff.
+Low-risk supported tasks may run after the appropriate runner approval flow.
 
-Eventually:
-```text
-1. Agent Control Room generates copy-ready prompt
-2. User copies prompt to Codex manually
-3. User runs Codex locally
-4. User copies result back
-5. Agent Control Room imports result and analyzes
+High/critical risk tasks must pause for explicit approval before execution.
 
-OR (if CLI verified):
-1-5. Same as Claude Code, but spawn: child_process.spawn("codex", [...])
-```
+Critical production actions remain manual unless a future phase adds a dedicated approval, rollback, and audit design.
 
-### Execution Path for Antigravity (Future)
+## Adapter Status
 
-Antigravity is a visual IDE tool for UI-heavy tasks.
-
-For now:
-```text
-1. Agent Control Room generates copy-ready prompt
-2. User opens Antigravity
-3. User manually opens the prepared handoff packet
-4. Antigravity generates screen prototypes or code
-5. User exports or imports result back to Agent Control Room
-```
-
-If IDE automation is safe and verified, future versions may:
-- Open Antigravity workspace links directly
-- Embed Antigravity preview UI in Agent Control Room
-- Capture Antigravity result exports programmatically
-
-### Execution Path for Hermes (Optional)
-
-Hermes is a background worker for monitoring and memory.
-
-```text
-1. After each execution, optionally invoke Hermes to summarize
-2. Generate Obsidian-compatible insight notes
-3. Create Context Pack for token/context reset
-4. Monitor retry candidates and blockers
-5. Do NOT use Hermes for primary code changes
-```
-
-## Agent Adapter Model
-
-Each adapter defines how Agent Control Room bridges to a local tool.
-
-### Claude Code Adapter
-
-**Status in MVP**: ✅ Fully automated
-
-| Property | Value |
+| Adapter | Current Policy |
 |---|---|
-| **Tool** | Claude Code CLI (terminal) |
-| **Executable** | ✅ Yes, via `child_process.spawn` |
-| **Endpoint** | `/api/runner` (internal local runner) |
-| **Approval Required** | ✅ Yes (workbench gate + token) |
-| **Authentication** | User's existing Claude Code session |
-| **Output Handling** | SSE stream to UI |
-| **Diff Capture** | ✅ Auto git diff analysis |
-| **Default for** | Architecture, reasoning, document review |
+| Claude Code CLI | Primary local CLI execution target when configured and approved. |
+| Codex | Backlog for automatic CLI execution until executable and safety behavior are verified. Use for QA/fixes through manual or result-import flow meanwhile. |
+| Antigravity | Backlog for automatic IDE automation until a safe API/workspace flow is verified. Use for UI/UX through manual/workbench flow meanwhile. |
+| Hermes | Supervisor only. May run safe checks and generate packets. Must not edit code. |
+| Vibe Kanban | Detailed workbench bridge. Not the orchestration brain. |
 
-**Files**:
-- `lib/runner/spawn-runner.ts` — Claude CLI spawn logic
-- `app/api/runner/route.ts` — Internal local runner endpoint
-- `components/runner/RunnerLogView.tsx` — Log streaming UI
-- `components/workbench/ExecutionReadinessGate.tsx` — Approval gate
+## Execution Evidence (Phase E Implementation)
 
-### Codex Adapter
+Each run produces:
 
-**Status in MVP**: 📋 Manual handoff only
+**ExecutionLog (Persisted):**
+- planTaskId
+- agent
+- branchName
+- startedAt / completedAt
+- logLines (array of strings)
+- status: "running" | "done" | "failed" | "boundary_violation" | "needs_review"
+- exitCode
 
-| Property | Value |
+**File:** `lib/storage/execution-log-store.ts`
+
+**ExecutionResultSummary (Normalized):**
+- planId
+- taskId
+- assignedAgent
+- status (from ExecutionLog)
+- logSummary (first 200 chars)
+- changedFiles (reconstructed from [BOUNDARY] log lines)
+- checksRun: { typecheck, lint, test, build: "pass" | "fail" | "not_run" }
+- failureReason (if status !== "done")
+- recommendedNextAction: "continue" | "manual_review" | "retry_same_agent" | "handoff_to_agent"
+
+**File:** `lib/runner/execution-result-normalizer.ts`
+
+**Retrieval:**
+- `GET /api/runner/result-summary?planId=...&taskId=...` returns ExecutionResultSummary
+- normalizeExecutionResult() is pure (no shell commands, no I/O)
+
+## Result Normalization (Phase E)
+
+**File:** `lib/runner/execution-result-normalizer.ts`
+
+**Function:** `normalizeExecutionResult(log: ExecutionLog, planId: string, changedFiles: string[]): ExecutionResultSummary`
+
+**What it does:**
+- Derives execution status from ExecutionLog.status
+- Scans log lines for typecheck/lint/test/build markers
+- Extracts failure reason from [ERROR]/[BOUNDARY]/[REVIEW_BLOCKED] lines
+- Determines recommended next action based on status and check results
+- Returns PM-friendly summary with no shell execution
+
+**What it does NOT do:**
+- Does not re-run any commands
+- Does not call shell or git
+- Does not call external APIs
+- Uses log analysis only (best-effort)
+
+**Note on changedFiles:**
+- changedFiles are collected by the runner during boundary checking
+- Best-effort reconstruction from [BOUNDARY] log lines in result-summary endpoint
+- Runner does not persist changedFiles directly on ExecutionLog (future improvement)
+
+## Forbidden Without Future Policy
+
+The runner and Hermes must not automatically run:
+
+```bash
+git push
+git merge
+git rebase
+git reset --hard
+git clean -fd
+npm install
+pnpm add
+pnpm remove
+vercel --prod
+prisma migrate deploy
+```
+
+Also forbidden:
+- production deployment
+- database migration
+- dependency changes
+- secret or `.env` edits
+- uncontrolled file deletion
+- bypassing approval gates
+
+## UI Connections
+
+| UI | Runner Role |
 |---|---|
-| **Tool** | Codex (local app) |
-| **Executable** | ❓ CLI unknown / not verified |
-| **Endpoint** | Manual copy-paste for now |
-| **Approval Required** | ✅ Yes (workbench gate) |
-| **Authentication** | User's existing Codex session |
-| **Output Handling** | Manual result import |
-| **Diff Capture** | Manual or import-based |
-| **Default for** | Bounded implementation, tests, type errors |
+| `/plan` | Shows task readiness, risk, status, and next action. |
+| `/workbench` | Shows approval checklist, scheduling explanation, runner launch, and logs. |
+| `/orchestration` | Shows queue, approval state, validation results, and re-orchestration. |
+| Kanban detail | Shows task status, agent, acceptance criteria, logs, and result summary. |
+| Hermes panel | Shows verification packets and drift/failure analysis. |
 
-**Future work**:
-- Verify if Codex has a stable CLI
-- If yes, implement `codex` spawn adapter similar to Claude Code
-- If no, keep manual handoff mode with copy-ready prompt
+## Status Persistence (Phase E)
 
-### Antigravity Adapter
+**In-Session Persistence:**
+- ExecutionLog stored in JSON file: `data/execution-logs.json`
+- Roadmap and PlanTask status updated in: `data/feature-plans.json`
+- Status persists across page refreshes during same session
 
-**Status in MVP**: 📋 Manual handoff only
+**Durable Persistence (Future):**
+- Supabase integration is backlog until explicit requirements
+- Current MVP uses local JSON storage
+- No automatic sync to external databases
 
-| Property | Value |
-|---|---|
-| **Tool** | Antigravity IDE |
-| **Executable** | ❓ IDE automation not verified |
-| **Endpoint** | Manual handoff or IDE automation (future) |
-| **Approval Required** | ✅ Yes (workbench gate) |
-| **Authentication** | User's existing Antigravity IDE session |
-| **Output Handling** | Manual export or IDE result capture (future) |
-| **Diff Capture** | Manual or event-based (future) |
-| **Default for** | UI prototype, visual iteration, screen-level changes |
+**Files Modified After Execution:**
+- `lib/storage/execution-log-store.ts` — addExecutionLog, updateExecutionLog
+- `lib/storage/feature-plan-store.ts` — updatePlanTaskStatus
+- `lib/orchestration/status-updater.ts` — updateRoadmapAndKanbanStatus
 
-**Future work**:
-- Research Antigravity IDE plugin/automation API
-- Design safe IDE automation boundary
-- If safe, implement Antigravity workspace open links
-- If safe, implement Antigravity result export capture
+## Decision Classification (Phase E)
 
-**Safety Rule**: Do not directly automate Antigravity IDE UI without explicit design and user approval.
+**File:** `lib/orchestration/decision-classifier.ts`
 
-### Hermes Adapter
+**Function:** `classifyExecutionDecision(summary: HermesExecutionInput): DecisionClassification`
 
-**Status in MVP**: 🔄 Optional background worker
+**Decision Logic (8 rules, no LLM):**
+1. If status === "boundary_violation" → "drift_detected"
+2. If status !== "done" → "blocked"
+3. If any check failed → "qa_needed"
+4. If all checks passed and status === "done" → "pass"
+5. Risk-based gating (future phase)
 
-| Property | Value |
-|---|---|
-| **Tool** | Hermes (background monitoring/summaries) |
-| **Executable** | ✅ Summary generation only |
-| **Endpoint** | Not applicable (no execution) |
-| **Approval Required** | ✅ Yes (view/approve before sending) |
-| **Output Handling** | Markdown exports (Obsidian notes, Context Packs) |
-| **Default for** | Long-running monitoring, recurring summaries, memory notes |
-| **Primary Coding** | ❌ NO (background worker only) |
+**Output:** DecisionClassification with decision, reason, confidence 0-100, nextAction
 
-**Responsibilities**:
-- Session summaries and analysis
-- Context Pack generation for token/context reset
-- Obsidian-compatible insight memory export
-- Retry candidate monitoring
-- Blocker tracking and recommendations
+## Phase F Stabilization Work
 
-**What Hermes Does NOT Do**:
-- Execute code changes
-- Deploy or push to main
-- Auto-merge
-- Run DB migrations
-- Make decisions without user approval
-
-## Safety Boundary: Local Execution Only
-
-### What Is Allowed
-
-✅ Local terminal command execution (Claude Code, Codex via CLI)
-✅ Local git branch creation and management
-✅ Local diff capture and analysis
-✅ Manual result import and session reporting
-✅ Local file inspection and metadata capture
-✅ Structured prompt generation and copy-paste
-✅ Optional background summaries (Hermes)
-✅ Vibe Kanban workbench integration (issue export / result import)
-
-### What Is NOT Allowed (MVP)
-
-❌ External paid model API calls (OpenAI, Anthropic, etc.)
-❌ Automatic deployment or git push
-❌ Automatic merge or PR creation
-❌ Database migration execution
-❌ Slack alerts or external service calls
-❌ Multi-user collaboration or permissions
-❌ Uncontrolled autonomous execution without approval
-❌ Direct Antigravity IDE UI automation (pending design)
-❌ Codex CLI automation (pending verification)
-
-## Internal Endpoint: `/api/runner`
-
-`/api/runner` is **NOT a paid AI API endpoint**.
-
-It is an **internal local runner endpoint** that:
-- Receives approved execution packets from `/workbench`
-- Validates the server-issued approval token
-- Validates the project path safety
-- Spawns a local terminal command (e.g. `claude -p "..."`)
-- Captures stdout/stderr as SSE stream
-- Returns logs to the UI in real time
-- Does NOT call external paid APIs by default
-
-### `/api/runner` Safety Rules
-
-1. **Approval Token Required** ✅
-   - Server-issued tokens only
-   - Client cannot forge tokens
-   - Tokens are context-bound (planId, taskId, agent, cwd)
-   - Tokens expire after 5 minutes
-   - Tokens are one-time use
-
-2. **Path Validation** ✅
-   - CWD must be within project root
-   - No path traversal allowed
-   - No symlink escapes
-
-3. **Agent Allowlist** ✅
-   - Only `claude-code` in MVP
-   - Explicit allow-list enforcement
-   - New agents require separate security review
-
-4. **Uncommitted Changes Block** ✅
-   - Must commit or stash changes first
-   - Prevents confusion about what changed
-
-5. **Branch Creation** ✅
-   - Safe git branch created before execution
-   - Named from taskId and timestamp
-   - Isolated from main development
-
-6. **Validation Commands Required** ✅
-   - After execution: `npm run typecheck && npm run lint && npm run test && npm run build`
-   - Prevents silent regressions
-   - User must review and approve results
-
-## What Is Still Manual
-
-| Work | Status | How |
-|---|---|---|
-| Prompt generation | 🤖 Auto | `/prompt-compiler` generates copy-ready prompts |
-| Handoff creation | 🤖 Auto | Structured handoff packets generated |
-| Diff analysis | 🤖 Auto | `/api/analyzer` inspects git diff |
-| Task decomposition | 🤖 Auto | Orchestrator breaks down features |
-| Agent routing | 🤖 Auto | Router recommends best agent |
-| Session reports | 🤖 Partial | Auto diff analysis + manual result review |
-| Codex execution | 📋 Manual | Copy prompt to Codex, run, copy result back |
-| Antigravity execution | 📋 Manual | Copy prompt to Antigravity, create screens, copy result back |
-| Vibe Kanban export | 🤖 Auto | Auto send prepared tasks as issues |
-| Vibe Kanban import | 📋 Manual | User manually imports result from Vibe Kanban |
-| Approval gate | 👤 User | User must check boxes and approve execution |
-| Deployment | 👤 User | User manually deploys after approval |
-| Git push/merge | 👤 User | User decides when to push and merge |
-
-## What Can Be Automated First
-
-Priority order for future work:
-
-1. **Claude Code Local Runner** ✅ DONE
-   - Terminal spawn, log capture, diff analysis
-
-2. **Codex Adapter** (if CLI available)
-   - Verify Codex has a stable CLI
-   - If yes, implement spawn adapter like Claude Code
-
-3. **Vibe Kanban Result Import**
-   - Capture issue/workspace completion status
-   - Import diff/outcome back to Agent Control Room
-
-4. **Antigravity IDE Research**
-   - Investigate IDE plugin/automation API
-   - Design safe boundaries for IDE automation
-
-5. **Obsidian Memory Export**
-   - Generate Markdown notes for Obsidian
-   - Preserve decisions, patterns, handoff context
-
-6. **Context Pack Workflow**
-   - Auto generate reset/handoff packets for token/context limits
-   - Preserve session state for new agent/session
-
-## Remaining Risks
-
-- **Codex CLI Unknown**: We don't know if Codex has a stable executable CLI. Requires investigation.
-- **Antigravity IDE Automation Unknown**: Safe IDE automation boundaries need design and approval before implementation.
-- **Vibe Kanban Result Import**: Currently one-way (issue export only). Bidirectional sync is Phase 10 work.
-- **Token Store In-Memory**: MVP uses in-memory token storage. For production, should migrate to Redis/Postgres.
-- **No Multi-User Auth**: Current MVP assumes single user. No authentication system.
-- **Hermes Not Installed**: Hermes background worker is planned but not yet integrated.
-
-## Recommended Next Step
-
-Verify this Local Runner Architecture by:
-1. ✅ Reading this document
-2. ✅ Confirming all docs are updated consistently
-3. ✅ Running validation: `npm run typecheck && npm run lint && npm run test && npm run build`
-4. ✅ Confirming `/api/runner` is clearly marked as internal local runner
-5. ✅ Confirming `/workbench` safety copy reflects local execution
-
-Then proceed with Phase L2: Codex Adapter Investigation (verify CLI availability and design execution path).
+- **Wire packet generation** to /api/runner completion callback
+- **Verify decision classification** accuracy on sample executions
+- **Verify Hermes packet display** in `/orchestration` and kanban views
+- **Test end-to-end flow:** plan → execution → result → status → next task
+- **Keep Codex and Antigravity** automatic execution in backlog until verified
+- **Update documentation** to reflect Phase E/F reality

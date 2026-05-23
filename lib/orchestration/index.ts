@@ -33,6 +33,21 @@ export type {
 
 export { makeOrchestrationDecision } from "./decision-engine";
 export { routeAgent, getAgentRole, isHermesAllowedAsPrimary } from "./agent-router";
+
+// Phase 2 — Multi-Agent Orchestration
+export type { NextTaskRecommendation } from "./next-task-generator";
+export { generateNextTaskRecommendation } from "./next-task-generator";
+export type { AgentRoutingDetail } from "./next-task-router";
+export {
+  routeNextTask,
+  describeAgentCapabilities,
+  getAutoRunDisabledReason,
+} from "./next-task-router";
+export type { ParallelSafetyDecision } from "./parallel-safety-decider";
+export {
+  decideParallelSafety,
+  decideSingleTaskExecutionMode,
+} from "./parallel-safety-decider";
 export { buildApprovalGate } from "./approval-gate-builder";
 export {
   buildContextPack,

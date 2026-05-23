@@ -343,23 +343,30 @@ export function KanbanCard({
                 </p>
               </div>
             </div>
-            {canExecute && runnerAgent && task.generatedPrompt && (
+            {/* Show workbench link for all agents that have generated prompt */}
+            {task.assignedAgent && task.generatedPrompt && (
               <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  onClick={() => copyToClipboard(task.generatedPrompt!, "prompt")}
-                  className="inline-flex items-center gap-1 rounded bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
-                  title="프롬프트 복사"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  프롬프트 복사
-                </button>
-                <button
-                  onClick={() => setShowPrompt(!showPrompt)}
-                  className="inline-flex items-center gap-1 rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  프롬프트 검토
-                </button>
+                {/* Prompt copy/review only for claude-code runner execution */}
+                {canExecute && runnerAgent && (
+                  <>
+                    <button
+                      onClick={() => copyToClipboard(task.generatedPrompt!, "prompt")}
+                      className="inline-flex items-center gap-1 rounded bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
+                      title="프롬프트 복사"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      프롬프트 복사
+                    </button>
+                    <button
+                      onClick={() => setShowPrompt(!showPrompt)}
+                      className="inline-flex items-center gap-1 rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      프롬프트 검토
+                    </button>
+                  </>
+                )}
+                {/* Workbench entry for all agents */}
                 <Link
                   href={`/workbench?planId=${planId}&taskId=${task.id}`}
                   className="inline-flex items-center gap-1 rounded border border-amber-400 bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"
@@ -422,7 +429,7 @@ export function KanbanCard({
             <div className="p-4 bg-surface">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                  Loop Approval
+                  반복 실행 승인
                 </span>
                 {branchName && (
                   <span className="text-xs text-gray-400 font-mono">
@@ -446,7 +453,7 @@ export function KanbanCard({
                     className="inline-flex items-center gap-1 rounded border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
                   >
                     <RefreshCw className="h-3 w-3" />
-                    Retry 분석
+                    분석 다시 시도
                   </button>
                 </div>
               ) : analysisResult ? (
@@ -486,7 +493,7 @@ export function KanbanCard({
                       ) : (
                         <ChevronRight className="h-3.5 w-3.5" />
                       )}
-                      {isPreparingNext ? "다음 작업 준비 중..." : "Continue"}
+                      {isPreparingNext ? "다음 작업 준비 중..." : "계속 진행"}
                     </button>
                     <button
                       onClick={() => {
@@ -495,7 +502,7 @@ export function KanbanCard({
                       }}
                       className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
                     >
-                      Stop
+                      중단
                     </button>
                   </div>
                 </div>
@@ -519,7 +526,7 @@ export function KanbanCard({
                       className="shrink-0 inline-flex items-center gap-1 rounded border border-red-300 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
                     >
                       <RefreshCw className="h-3 w-3" />
-                      Retry
+                      다시 시도
                     </button>
                   )}
                 </div>
@@ -530,7 +537,7 @@ export function KanbanCard({
           {/* 변경 파일 */}
           <div className="p-4">
             <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-              변경 파일
+              변경된 파일
             </span>
             {task.changedFiles && task.changedFiles.length > 0 ? (
               <ul className="mt-2 space-y-1">
@@ -549,7 +556,7 @@ export function KanbanCard({
           {/* Diff 요약 */}
           <div className="p-4">
             <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-              Diff 요약
+              변경된 파일 내용
             </span>
             {task.diffSummary ? (
               <p className="mt-1 text-xs text-gray-600 leading-relaxed">
@@ -563,7 +570,7 @@ export function KanbanCard({
           {/* 완료 판정 */}
           <div className="p-4">
             <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-              완료 판정
+              자동 판단
             </span>
             {task.completionJudgment ? (
               <p
@@ -582,7 +589,7 @@ export function KanbanCard({
           <div className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                다음 프롬프트
+                다음 추천 작업
               </span>
               {task.nextPrompt && (
                 <button

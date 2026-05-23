@@ -3,7 +3,8 @@ import path from "path";
 import type { AgentStatus, AgentType } from "@/lib/types";
 import { getSupabaseClient } from "./supabase-client";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Support DATA_DIR override via environment for test isolation
+const DATA_DIR = process.env.AGENT_STATUS_DATA_DIR || path.join(process.cwd(), "data");
 const AGENT_STATUSES_FILE = "agent-statuses.json";
 
 type DbRow = Record<string, string | number | boolean | null | unknown[] | object>;

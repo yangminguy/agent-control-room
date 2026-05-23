@@ -3,7 +3,8 @@ import path from "path";
 import type { ExecutionLog } from "@/lib/types";
 import { getSupabaseClient } from "./supabase-client";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Support DATA_DIR override via environment for test isolation
+const DATA_DIR = process.env.EXECUTION_LOG_DATA_DIR || path.join(process.cwd(), "data");
 const EXECUTION_LOGS_FILE = "execution-logs.json";
 
 type DbRow = Record<string, string | number | boolean | null | unknown[] | object>;

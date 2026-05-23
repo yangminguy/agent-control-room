@@ -3,21 +3,51 @@ import path from "path";
 import type { AgentStatus, Handoff, Project, SessionReport, Task } from "@/lib/types";
 import { getSupabaseClient } from "./supabase-client";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Support DATA_DIR override via environment for test isolation
+const DATA_DIR = process.env.JSON_STORE_DATA_DIR || path.join(process.cwd(), "data");
+
+const globalWithJsonStore = globalThis as typeof globalThis & {
+  __jsonStorageMemoryStore?: Map<string, unknown>;
+};
+
+function memoryStore(): Map<string, unknown> {
+  if (!globalWithJsonStore.__jsonStorageMemoryStore) {
+    globalWithJsonStore.__jsonStorageMemoryStore = new Map();
+  }
+  return globalWithJsonStore.__jsonStorageMemoryStore;
+}
 
 // ─── JSON helpers (fallback) ────────────────────────────────────────────────
 
 async function readJson<T>(fileName: string): Promise<T> {
-  const file = await fs.readFile(path.join(DATA_DIR, fileName), "utf8");
-  return JSON.parse(file) as T;
+  try {
+    const file = await fs.readFile(path.join(DATA_DIR, fileName), "utf8");
+    const parsed = JSON.parse(file) as T;
+    memoryStore().set(fileName, parsed);
+    return parsed;
+  } catch {
+    const cached = memoryStore().get(fileName);
+    if (cached !== undefined) return cached as T;
+    return [] as T;
+  }
 }
 
 async function writeJson<T>(fileName: string, value: T): Promise<void> {
-  await fs.writeFile(
-    path.join(DATA_DIR, fileName),
-    `${JSON.stringify(value, null, 2)}\n`,
-    "utf8",
-  );
+  memoryStore().set(fileName, value);
+  try {
+    await fs.writeFile(
+      path.join(DATA_DIR, fileName),
+      `${JSON.stringify(value, null, 2)}\n`,
+      "utf8",
+    );
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "EROFS" || code === "EACCES" || code === "ENOENT") {
+      console.warn(`[json-store] disk write unavailable for ${fileName}; using volatile memory fallback`);
+      return;
+    }
+    throw error;
+  }
 }
 
 // ─── Projects ───────────────────────────────────────────────────────────────

@@ -32,6 +32,12 @@ import { getFeaturePlanById } from "@/lib/storage/feature-plan-store";
 import { getProjects } from "@/lib/storage/json-store";
 import { resolveRealPath, validateCwdSafety } from "@/lib/runner/git-utils";
 import { createHash } from "crypto";
+import { routeAgentAndModel } from "@/lib/agents/agent-model-router";
+import { storeRuntimeDecision } from "@/lib/storage/runtime-decision-store";
+import { getAgentRuntime } from "@/lib/agents/runtime-registry";
+import { createReleaseGateRequest, getPendingReleaseGateRequests } from "@/lib/agents/release-gate";
+import type { RiskLevel } from "@/lib/types";
+import type { TaskKind } from "@/lib/agents/agent-model-router";
 
 const SUPPORTED_AGENTS = new Set(["claude-code", "codex", "antigravity"]);
 const APPROVAL_STATEMENT = "I approve local execution for this exact task";
@@ -177,6 +183,89 @@ export async function POST(request: Request) {
         { success: false, error: "Working directory must exactly match the registered project path for local execution." },
         { status: 403 }
       );
+    }
+
+    // MULTI-AGENT RUNTIME: Route task using Agent × Model Router
+    // Determine task kind from agent and priority
+    let taskKind: TaskKind = "implementation"; // default
+    if (task.assignedAgent === "codex") taskKind = "qa";
+    else if (task.assignedAgent === "antigravity") taskKind = "ui";
+
+    // Determine risk level from priority
+    const riskLevel: "low" | "medium" | "high" | "critical" =
+      task.priority === "P0" ? "critical" : task.priority === "P1" ? "high" : "medium";
+
+    // Route the task
+    const routingDecision = routeAgentAndModel(taskKind, undefined, undefined, riskLevel);
+
+    // Store the runtime decision
+    storeRuntimeDecision(taskId, routingDecision, planId);
+
+    // Check if recommended agent is available
+    const recommendedAgentProfile = getAgentRuntime(routingDecision.recommendedAgentId);
+    if (!recommendedAgentProfile || recommendedAgentProfile.status === "rate_limited" || recommendedAgentProfile.status === "token_exhausted") {
+      // Agent is not available
+      if (routingDecision.fallbackAgentId) {
+        // Use fallback agent
+        const fallbackAgentProfile = getAgentRuntime(routingDecision.fallbackAgentId);
+        if (!fallbackAgentProfile) {
+          return Response.json(
+            {
+              success: false,
+              error: `Recommended agent ${routingDecision.recommendedAgentId} is unavailable, and fallback agent ${routingDecision.fallbackAgentId} not found.`,
+            },
+            { status: 503 }
+          );
+        }
+      } else {
+        // No fallback available
+        return Response.json(
+          {
+            success: false,
+            error: `Recommended agent ${routingDecision.recommendedAgentId} is unavailable and no fallback is available. Task must wait for recovery.`,
+          },
+          { status: 503 }
+        );
+      }
+    }
+
+    // Check Release Gate for high/critical operations
+    if (routingDecision.requiresApproval && routingDecision.executionMode === "release_gate") {
+      // Only enforce Release Gate for high/critical operations
+      if (riskLevel === "high" || riskLevel === "critical") {
+        // Check if there's already a pending Release Gate request
+        const pendingRequests = getPendingReleaseGateRequests();
+        const existingGate = pendingRequests.find((r) => r.taskId === taskId);
+
+        if (!existingGate) {
+          // Create a Release Gate request for this operation
+          createReleaseGateRequest(taskId, "dangerous_file_change", riskLevel, {
+            summary: `Execute ${taskKind} task: ${task.title}`,
+            changedFiles: task.allowedFiles || [],
+            riskExplanation: `Task is marked as ${riskLevel} risk and requires explicit approval.`,
+            requiredChecks: ["typecheck passed", "tests passed", "code review completed"],
+          });
+
+          return Response.json(
+            {
+              success: false,
+              error: "Release Gate approval required for this high/critical risk operation. Please approve in the Release Gate panel and retry.",
+            },
+            { status: 403 }
+          );
+        }
+
+        // Check if gate is approved
+        if (existingGate.status !== "approved") {
+          return Response.json(
+            {
+              success: false,
+              error: `Release Gate request is ${existingGate.status}. Complete approval before executing.`,
+            },
+            { status: 403 }
+          );
+        }
+      }
     }
 
     // Issue token
