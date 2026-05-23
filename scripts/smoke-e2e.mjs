@@ -3,7 +3,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -91,7 +91,7 @@ function runCommand(cmd, args, options = {}) {
 }
 
 function getGitStatus() {
-  const result = require("child_process").execSync("git status --short", {
+  const result = execSync("git status --short", {
     cwd: projectRoot,
     encoding: "utf-8",
   });
@@ -112,7 +112,7 @@ function resolveClaudeCommand() {
 
   // 2. Try 'claude' from PATH using command -v
   try {
-    const result = require("child_process").execSync("command -v claude", {
+    const result = execSync("command -v claude", {
       cwd: projectRoot,
       stdio: "pipe",
       encoding: "utf-8",
@@ -122,13 +122,13 @@ function resolveClaudeCommand() {
     if (commandPath && fs.existsSync(commandPath)) {
       return commandPath;
     }
-  } catch {
-    // Fall through to next detection method
+  } catch (error) {
+    // Fall through to next detection method - this is expected if claude is not in PATH
   }
 
   // 3. Check ${HOME}/.npm-global/bin/claude
   const homeNpmGlobalBin = path.join(process.env.HOME || "", ".npm-global", "bin", "claude");
-  if (fs.existsSync(homeNpmGlobalBin)) {
+  if (process.env.HOME && fs.existsSync(homeNpmGlobalBin)) {
     return homeNpmGlobalBin;
   }
 
@@ -153,15 +153,29 @@ function checkClaudeCodeAvailable() {
     return { available: false, command: null };
   }
 
+  // Just check if the file exists and is executable
+  // The version check might fail due to environment differences
   try {
-    // Verify it's actually the Claude Code CLI by checking version
-    const result = require("child_process").execSync(`"${claudeCmd}" --version`, {
-      cwd: projectRoot,
-      stdio: "pipe",
-      encoding: "utf-8",
-    });
-    return { available: true, command: claudeCmd, version: result.trim() };
-  } catch {
+    const stat = fs.statSync(claudeCmd);
+    if (stat.isFile() || (fs.lstatSync(claudeCmd).isSymbolicLink())) {
+      // File exists - assume it's Claude Code CLI
+      // Try to get version but don't fail if version check fails
+      try {
+        const result = execSync(`"${claudeCmd}" --version`, {
+          cwd: projectRoot,
+          stdio: "pipe",
+          encoding: "utf-8",
+          shell: true,
+          timeout: 5000,
+        });
+        return { available: true, command: claudeCmd, version: result.trim() };
+      } catch {
+        // Version check failed, but file exists - still consider it available
+        return { available: true, command: claudeCmd, version: "unknown" };
+      }
+    }
+    return { available: false, command: claudeCmd };
+  } catch (error) {
     return { available: false, command: claudeCmd };
   }
 }
