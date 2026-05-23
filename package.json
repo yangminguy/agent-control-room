@@ -9,6 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "local-runner": "node scripts/local-runner-daemon.mjs",
+    "smoke:e2e:dry": "node scripts/smoke-e2e.mjs --dry",
+    "smoke:e2e": "node scripts/smoke-e2e.mjs --runner",
     "test": "jest"
   },
   "dependencies": {
