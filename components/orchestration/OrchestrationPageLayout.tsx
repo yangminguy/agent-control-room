@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useOrchestration } from "@/lib/dispatch/orchestration-context";
 import {
   DispatchStatusPanel,
-  DiscordApprovalPreviewCard,
   ProgressManagerStatusView,
   FeedbackLoopSummaryCard,
   ConversationToJobPanel,
@@ -15,6 +14,8 @@ import {
   OrchestrationMetricsPanel,
   OrchestrationDecisionPanel,
 } from "@/components/orchestration/index";
+import { ApprovalGatePanel } from "@/components/orchestration/ApprovalGatePanel";
+import { AutoDecisionPanel } from "@/components/orchestration/AutoDecisionPanel";
 import { ResultCollectionPanel } from "@/components/orchestration/ResultCollectionPanel";
 import type { DispatchJob } from "@/lib/types";
 
@@ -45,8 +46,6 @@ function getRemainingMs(job: DispatchJob): number {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function OrchestrationPageLayout() {
-  const [activeTab, setActiveTab] = useState<TabIndex>(0);
-
   const {
     jobs,
     results,
@@ -59,6 +58,9 @@ export function OrchestrationPageLayout() {
     mockApprove,
     mockReject,
   } = useOrchestration();
+
+  // Auto-open Approvals tab if there are pending approvals
+  const [activeTab, setActiveTab] = useState<TabIndex>(approvals.length > 0 ? 3 : 0);
 
   // Derived data for sub-components
   const safeJobs = jobs.filter((j) => j.riskLevel === "safe" || j.riskLevel === "low");
@@ -156,13 +158,15 @@ export function OrchestrationPageLayout() {
                     const job = jobs.find((j) => j.id === approval.dispatchJobId) ?? firstApprovalJob;
                     return (
                       <div key={approval.id} className="space-y-2">
-                        <DiscordApprovalPreviewCard
-                          approvalRequest={approval}
-                          dispatchJob={job}
-                          discordMessage={
-                            approval.discordMessagePreview ??
-                            `[APPROVAL REQUIRED]\nJob: ${job.id}\nRisk: ${job.riskLevel}`
-                          }
+                        <ApprovalGatePanel
+                          approval={approval}
+                          jobId={job.id}
+                          onApprove={async () => {
+                            mockApprove(approval.id);
+                          }}
+                          onReject={async () => {
+                            mockReject(approval.id);
+                          }}
                         />
                         {approval.status === "pending" && (
                           <div className="flex gap-2 px-1">
@@ -227,7 +231,12 @@ export function OrchestrationPageLayout() {
           )}
 
           {/* Tab 6: Hermes Insights */}
-          {activeTab === 6 && <MonitorInsightPanel />}
+          {activeTab === 6 && (
+            <div className="space-y-4">
+              <AutoDecisionPanel validationId={results[0]?.id ?? "latest-validation"} />
+              <MonitorInsightPanel />
+            </div>
+          )}
 
           {/* Tab 7: Logs */}
           {activeTab === 7 && <OrchestrationLogViewer />}

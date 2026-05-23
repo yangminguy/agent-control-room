@@ -50,89 +50,81 @@ export function ApprovalGatePanel({
 
   return (
     <div className="border border-gray-300 rounded-lg p-6 bg-white shadow-md">
-      {/* Destructive Patterns Warning */}
+      {/* 위험한 작업 감지 경고 */}
       {hasDestructivePatterns && (
         <div className="mb-6 p-4 bg-red-50 border border-red-300 rounded-lg">
           <div className="flex items-start gap-3">
             <div className="text-red-600 font-bold text-lg">⚠️</div>
             <div>
-              <h3 className="text-red-700 font-semibold mb-2">Destructive Patterns Detected</h3>
+              <h3 className="text-red-700 font-semibold mb-2">위험한 작업이 감지되었습니다</h3>
               <p className="text-red-600 text-sm mb-2">
                 {destructivePatternExplanation(approval.destructivePatterns || [])}
               </p>
               <p className="text-red-700 text-xs font-semibold">
-                This job contains commands that CANNOT be undone. Approve only if you are absolutely certain of the consequences.
+                이 작업에는 되돌릴 수 없는 명령이 포함되어 있습니다. 결과를 완전히 이해한 경우에만 승인하세요.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Approval Request Details */}
+      {/* 승인 요청 사항 */}
       <div className="mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Approval Request</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4">승인 요청 사항</h2>
         <div className="space-y-3">
           <div>
-            <label className="text-sm font-semibold text-gray-600">Approval ID</label>
-            <p className="text-sm text-gray-900 font-mono">{approval.id}</p>
+            <label className="text-sm font-semibold text-gray-600">상태</label>
+            <p className="text-sm text-gray-900 capitalize">{approval.status === 'pending' ? '대기 중' : approval.status}</p>
           </div>
           <div>
-            <label className="text-sm font-semibold text-gray-600">Job ID</label>
-            <p className="text-sm text-gray-900 font-mono">{jobId}</p>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-gray-600">Status</label>
-            <p className="text-sm text-gray-900 capitalize">{approval.status}</p>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-gray-600">Created At</label>
-            <p className="text-sm text-gray-900">{new Date(approval.createdAt).toLocaleString()}</p>
+            <label className="text-sm font-semibold text-gray-600">신청 시간</label>
+            <p className="text-sm text-gray-900">{new Date(approval.createdAt).toLocaleString('ko-KR')}</p>
           </div>
         </div>
       </div>
 
-      {/* Approver Note Input */}
+      {/* 승인 의견 입력 */}
       <div className="mb-6">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Approver Note (Optional)
+          승인 의견 (선택사항)
         </label>
         <textarea
           value={approverNote}
           onChange={(e) => setApproverNote(e.target.value)}
-          placeholder="Provide a reason for your approval or rejection..."
+          placeholder="승인 또는 거절 이유를 작성하세요..."
           className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={3}
           disabled={isLoading || actionInProgress !== null}
         />
       </div>
 
-      {/* Action Buttons */}
+      {/* 승인/거절 버튼 */}
       <div className="flex gap-3 justify-end">
         <button
           onClick={handleReject}
           disabled={isLoading || actionInProgress !== null}
           className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
         >
-          {actionInProgress === "reject" ? "Rejecting..." : "Reject"}
+          {actionInProgress === "reject" ? "거절 중..." : "거절"}
         </button>
         <button
           onClick={handleApprove}
           disabled={isLoading || actionInProgress !== null}
           className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
         >
-          {actionInProgress === "approve" ? "Approving..." : "Approve"}
+          {actionInProgress === "approve" ? "승인 중..." : "승인"}
         </button>
       </div>
 
-      {/* Already Resolved Notice */}
+      {/* 이미 처리된 승인 */}
       {approval.status !== "pending" && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-300 rounded-lg text-sm text-blue-700">
-          <strong>Note:</strong> This approval has already been resolved as &quot;{approval.status}&quot;
-          {approval.resolvedAt && ` on ${new Date(approval.resolvedAt).toLocaleString()}`}.
+          <strong>알림:</strong> 이 승인 요청은 이미 &quot;{approval.status === 'approved' ? '승인됨' : '거절됨'}&quot;으로 처리되었습니다
+          {approval.resolvedAt && ` (${new Date(approval.resolvedAt).toLocaleString('ko-KR')})`}.
           {approval.approverNote && (
             <>
               <br />
-              <strong>Reason:</strong> {approval.approverNote}
+              <strong>의견:</strong> {approval.approverNote}
             </>
           )}
         </div>

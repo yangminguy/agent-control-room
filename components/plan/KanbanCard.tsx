@@ -343,23 +343,30 @@ export function KanbanCard({
                 </p>
               </div>
             </div>
-            {canExecute && runnerAgent && task.generatedPrompt && (
+            {/* Show workbench link for all agents that have generated prompt */}
+            {task.assignedAgent && task.generatedPrompt && (
               <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  onClick={() => copyToClipboard(task.generatedPrompt!, "prompt")}
-                  className="inline-flex items-center gap-1 rounded bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
-                  title="프롬프트 복사"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  프롬프트 복사
-                </button>
-                <button
-                  onClick={() => setShowPrompt(!showPrompt)}
-                  className="inline-flex items-center gap-1 rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  프롬프트 검토
-                </button>
+                {/* Prompt copy/review only for claude-code runner execution */}
+                {canExecute && runnerAgent && (
+                  <>
+                    <button
+                      onClick={() => copyToClipboard(task.generatedPrompt!, "prompt")}
+                      className="inline-flex items-center gap-1 rounded bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
+                      title="프롬프트 복사"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      프롬프트 복사
+                    </button>
+                    <button
+                      onClick={() => setShowPrompt(!showPrompt)}
+                      className="inline-flex items-center gap-1 rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      프롬프트 검토
+                    </button>
+                  </>
+                )}
+                {/* Workbench entry for all agents */}
                 <Link
                   href={`/workbench?planId=${planId}&taskId=${task.id}`}
                   className="inline-flex items-center gap-1 rounded border border-amber-400 bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"

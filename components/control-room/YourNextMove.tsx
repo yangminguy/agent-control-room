@@ -83,7 +83,7 @@ export function YourNextMove({
                     고위험 작업 승인 대기
                   </h3>
                   <p className="text-xs text-text-secondary mt-1">
-                    현재 디스패치 큐에 고위험 작업이 승인 대기 중입니다. 계속하려면 변경된 내용 확인 후 승인을 진행하세요.
+                    현재 실행 작업 대기열에 고위험 작업이 승인 대기 중입니다. 계속하려면 변경된 내용 확인 후 승인을 진행하세요.
                   </p>
                 </div>
               </div>
