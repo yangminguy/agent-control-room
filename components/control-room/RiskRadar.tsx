@@ -34,7 +34,7 @@ export function RiskRadar({ stages, agents }: RiskRadarProps) {
     <div className="rounded-xl border border-border bg-surface p-5 animate-fade-in space-y-4">
       <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
         <ShieldAlert className="w-4 h-4 text-pink-primary" />
-        System Risk Radar
+        시스템 리스크 감시
       </h3>
 
       <div className="space-y-3">
@@ -46,7 +46,7 @@ export function RiskRadar({ stages, agents }: RiskRadarProps) {
           >
             <AlertTriangle className="w-4.5 h-4.5 text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-red-200">Phase Blocked</p>
+              <p className="font-semibold text-red-200">작업 막힘</p>
               <p className="text-text-secondary mt-1">{stage.title} 단계가 진행 불가 상태입니다.</p>
             </div>
           </div>
@@ -59,7 +59,7 @@ export function RiskRadar({ stages, agents }: RiskRadarProps) {
           >
             <AlertTriangle className="w-4.5 h-4.5 text-amber-400 shrink-0 mt-0.5 animate-status-ping" />
             <div>
-              <p className="font-semibold text-amber-200">User Input Required</p>
+              <p className="font-semibold text-amber-200">사용자 입력 대기</p>
               <p className="text-text-secondary mt-1">{stage.title} 단계에서 사용자 결정이 지연되고 있습니다.</p>
             </div>
           </div>
@@ -72,7 +72,7 @@ export function RiskRadar({ stages, agents }: RiskRadarProps) {
           >
             <AlertTriangle className="w-4.5 h-4.5 text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-red-200">Agent Alert: {agent.name}</p>
+              <p className="font-semibold text-red-200">에이전트 경고: {agent.name}</p>
               <p className="text-text-secondary mt-1">상태: {agent.availability} (동작 제한 또는 승인 대기 중)</p>
             </div>
           </div>
@@ -82,7 +82,7 @@ export function RiskRadar({ stages, agents }: RiskRadarProps) {
           <div className="flex items-start gap-3 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs">
             <AlertTriangle className="w-4.5 h-4.5 text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-amber-200">QA / Verification Pending</p>
+              <p className="font-semibold text-amber-200">QA / 검증 대기</p>
               <p className="text-text-secondary mt-1">
                 QA/검증 단계인 &quot;{pendingQaStage.title}&quot;가 미완료 상태입니다.
               </p>
@@ -95,25 +95,25 @@ export function RiskRadar({ stages, agents }: RiskRadarProps) {
           <div className="rounded-lg bg-surface-2 p-2.5 flex items-center justify-between border border-border/60">
             <div className="flex items-center gap-2">
               <Database className="w-3.5 h-3.5 text-text-secondary" />
-              <span className="text-[10px] text-text-secondary font-medium">API Cost Limit</span>
+              <span className="text-[10px] text-text-secondary font-medium">API 비용 한도</span>
             </div>
-            <span className="text-[10px] text-text-secondary/60">No current signal</span>
+            <span className="text-[10px] text-text-secondary/60">현재 감지된 신호 없음</span>
           </div>
 
           <div className="rounded-lg bg-surface-2 p-2.5 flex items-center justify-between border border-border/60">
             <div className="flex items-center gap-2">
               <GitBranch className="w-3.5 h-3.5 text-text-secondary" />
-              <span className="text-[10px] text-text-secondary font-medium">Git Conflicts</span>
+              <span className="text-[10px] text-text-secondary font-medium">Git 충돌</span>
             </div>
-            <span className="text-[10px] text-text-secondary/60">No current signal</span>
+            <span className="text-[10px] text-text-secondary/60">현재 감지된 신호 없음</span>
           </div>
 
           <div className="rounded-lg bg-surface-2 p-2.5 flex items-center justify-between border border-border/60">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-3.5 h-3.5 text-text-secondary" />
-              <span className="text-[10px] text-text-secondary font-medium">Deploy Risks</span>
+              <span className="text-[10px] text-text-secondary font-medium">배포 리스크</span>
             </div>
-            <span className="text-[10px] text-text-secondary/60">No current signal</span>
+            <span className="text-[10px] text-text-secondary/60">현재 감지된 신호 없음</span>
           </div>
         </div>
 

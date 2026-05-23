@@ -14,6 +14,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { WorkbenchRunPanel } from "./WorkbenchRunPanel";
+import { SchedulingModePanel } from "./SchedulingModePanel";
+import { selectSchedulingMode } from "@/lib/orchestration/scheduling-mode-selector";
 import type { PlanTask, PlanTaskStatus, AgentType } from "@/lib/types";
 
 const STATUS_CONFIG: Record<
@@ -46,14 +48,14 @@ const AGENT_EXECUTION_MODE: Record<AgentType, { type: 'executable' | 'manual' | 
     description: '이 작업은 로컬 머신에서 실행됩니다. 승인 후 자동으로 진행되며 실시간으로 로그를 볼 수 있습니다.'
   },
   codex: {
-    type: 'executable',
-    label: '로컬 실행 가능',
-    description: '이 작업은 로컬 Codex CLI에서 실행됩니다. 승인 후 자동으로 진행되며 실시간으로 로그를 볼 수 있습니다.'
+    type: 'manual',
+    label: '검증 전 수동 실행',
+    description: 'Codex CLI 자동 실행은 아직 검증 대상입니다. 현재는 QA/수정 에이전트로 추천하되 결과 가져오기 또는 수동 실행 흐름을 사용합니다.'
   },
   antigravity: {
-    type: 'executable',
-    label: '로컬 실행 가능',
-    description: '이 UI/시각 작업은 Antigravity IDE CLI chat 모드에서 실행됩니다. 승인 후 자동으로 진행됩니다.'
+    type: 'manual',
+    label: '검증 전 수동 실행',
+    description: 'Antigravity IDE 자동화는 아직 검증 대상입니다. 현재는 UI/UX 작업을 위한 수동 또는 워크벤치 흐름을 사용합니다.'
   }
 };
 
@@ -95,6 +97,14 @@ export function ExecutionReadinessGate({
 
   const cfg = STATUS_CONFIG[task.status];
   const agentCfg = AGENT_COLOR[task.assignedAgent];
+  const schedulingDecision = selectSchedulingMode({
+    taskRiskLevel: task.priority === "P0" || task.priority === "P1" ? "high" : "medium",
+    primaryAgent: task.assignedAgent,
+    primaryAgentStatus: "available",
+    filePaths: [...(task.allowedFiles ?? []), ...(task.doNotTouchFiles ?? [])],
+    requiresVerification: true,
+    secondaryAgents: task.assignedAgent === "codex" ? ["claude-code"] : ["codex"],
+  });
 
   return (
     <div className="space-y-6">
@@ -143,6 +153,12 @@ export function ExecutionReadinessGate({
               </ul>
             </div>
           )}
+
+          <SchedulingModePanel
+            taskId={task.id}
+            taskTitle={task.title}
+            decision={schedulingDecision}
+          />
 
           {/* Prompt preview */}
           <div className="rounded-lg border border-border bg-surface-2 p-4">
@@ -318,7 +334,7 @@ export function ExecutionReadinessGate({
                   {
                     key: "forbiddenFiles" as const,
                     label:
-                      "핸드오프 준비: 결과와 diff를 저장하고 복사할 준비가 되었습니다.",
+                      "핸드오프 준비: 결과와 변경된 파일 내용을 저장하고 복사할 준비가 되었습니다.",
                   },
                   {
                     key: "verifyCommands" as const,
@@ -362,7 +378,7 @@ export function ExecutionReadinessGate({
                 모든 조건이 충족되었습니다
               </p>
               <p className="text-xs text-emerald-600 mt-1">
-                로컬 실행 영역이 활성화되었습니다. 이 러너는 기본적으로 유료 API를 호출하지 않으며, 로컬 도구에서만 실행됩니다.
+                로컬 실행 영역이 활성화되었습니다. 이 로컬 실행기는 기본적으로 유료 API를 호출하지 않으며, 로컬 도구에서만 실행됩니다.
               </p>
             </div>
           </div>
@@ -444,7 +460,7 @@ export function ExecutionReadinessGate({
               <p className="font-semibold">실행 후:</p>
               <ol className="list-decimal list-inside space-y-0.5">
                 <li>{task.assignedAgent}에서 작업을 완료합니다</li>
-                <li>결과/diff를 저장하고 복사합니다</li>
+                <li>결과 및 변경된 파일 내용을 저장하고 복사합니다</li>
                 <li>이 페이지로 돌아와 세션 리포트를 작성합니다</li>
               </ol>
             </div>

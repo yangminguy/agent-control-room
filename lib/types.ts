@@ -317,6 +317,39 @@ export type ExecutionLog = {
   status: "running" | "done" | "failed" | "review_blocked" | "boundary_violation";
 };
 
+/** Phase E: Per-check result value */
+export type CheckResult = "passed" | "failed" | "not_run";
+
+/** Phase E: Normalized execution result summary derived from ExecutionLog */
+export type ExecutionResultSummary = {
+  planId: string;
+  taskId: string;
+  assignedAgent: AgentType;
+  status: ExecutionLog["status"];
+  logSummary: string;                   // first 200 chars of joined log lines
+  changedFiles: string[];               // from git diff at completion
+  checksRun: {
+    typecheck?: CheckResult;
+    lint?: CheckResult;
+    test?: CheckResult;
+    build?: CheckResult;
+  };
+  failureReason?: string;               // populated when status is failed/boundary_violation
+  recommendedNextAction:
+    | "continue"
+    | "retry_same_agent"
+    | "handoff_to_agent"
+    | "manual_review"
+    | "blocked";
+
+  // Phase E Task 3: Decision-classifier fields
+  exitCode?: number | null;             // 에이전트 프로세스 종료 코드 (null = 미수집)
+  errorMessages?: string[];             // 실행 중 감지된 오류 메시지 목록
+  allowedFiles?: string[];              // 이 태스크에서 수정이 허용된 파일/패턴
+  doNotTouchFiles?: string[];           // 절대 건드려선 안 되는 파일/패턴
+  changesExpected?: boolean;            // 변경이 예상됐는지 여부
+};
+
 // ─────────────────────────────────────────────────────────
 // T027 — Roadmap-First Control Tower UX
 // ─────────────────────────────────────────────────────────
@@ -423,15 +456,22 @@ export type DispatchJobStatus =
 export type DispatchJob = {
   id: string;
   taskId: string;                    // 원본 task ID
+  planId?: string;                   // Control Room plan ID
+  runId?: string;                    // Control Room execution run ID
+  phaseId?: string;                  // Control Room phase ID
+  featurePlanId?: string;            // persisted FeaturePlan ID for result updates
   agentId: AgentType;                // 할당된 에이전트
   riskLevel: RiskLevel;              // 위험도
   status: DispatchJobStatus;         // 현재 상태
+  executionSurface?: "local_runner" | "vibe_kanban" | "manual";
 
   // ── 타임스탬프 ──
   createdAt: string;                 // 생성 시간
   approvedAt?: string;               // 승인 시간 (risky 작업만)
   timeoutAt?: string;                // 타임아웃 시간
   completedAt?: string;              // 완료 시간
+  claimedAt?: string;                // local runner가 가져간 시간
+  claimedBy?: string;                // local runner ID
 
   // ── 재시도 ──
   retryCount: number;                // 재시도 횟수
@@ -590,6 +630,7 @@ export type ControlRoomPlan = {
 export type ControlRoomExecutionRun = {
   id: string;
   planId: string;
+  featurePlanId?: string;
   status: "queued" | "running" | "blocked" | "completed";
   startedAt: string;
   completedAt?: string;
@@ -969,6 +1010,246 @@ export type PhaseCompletePacket = {
 
   // 타임스탐프
   completed_at: string;
+};
+
+// ─────────────────────────────────────────────────────────
+// Phase E — Hermes Supervision Packet Types
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Normalised input consumed by packet-builder.ts.
+ * Distinct from the runner's ExecutionResultSummary (line ~324) which has a
+ * different shape focused on PlanTask normalisation.
+ */
+export type HermesExecutionInput = {
+  // Identifiers
+  taskId: string;
+  phaseId: string;
+  planId: string;
+
+  // Assignment
+  assignedAgent: AgentType;
+
+  // Outcome
+  executionStatus: "success" | "failure" | "drift" | "needs_approval" | "boundary_violation";
+
+  // Output
+  logSummary: string;        // first 200 chars of raw log
+  changedFiles: string[];    // files modified during execution
+
+  // Check results — each key is a check name (e.g. "typecheck", "lint")
+  checksResult: Record<string, "pass" | "fail" | "skipped">;
+
+  // Risk
+  riskLevel: RiskLevel;
+
+  // Optional extras
+  driftFiles?: string[];     // files changed that were not in allowedFiles
+  failureReason?: string;    // human-readable reason when status is "failure"
+  approvalReason?: string;   // reason approval is needed when status is "needs_approval"
+
+  // Decision-classifier fields (Phase E Task 3)
+  exitCode?: number | null;          // 에이전트 프로세스 종료 코드
+  errorMessages?: string[];          // 실행 중 감지된 오류 메시지 목록
+  allowedFiles?: string[];           // 이 태스크에서 수정이 허용된 파일/패턴
+  doNotTouchFiles?: string[];        // 절대 건드려선 안 되는 파일/패턴
+  changesExpected?: boolean;         // 변경이 예상됐는지 여부
+};
+
+/** Minimal packet for a successful phase completion. */
+export type PhaseSuccessPacket = {
+  packet_type: "phase_success_packet";
+  source: "hermes";
+  packet_id: string;
+
+  // Identifiers
+  task_id: string;
+  phase_id: string;
+  plan_id: string;
+
+  // Assignment
+  assigned_agent: AgentType;
+
+  // Outcome
+  execution_status: "success";
+  log_summary: string;
+  changed_files: string[];
+  checks_result: Record<string, "pass" | "fail" | "skipped">;
+
+  // Risk
+  risk_level: RiskLevel;
+
+  // PM-friendly summary
+  pm_summary: string;
+
+  // Next step
+  recommended_next_action: string;
+
+  // Decision classification (from classifyExecutionResult)
+  decision: DecisionLabel;
+  decision_reason: string;       // 한국어 판정 이유
+  confidence: number;            // 0–100 판정 신뢰도
+  next_action: string;           // 한국어 권장 액션
+
+  created_at: string;
+};
+
+/** Minimal packet when execution fails. */
+export type PhaseFailurePacket = {
+  packet_type: "phase_failure_packet";
+  source: "hermes";
+  packet_id: string;
+
+  // Identifiers
+  task_id: string;
+  phase_id: string;
+  plan_id: string;
+
+  // Assignment
+  assigned_agent: AgentType;
+
+  // Outcome
+  execution_status: "failure";
+  log_summary: string;
+  changed_files: string[];
+  checks_result: Record<string, "pass" | "fail" | "skipped">;
+  failure_reason: string;
+
+  // Risk
+  risk_level: RiskLevel;
+
+  // PM-friendly summary
+  pm_summary: string;
+
+  // Next step
+  recommended_next_action: string;
+
+  // Decision classification (from classifyExecutionResult)
+  decision: DecisionLabel;
+  decision_reason: string;       // 한국어 판정 이유
+  confidence: number;            // 0–100 판정 신뢰도
+  next_action: string;           // 한국어 권장 액션
+
+  created_at: string;
+};
+
+/** Minimal packet when unexpected file changes are detected (drift). */
+export type DriftDetectionPacket = {
+  packet_type: "drift_detection_packet";
+  source: "hermes";
+  packet_id: string;
+
+  // Identifiers
+  task_id: string;
+  phase_id: string;
+  plan_id: string;
+
+  // Assignment
+  assigned_agent: AgentType;
+
+  // Outcome
+  execution_status: "drift";
+  log_summary: string;
+  changed_files: string[];   // all changed files
+  drift_files: string[];     // files outside allowed boundary
+  checks_result: Record<string, "pass" | "fail" | "skipped">;
+
+  // Risk
+  risk_level: RiskLevel;
+
+  // PM-friendly summary
+  pm_summary: string;
+
+  // Next step
+  recommended_next_action: string;
+
+  // Decision classification (from classifyExecutionResult)
+  decision: DecisionLabel;
+  decision_reason: string;       // 한국어 판정 이유
+  confidence: number;            // 0–100 판정 신뢰도
+  next_action: string;           // 한국어 권장 액션
+
+  created_at: string;
+};
+
+/** Minimal packet requesting explicit user approval before continuing. */
+export type HermesApprovalRequestPacket = {
+  packet_type: "approval_request_packet";
+  source: "hermes";
+  packet_id: string;
+
+  // Identifiers
+  task_id: string;
+  phase_id: string;
+  plan_id: string;
+
+  // Assignment
+  assigned_agent: AgentType;
+
+  // Outcome
+  execution_status: "needs_approval";
+  log_summary: string;
+  changed_files: string[];
+  checks_result: Record<string, "pass" | "fail" | "skipped">;
+  approval_reason: string;
+
+  // Risk
+  risk_level: RiskLevel;
+
+  // PM-friendly summary
+  pm_summary: string;
+
+  // Next step
+  recommended_next_action: string;
+
+  // Decision classification (from classifyExecutionResult)
+  decision: DecisionLabel;
+  decision_reason: string;       // 한국어 판정 이유
+  confidence: number;            // 0–100 판정 신뢰도
+  next_action: string;           // 한국어 권장 액션
+
+  created_at: string;
+};
+
+/** Union of all packet types that packet-builder can produce. */
+export type HermesPacket =
+  | PhaseSuccessPacket
+  | PhaseFailurePacket
+  | DriftDetectionPacket
+  | HermesApprovalRequestPacket;
+
+// ─────────────────────────────────────────────────────────
+// Phase E Task 3 — Decision Classifier Output Types
+// ─────────────────────────────────────────────────────────
+
+/**
+ * 결정 레이블.
+ * Phase 13의 ResultStatus보다 더 세분화된 분류를 제공한다.
+ */
+export type DecisionLabel =
+  | "pass"            // 완전 성공 — 다음 태스크로 진행
+  | "fail"            // 에이전트 오류 (exitCode 비정상)
+  | "qa_needed"       // exitCode 0이지만 체크(typecheck/lint/test/build) 실패
+  | "retry_needed"    // 경미한 오류, 동일 에이전트 재시도 권장
+  | "blocked"         // 경계 위반 또는 안전 우려
+  | "drift_detected"  // 허용 범위를 벗어난 파일 변경 감지
+  | "manual_review";  // 데이터 부족 또는 예상 변경 없음
+
+/** decision-classifier의 출력 */
+export type DecisionClassification = {
+  decision: DecisionLabel;
+  /** PM이 읽을 수 있는 한국어 판정 이유 */
+  reason: string;
+  /** 0–100: 판정 신뢰도 */
+  confidence: number;
+  /** 시스템이 권장하는 다음 액션 */
+  nextAction:
+    | "proceed_to_next_task"
+    | "run_qa_agent"
+    | "retry_same_agent"
+    | "request_user_approval"
+    | "halt_and_notify"
+    | "request_manual_review";
 };
 
 /** 위험도 분류 엔진의 결과 */

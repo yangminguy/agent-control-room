@@ -164,7 +164,7 @@ interface ModeDescription {
 
 const MODE_DESCRIPTIONS: Record<SchedulingMode, ModeDescription> = {
   single: {
-    label: "Single (단일 에이전트)",
+    label: "단일 실행",
     pmDescription:
       "한 에이전트가 처음부터 끝까지 작업합니다. 가장 안전하지만 느립니다.",
     whenToUse: [
@@ -180,7 +180,7 @@ const MODE_DESCRIPTIONS: Record<SchedulingMode, ModeDescription> = {
     ],
   },
   sequential: {
-    label: "Sequential (순차 다중 에이전트)",
+    label: "순차 실행",
     pmDescription:
       "여러 에이전트가 차례대로 작업합니다. 파일 충돌을 방지하고 작업 순서를 보장합니다.",
     whenToUse: [
@@ -191,7 +191,7 @@ const MODE_DESCRIPTIONS: Record<SchedulingMode, ModeDescription> = {
     forbidden: ["같은 파일을 두 에이전트가 동시에 편집하는 경우"],
   },
   parallel: {
-    label: "Parallel Safe (병렬 안전 모드)",
+    label: "병렬 실행 가능",
     pmDescription:
       "여러 에이전트가 동시에 다른 파일을 작업합니다. 빠르고 안전합니다.",
     whenToUse: [

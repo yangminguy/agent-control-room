@@ -1,228 +1,126 @@
 # CONTROL_TOWER_DIRECTION.md — Agent Control Room
 
-## Current Direction
+## Canonical Direction
 
-Agent Control Room is an **AI Development Control Tower for non-developer PMs**.
+Agent Control Room is a **roadmap-driven local AI development automation control tower for non-developer PMs**.
 
-The user should be able to give an idea or product direction, including from mobile, and rely on Agent Control Room to turn it into a visible development roadmap, implementation tasks, agent assignments, senior-developer-quality prompts, execution tracking, completion checks, handoffs, and reusable development memory.
+It is not a copy-paste prompt generator. Prompt and handoff generation are support modules inside a larger automation loop.
 
-Prompt and handoff generation remain important submodules, but they are not the whole product definition.
+The user owns:
+- product direction
+- planning intent
+- high-risk approval
+- final product judgment
+
+The system owns:
+- roadmap generation
+- task decomposition
+- agent assignment
+- risk classification
+- local CLI execution through approved runner flows
+- execution monitoring
+- log, diff, typecheck, test, lint, and build analysis
+- roadmap and kanban status updates
+- Hermes-based supervision
+- re-orchestration when execution drifts from the original direction
 
 ## Product Loop
 
 ```text
 Idea or product direction
-→ Senior developer translation
-→ Product roadmap generation
-→ Visual Development Roadmap Control Panel
-→ Task decomposition
-→ Agent routing
-→ Senior Dev Prompt Compiler
-→ Human approval
-→ Agent execution or Vibe Kanban workbench handoff
-→ Result/diff analysis
-→ Roadmap status update
-→ Obsidian-compatible insight memory
-→ Next task, handoff, or Context Pack
+→ senior developer translation
+→ visual roadmap
+→ phase/task decomposition with acceptance criteria
+→ agent routing
+→ risk and scheduling decision
+→ approval gate when needed
+→ local CLI runner or workbench handoff
+→ execution logs and git diff capture
+→ Hermes supervision and verification
+→ completion/failure/drift packet
+→ roadmap and kanban status update
+→ next task, QA, retry, or re-orchestration
 ```
 
-The user should only be interrupted when product direction, approval, credentials, deployment, or risk acceptance is genuinely needed.
+The user should be interrupted only when product direction, credentials, approval, deployment, or risk acceptance is genuinely needed.
 
-## `/plan` Direction
+## UI Roles
 
-`/plan` should be a **Visual Development Roadmap Control Panel**, not only a kanban board.
+| Surface | Role |
+|---|---|
+| `/plan` | Main roadmap control panel. Shows phases, progress, current task, risk, approvals, blockers, and next action. |
+| Kanban / task cards | Detailed task inspection only. Shows status, assigned agent, risk, acceptance criteria, logs, and result summary. |
+| Runner logs | Local execution log surface. Shows user-friendly stdout/stderr and command results. |
+| Approval queue | Risk approval surface. Explains why approval is needed and what will happen if approved. |
+| Hermes panel | Background supervision, validation, drift detection, and packet reporting surface. |
+| `/dashboard` | Multi-project status summary. |
 
-It should show:
-- full product development roadmap
-- roadmap stages
-- `completed`, `active`, `waiting`, `blocked`, and `user_input_required` states
-- clear check marks for completed stages
-- responsible agent per stage
-- current task
-- next action
-- blocked reason
-- user decision points
-- acceptance criteria
+Roadmap is the main product surface. Kanban is not the main product and should not compete with Vibe Kanban's workbench UI.
 
-Internal kanban-style elements may remain when useful, but the first impression should be "where are we in the product journey?" rather than "which column is this task in?"
+## Agent Roles
 
-## Senior Dev Prompt Compiler
+| Agent | Role |
+|---|---|
+| Claude Code | Architecture, complex implementation, local CLI execution where approved. |
+| Codex | Bounded fixes, tests, QA, type errors. CLI automation remains backlog until verified stable. |
+| Antigravity | UI/UX and visual iteration. IDE automation remains backlog until verified stable. |
+| Hermes | Background Execution Supervisor: logs, checks, packets, drift detection, reports. Never a coding agent. |
+| Vibe Kanban | Detailed execution workbench for cards, workspaces, sessions, diffs, and previews. Not the product brain. |
 
-The Senior Dev Prompt Compiler converts weak or broad non-developer requests into precise implementation prompts.
+## Automation Policy
 
-Each generated prompt should include:
-- goal
-- product context
-- current implementation context
-- scope
-- non-goals
-- files to inspect first
-- files allowed to edit
-- data model changes
-- UI requirements
-- do-not-do rules
-- acceptance criteria
-- test/check instructions
-- handoff instructions
+Low-risk automation may run through approved local runner flows. High/critical risk work must pause for user approval.
 
-## Agent Availability Manager
+Allowed Hermes automatic checks:
 
-Supported statuses:
-- `available`
-- `cooling_down`
-- `token_limited`
-- `blocked`
-- `context_overloaded`
-- `manual_only`
-- `experimental`
-
-Rules:
-- If the preferred agent is `available`, recommend it.
-- If it is `token_limited`, generate a handoff to another viable agent.
-- If it is `context_overloaded`, generate a Context Pack.
-- If it is `blocked`, ask the user only for the missing decision or action.
-- If it is `manual_only` or `experimental`, keep execution copy-ready and require explicit approval.
-
-## Context Reset Protocol
-
-Do not depend on literal `/clear` automation. Use a documented reset workflow.
-
-Context reset should:
-1. summarize the current goal
-2. summarize completed work
-3. summarize changed files
-4. preserve important decisions
-5. list remaining work
-6. identify blockers
-7. generate a Context Pack
-8. create the next session prompt
-9. continue in a new session or another agent after approval
-
-See [[CONTEXT_TOKEN_RESUME_PROTOCOL.md]] for full protocol.
-
-## Agent Scheduling Policy
-
-Agent Control Room does **not** run all agents simultaneously by default.
-
-Use these execution modes:
-- **Single Agent Mode**: One agent handles the full task (high-risk, tightly-coupled files)
-- **Sequential Multi-Agent Mode**: Agents work in order (implementation → QA → integration)
-- **Parallel Safe Mode**: Agents work in parallel with no file conflicts (separate routes/components)
-- **Token Relay Mode**: Current agent hits token limit; handoff to another agent continues
-
-**Key principle**: Multiple agents are used for task specialization and token distribution, not blind parallelization.
-
-See [[AGENT_SCHEDULING_POLICY.md]] for detailed decision tree and file conflict rules.
-
-## Agent Run Policy
-
-Agents are executed on these surfaces:
-- **Claude Code CLI** — local terminal for focused, low-context tasks
-- **Vibe Kanban Workbench** — collaborative workspace for long-running work with diffs/previews
-- **Manual/User** — user runs agent directly (Claude.ai, IDE extension, etc.)
-
-See [[AGENT_RUN_POLICY.md]] for execution surfaces, approval gates, and error handling.
-
-Context Pack format:
-
-```md
-# Context Pack
-
-## Project Goal
-
-## Current Product Direction
-
-## Completed Work
-
-## Changed Files
-
-## Important Decisions
-
-## Current Blockers
-
-## Next Task
-
-## Acceptance Criteria
-
-## Do Not Do
-
-## Prompt for Next Session
+```bash
+git status
+git diff --stat
+git log --oneline -n 10
+npm run typecheck
+npm run lint
+npm run test
+npm run build
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
 ```
 
-## Obsidian Knowledge Memory
-
-Agent Control Room should be able to export durable development memory as Obsidian-compatible Markdown.
-
-Store:
-- development insights
-- technical decisions
-- failed attempts
-- successful prompt patterns
-- agent performance notes
-- handoffs
-- reusable checklists
-- project-specific lessons
-
-Suggested vault structure:
-
-```text
-Agent Control Room/
-  Projects/
-  Insights/
-  Decisions/
-  Handoffs/
-  Prompt Patterns/
-  Agent Performance/
-  Checklists/
-```
-
-## Hermes Positioning
-
-Hermes may be introduced as an optional background worker. It is not the main coding brain.
-
-Hermes is suitable for:
-- long-running monitoring
-- memory-backed task tracking
-- recurring project summaries
-- Obsidian note generation
-- development log summarization
-- retry candidate discovery
-
-Hermes should not perform high-risk autonomous code changes, DB migrations, deployment, auto-merge, or security-sensitive edits without explicit user approval.
+Hermes must not:
+- edit code
+- change dependencies
+- modify secrets or `.env`
+- run database migrations
+- push, merge, rebase, reset, or clean git state
+- deploy to production
+- approve its own actions
 
 ## Vibe Kanban Boundary
 
-Agent Control Room is the orchestration brain / control tower.
+Agent Control Room owns product intent, roadmap, task decomposition, routing, risk, approvals, prompt/context preparation, result interpretation, and re-orchestration.
 
-Vibe Kanban is the execution workbench.
+Vibe Kanban owns or inspires detailed board/workspace/session/diff/preview surfaces.
 
-Agent Control Room owns:
-- product intent
-- requirement translation
-- roadmap generation
-- task decomposition
-- agent routing
-- prompt compilation
-- approval gates
-- result interpretation
-- insight memory
-- handoff context
+Use Vibe Kanban for detailed task execution where helpful, but do not make it the source of roadmap truth or product direction.
 
-Vibe Kanban owns or inspires:
-- issue cards
-- workspaces
-- git worktrees
-- Claude/Codex sessions
-- diffs/reviews
-- previews
+## Backlog Boundaries
 
-Do not clone Vibe Kanban's full board/session/diff UI inside Agent Control Room.
+The following are valid future directions but not the current core loop:
+- Telegram full approval bot integration
+- Obsidian filesystem sync
+- Supabase durable storage
+- Codex CLI automation if not verified
+- Antigravity IDE automation if not verified
+- GitHub PR automation
+- Production deployment automation
+- Multi-user collaboration
+- Discord Webhook
 
 ## Non-Negotiables
 
-- Human approval remains required before risky execution.
-- Do not add auto-merge.
-- Do not add uncontrolled deployment automation.
-- Do not add unsafe autonomous DB migration.
-- Do not remove existing implemented features.
-- Do not mark planned features as implemented.
+- Roadmap remains the main surface.
+- Kanban remains a detailed task view.
+- Hermes is a supervisor, not a coder.
+- High/critical risk work cannot bypass approval.
+- Local automation must return evidence: logs, diff, checks, and packetized result.

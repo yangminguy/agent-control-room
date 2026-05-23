@@ -186,7 +186,7 @@ export function RunnerLogView({
               <span className={`text-xs ${
                 isSuccess ? 'text-emerald-600' : 'text-red-600'
               }`}>
-                종료 코드: {exitCode}
+                종료 결과: {exitCode}
               </span>
             </div>
           )}

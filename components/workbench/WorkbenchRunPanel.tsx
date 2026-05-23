@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   ShieldAlert,
   Loader2,
-  FileCode2,
   Copy,
   Check,
   ChevronRight,
@@ -13,19 +12,12 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { RunnerLogView } from "@/components/runner/RunnerLogView";
-import type { PlanTask, CompletionJudgment, DiffAnalysisOutput } from "@/lib/types";
+import { ExecutionResultCard } from "@/components/runner/ExecutionResultCard";
+import { ExecutionDecisionPanel } from "@/components/workbench/ExecutionDecisionPanel";
+import type { ExecutionResultSummary, ExecutionDecision } from "@/components/runner/ExecutionResultCard";
+import type { PlanTask, CompletionJudgment, DiffAnalysisOutput, DecisionClassification } from "@/lib/types";
 
 type Phase = "pre-execution" | "analyzing" | "analysis-done" | "analysis-error";
-
-const JUDGMENT_CONFIG: Record<
-  CompletionJudgment,
-  { label: string; color: string }
-> = {
-  completed: { label: "완료 ✅", color: "text-emerald-600" },
-  partial: { label: "부분 완료 🟡", color: "text-orange-500" },
-  not_completed: { label: "미완료 ❌", color: "text-red-500" },
-  pending: { label: "판정 전 —", color: "text-gray-400" },
-};
 
 interface WorkbenchRunPanelProps {
   task: PlanTask;
@@ -49,6 +41,33 @@ async function sha256(value: string): Promise<string> {
     .join("");
 }
 
+function judgmentToDecision(judgment: CompletionJudgment): ExecutionDecision {
+  switch (judgment) {
+    case "completed":
+      return "pass";
+    case "partial":
+      return "retry_needed";
+    case "not_completed":
+      return "fail";
+    default:
+      return "retry_needed";
+  }
+}
+
+function buildResultSummary(analysis: DiffAnalysisOutput): ExecutionResultSummary {
+  const nextAction =
+    analysis.completionJudgment === "completed"
+      ? "변경된 파일들을 검토하고 실행 계획에서 다음 작업을 선택하세요."
+      : "동일한 에이전트로 다시 시도하거나 다른 에이전트에게 넘기세요.";
+
+  return {
+    decision: judgmentToDecision(analysis.completionJudgment),
+    logSnippet: analysis.diffSummary,
+    changedFiles: analysis.changedFiles,
+    nextAction,
+  };
+}
+
 export function WorkbenchRunPanel({
   task,
   planId,
@@ -58,6 +77,7 @@ export function WorkbenchRunPanel({
   const [phase, setPhase] = useState<Phase>("pre-execution");
   const [analysis, setAnalysis] = useState<DiffAnalysisOutput | null>(null);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [decisionResult, setDecisionResult] = useState<DecisionClassification | null>(null);
   const [copiedNext, setCopiedNext] = useState(false);
   const [isPreparingNext, setIsPreparingNext] = useState(false);
   const [approvalToken, setApprovalToken] = useState<string | null>(null);
@@ -69,7 +89,7 @@ export function WorkbenchRunPanel({
 
   // Request approval token on mount
   useEffect(() => {
-    if (approvalToken || tokenError) return; // Already requested or failed
+    if (approvalToken || tokenError) return;
 
     const requestApprovalToken = async () => {
       try {
@@ -95,7 +115,7 @@ export function WorkbenchRunPanel({
         };
 
         if (!res.ok || !data.success) {
-          throw new Error(data.error || "토큰 요청 실패");
+          throw new Error(data.error || "일회성 승인권 요청 실패");
         }
 
         if (data.approvalToken) {
@@ -103,7 +123,7 @@ export function WorkbenchRunPanel({
         }
       } catch (err) {
         setTokenError(
-          err instanceof Error ? err.message : "토큰 요청 중 오류 발생"
+          err instanceof Error ? err.message : "일회성 승인권 요청 중 오류 발생"
         );
       }
     };
@@ -111,11 +131,44 @@ export function WorkbenchRunPanel({
     requestApprovalToken();
   }, [planId, task.id, task.assignedAgent, task.generatedPrompt, projectPath, approvalChecklist, approvalToken, tokenError]);
 
-  const runAnalyzer = useCallback(async () => {
+  const runOrchestration = useCallback(async () => {
     setPhase("analyzing");
     setAnalyzeError(null);
     setAnalysis(null);
+    setDecisionResult(null);
 
+    // Step 1: Try the orchestration route for decision classification.
+    try {
+      const orchRes = await fetch("/api/orchestration/execution-result", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId, taskId: task.id }),
+      });
+
+      if (orchRes.ok) {
+        const orchData = await orchRes.json() as {
+          decision?: DecisionClassification;
+          summary?: DiffAnalysisOutput;
+          error?: string;
+        };
+
+        if (orchData.decision) {
+          setDecisionResult(orchData.decision);
+        }
+
+        // If the orchestration route also returns a summary, use it directly.
+        if (orchData.summary) {
+          setAnalysis(orchData.summary);
+          setPhase("analysis-done");
+          return;
+        }
+      }
+      // Orchestration route available but no summary — fall through to analyzer.
+    } catch {
+      // Orchestration route unavailable — fall through to analyzer.
+    }
+
+    // Step 2: Fallback to /api/analyzer for the diff-based analysis display.
     try {
       const res = await fetch("/api/analyzer", {
         method: "POST",
@@ -128,7 +181,7 @@ export function WorkbenchRunPanel({
       };
 
       if (!res.ok) {
-        throw new Error(data.error || "Analyzer request failed.");
+        throw new Error(data.error || "분석 요청이 실패했습니다.");
       }
 
       if (data.analysis) {
@@ -171,11 +224,11 @@ export function WorkbenchRunPanel({
       };
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to prepare next task.");
+        throw new Error(data.error || "다음 작업 준비에 실패했습니다.");
       }
 
       setLoopMessage({
-        text: `다음 작업 준비 완료. 실행 계획으로 돌아가서 다음 작업을 확인하세요.`,
+        text: "다음 작업 준비 완료. 실행 계획으로 돌아가서 다음 작업을 확인하세요.",
         type: "success",
       });
     } catch (error) {
@@ -190,7 +243,7 @@ export function WorkbenchRunPanel({
 
   const handleRunnerComplete = (status: "done" | "failed") => {
     if (status === "done") {
-      runAnalyzer();
+      runOrchestration();
     } else {
       setPhase("analysis-error");
       setAnalyzeError("에이전트 실행에 실패했습니다.");
@@ -224,7 +277,7 @@ export function WorkbenchRunPanel({
           <AlertTriangle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-red-700">
-              승인 토큰 요청 실패
+              일회성 승인권 요청 실패
             </p>
             <p className="text-xs text-red-600 mt-1">
               {tokenError}. 페이지를 새로고침하고 다시 시도하세요.
@@ -233,7 +286,7 @@ export function WorkbenchRunPanel({
         </div>
       )}
 
-      {/* RunnerLogView (visible during pre-execution and after) */}
+      {/* RunnerLogView */}
       {approvalToken ? (
         <div>
           <RunnerLogView
@@ -249,7 +302,7 @@ export function WorkbenchRunPanel({
       ) : (
         <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
           <Loader2 className="h-4 w-4 animate-spin" />
-          승인 토큰을 요청하는 중입니다...
+          일회성 승인권을 요청하는 중입니다...
         </div>
       )}
 
@@ -274,18 +327,18 @@ export function WorkbenchRunPanel({
             <ol className="list-decimal list-inside space-y-1 text-gray-600">
               <li>위의 로그를 확인하여 오류의 원인을 파악하세요</li>
               <li>필요하면 Claude Code를 직접 실행하여 문제를 해결하세요</li>
-              <li>해결 후 &apos;다시 분석&apos; 버튼을 클릭하거나 페이지를 새로고침하세요</li>
+              <li>해결 후 아래의 &apos;다시 시도&apos; 버튼을 클릭하거나 페이지를 새로고침하세요</li>
               <li>여전히 실패하면 Codex 또는 Claude Code 명시적 실행을 고려하세요</li>
             </ol>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => runAnalyzer()}
+              onClick={() => runOrchestration()}
               className="inline-flex items-center gap-1 rounded border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
             >
               <RefreshCw className="h-3 w-3" />
-              다시 분석
+              다시 시도
             </button>
             <Link
               href="/plan"
@@ -298,88 +351,21 @@ export function WorkbenchRunPanel({
         </div>
       )}
 
-      {/* Analysis done state */}
+      {/* Analysis done — ExecutionResultCard + Decision Panel */}
       {phase === "analysis-done" && analysis && (
         <div className="space-y-4">
-          {/* Result summary card */}
-          <div className={`rounded-lg border p-4 space-y-3 ${
-            analysis.completionJudgment === 'completed'
-              ? 'border-emerald-200 bg-emerald-50'
-              : analysis.completionJudgment === 'partial'
-              ? 'border-amber-200 bg-amber-50'
-              : 'border-red-200 bg-red-50'
-          }`}>
-            <div className="space-y-2">
-              <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                작업 결과
-              </span>
-              <p
-                className={`text-lg font-semibold ${
-                  JUDGMENT_CONFIG[analysis.completionJudgment].color
-                }`}
-              >
-                {JUDGMENT_CONFIG[analysis.completionJudgment].label}
-              </p>
-            </div>
+          <ExecutionResultCard result={buildResultSummary(analysis)} />
 
-            {/* Diff summary */}
-            {analysis.diffSummary && (
-              <div className="text-sm leading-relaxed">
-                <p className={
-                  analysis.completionJudgment === 'completed' ? 'text-emerald-700'
-                  : analysis.completionJudgment === 'partial' ? 'text-amber-700'
-                  : 'text-red-700'
-                }>
-                  {analysis.diffSummary}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Changed files */}
-          {analysis.changedFiles && analysis.changedFiles.length > 0 && (
-            <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-2">
-              <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                변경된 파일 ({analysis.changedFiles.length}개)
-              </span>
-              <ul className="space-y-1 max-h-32 overflow-y-auto">
-                {analysis.changedFiles.map((f) => (
-                  <li
-                    key={f}
-                    className="flex items-center gap-1.5 text-xs text-gray-600"
-                  >
-                    <FileCode2 className="w-3 h-3 text-gray-400 shrink-0" />
-                    <span className="font-mono truncate">{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Next action based on completion */}
-          {analysis.completionJudgment === 'completed' ? (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 space-y-3">
-              <p className="text-sm font-semibold text-emerald-700">작업이 완료되었습니다 ✅</p>
-              <div className="text-xs text-emerald-700 space-y-2">
-                <p><strong>다음 단계:</strong></p>
-                <ol className="list-decimal list-inside space-y-1">
-                  <li>변경된 파일들을 검토하세요</li>
-                  <li>필요하면 세션 리포트를 작성하세요</li>
-                  <li>실행 계획에서 다음 작업을 선택하세요</li>
-                </ol>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
-              <p className="text-sm font-semibold text-amber-700">부분 완료 또는 미완료</p>
-              <div className="text-xs text-amber-700 space-y-2">
-                <p><strong>옵션:</strong></p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>동일한 에이전트로 다시 실행 (다음 프롬프트로)</li>
-                  <li>다른 에이전트에게 핸드오프 (Codex, Claude Code 등)</li>
-                  <li>수동으로 변경 후 재시도</li>
-                </ul>
-              </div>
+          {/* Auto decision classification */}
+          {decisionResult && (
+            <div className="space-y-3">
+              <h3 className="text-base font-semibold text-gray-900">자동 판단 결과</h3>
+              <ExecutionDecisionPanel
+                decision={decisionResult.decision}
+                reason={decisionResult.reason}
+                confidence={decisionResult.confidence}
+                nextAction={decisionResult.nextAction}
+              />
             </div>
           )}
 
@@ -387,7 +373,7 @@ export function WorkbenchRunPanel({
           {analysis.nextPrompt && (
             <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-2">
               <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                다음 작업 프롬프트
+                다음 추천 작업
               </span>
               <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded border border-border bg-surface p-3 text-xs leading-relaxed text-text-secondary">
                 {analysis.nextPrompt}
@@ -407,7 +393,7 @@ export function WorkbenchRunPanel({
                 ) : (
                   <Copy className="h-3.5 w-3.5" />
                 )}
-                {copiedNext ? "복사됨" : "다음 프롬프트 복사"}
+                {copiedNext ? "복사됨" : "다음 추천 작업 복사"}
               </button>
             )}
 
@@ -431,7 +417,7 @@ export function WorkbenchRunPanel({
                 ) : (
                   <ChevronRight className="h-3.5 w-3.5" />
                 )}
-                {isPreparingNext ? "준비 중..." : "다음 작업 준비"}
+                {isPreparingNext ? "준비 중..." : "계속 진행"}
               </button>
             )}
 

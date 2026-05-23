@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowRight, Eye, ChevronDown } from "lucide-react";
 
 import { getLatestControlRoomPlan, getControlRoomRuns } from "@/lib/control-room/store";
+import { getFeaturePlans } from "@/lib/storage/feature-plan-store";
+import { getProjects } from "@/lib/storage/json-store";
 import { getAllRoadmaps } from "@/lib/storage/roadmap-store";
 import { getAgentStatuses } from "@/lib/storage/agent-status-store";
 import type { RoadmapStatus } from "@/lib/types";
@@ -14,6 +16,8 @@ import { YourNextMove } from "@/components/control-room/YourNextMove";
 import { RiskRadar } from "@/components/control-room/RiskRadar";
 import { AgentStatusPanel } from "@/components/agents/AgentStatusPanel";
 import { RoadmapTimeline } from "@/components/roadmap/RoadmapTimeline";
+import RoadmapStatusWidget from "@/components/roadmap/RoadmapStatusWidget";
+import { KanbanBoard } from "@/components/plan/KanbanBoard";
 
 import type { AgentStatus as UIAgentStatus, AgentAvailability } from "@/components/agents/types";
 import type { RoadmapStage as UIRoadmapStage } from "@/components/roadmap/RoadmapStageCard";
@@ -32,9 +36,16 @@ export default async function PlanPage() {
     getAllRoadmaps(),
     getAgentStatuses(),
   ]);
+  const [featurePlans, projects] = await Promise.all([
+    getFeaturePlans(),
+    getProjects(),
+  ]);
 
   const latestRun = runs[0] ?? null;
   const roadmap = roadmaps[0] ?? null;
+  const featurePlan = featurePlans[0] ?? null;
+  const projectPath =
+    projects.find((project) => project.id === featurePlan?.projectId)?.path ?? "";
   const phases = roadmap?.stages ?? latestPlan?.phases ?? [];
   const overallProgress =
     roadmap?.overallProgress ??
@@ -118,7 +129,7 @@ export default async function PlanPage() {
       userDecisions.push({
         id: `implicit-decision-${p.id}`,
         question: `사용자 결정 대기 중 (${p.title})`,
-        options: ["Review Phase", "Approve", "Hold"],
+        options: ["리뷰 하기", "승인", "대기"],
         stageId: p.id,
         stageTitle: p.title
       });
@@ -168,7 +179,7 @@ export default async function PlanPage() {
             Control Tower
           </p>
           <h1 className="text-2xl font-extrabold text-text-primary tracking-tight">
-            AI Development Command Center
+            AI 자동화 컨트롤 타워
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-text-secondary">
             프로젝트 전체 상황을 모니터링하고 지휘합니다. 모든 에이전트는 승인된 범위 내에서만 작동합니다.
@@ -232,9 +243,9 @@ export default async function PlanPage() {
           {/* Mission Timeline */}
           <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-text-primary">Mission Timeline</h2>
+              <h2 className="text-lg font-bold text-text-primary">전체 실행 로드맵</h2>
               <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-surface-2 border border-border/60 text-text-secondary">
-                {phases.length} Phases
+                총 {phases.length} 단계
               </span>
             </div>
             <div className="bg-surface rounded-xl border border-border p-4 sm:p-6 lg:p-8">
@@ -247,12 +258,32 @@ export default async function PlanPage() {
         <div className="space-y-8 min-w-0 flex flex-col order-first lg:order-none">
           
           <section className="space-y-4">
-            <h2 className="text-lg font-bold text-text-primary">Risk & Security Radar</h2>
+            <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+              <span className="text-pink-primary">●</span> 리스크 및 보안 감시
+            </h2>
             <RiskRadar stages={phases} agents={agentsList} />
           </section>
 
+          {roadmap && (
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold text-text-primary">로드맵 진행 상황</h2>
+              <RoadmapStatusWidget
+                roadmap={roadmap}
+                currentExecution={
+                  latestRun?.startedTasks[0]
+                    ? {
+                        taskId: latestRun.startedTasks[0].id,
+                        agent: latestRun.startedTasks[0].agentId,
+                        startedAt: latestRun.startedAt,
+                      }
+                    : undefined
+                }
+              />
+            </section>
+          )}
+
           <section className="space-y-4">
-            <h2 className="text-lg font-bold text-text-primary">Agent Live Board</h2>
+            <h2 className="text-lg font-bold text-text-primary">에이전트 실시간 현황</h2>
             <div className="bg-surface rounded-xl border border-border p-4">
               <AgentStatusPanel agents={agentsList} />
             </div>
@@ -265,16 +296,18 @@ export default async function PlanPage() {
       <section className="mt-16 pt-8 border-t border-border/40">
         <details className="group">
           <summary className="flex cursor-pointer items-center justify-between rounded-lg bg-surface-2 p-4 border border-border/60 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-2/80">
-            <span>Detailed Task Kanban (Legacy View)</span>
+            <span>상세 작업 보기 (Kanban)</span>
             <ChevronDown className="h-5 w-5 text-text-secondary transition-transform group-open:rotate-180" />
           </summary>
-          <div className="mt-4 rounded-xl border border-dashed border-border bg-surface-2/40 px-6 py-12 text-center text-sm text-text-secondary">
-            Vibe Kanban 워크벤치와의 통합으로 인해 상세 태스크 보기는 이곳에서 제공되지 않습니다. 
-            <br className="mb-4" />
-            <a href="#" className="inline-flex mt-4 items-center gap-1.5 text-pink-primary hover:text-pink-soft font-semibold">
-              Open Vibe Kanban <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
+          {featurePlan ? (
+            <div className="mt-4 rounded-xl border border-border bg-surface p-4">
+              <KanbanBoard plan={featurePlan} projectPath={projectPath} />
+            </div>
+          ) : (
+            <div className="mt-4 rounded-xl border border-dashed border-border bg-surface-2/40 px-6 py-12 text-center text-sm text-text-secondary">
+              아직 상세 태스크 계획이 없습니다. Roadmap에서 다음 실행 작업이 만들어지면 이곳에서 세부 상태를 확인합니다.
+            </div>
+          )}
         </details>
       </section>
     </main>

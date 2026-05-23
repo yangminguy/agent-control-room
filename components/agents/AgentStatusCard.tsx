@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { AgentStatus } from './types';
 import { AgentAvailabilityBadge } from './AgentAvailabilityBadge';
+import { AgentCapabilityList } from './AgentCapabilityList';
 import { Bot, User, Wrench, Terminal, Database, Sparkles, ArrowRight, FileText, ChevronDown, ChevronUp, AlertOctagon } from 'lucide-react';
 
 interface AgentStatusCardProps {
@@ -126,28 +127,10 @@ export function AgentStatusCard({ agent }: AgentStatusCardProps) {
 
         {showCapabilities && (
           <div className="mt-2.5 space-y-2 text-xs text-text-secondary animate-fade-in bg-surface-2/40 p-2.5 rounded-lg border border-border/40">
-            <div>
-              <p className="font-semibold text-text-primary mb-0.5">Best For:</p>
-              <ul className="list-disc pl-4 space-y-0.5">
-                {agent.bestFor.map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
-              </ul>
-            </div>
-            {agent.notFor && agent.notFor.length > 0 && (
-              <div>
-                <p className="font-semibold text-text-primary mb-0.5">Not For:</p>
-                <ul className="list-disc pl-4 space-y-0.5">
-                  {agent.notFor.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <AgentCapabilityList bestFor={agent.bestFor} notFor={agent.notFor} />
           </div>
         )}
       </div>
     </div>
   );
 }
-

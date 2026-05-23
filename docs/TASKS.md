@@ -86,25 +86,35 @@ Acceptance criteria:
 - [x] Define Failure Packet
 - [x] Define Drift Detection Packet
 - [x] Define Re-orchestration Packet
-- [ ] Implement/verify packet generation from live runner results
+- [x] Implement packet builder (buildHermesPacket)
+- [x] Implement result normalizer (normalizeExecutionResult)
+- [x] Implement decision classifier (classifyExecutionDecision)
+- [x] Implement status updater (updateRoadmapAndKanbanStatus)
+- [ ] Connect packet generation to live runner completion
 
 Acceptance criteria:
-- Hermes can run only safe verification commands automatically.
-- Hermes cannot edit code, change dependencies, migrate databases, deploy, push, merge, rebase, or reset.
-- Hermes reports completion, failure, drift, and approval needs back to Agent Control Room.
-- Agent Control Room makes the next orchestration decision.
+- ✅ Hermes can run only safe verification commands automatically.
+- ✅ Hermes cannot edit code, change dependencies, migrate databases, deploy, push, merge, rebase, or reset.
+- ✅ Result normalizer extracts execution status, checks, and changed files from ExecutionLog.
+- ✅ Decision classifier determines pass/fail/qa_needed/retry_needed/blocked/drift from ExecutionResultSummary.
+- ✅ Packet builder generates typed Hermes packets (PhaseSuccessPacket, PhaseFailurePacket, etc.) with PM-friendly summaries.
+- ✅ Roadmap and Kanban status updates based on decision classification.
+- ⚠️ Packet generation is built but not yet wired to automatic execution completion (on-demand only).
 
-## Phase F — Cleanup
+## Phase F — Validation & Documentation
 
-- [x] Archive/delete old Monitor Panel after import check
-- [x] Archive/delete old Direction Orchestrator after route check
-- [x] Archive/delete old monitor components folder after current component migration check
-- [x] Move Discord Webhook to Backlog unless actively needed
+- [ ] Wire packet generation to /api/runner completion flow
+- [ ] Verify decision classification accuracy on sample executions
+- [ ] Verify Hermes packet display in `/orchestration` and kanban views
+- [ ] Update documentation to reflect Phase E implementation reality
+- [ ] Archive temporary test stubs and old components
 
 Acceptance criteria:
-- Current routes no longer direct users into legacy monitor/direction flows.
-- Legacy components are either removed or isolated under archive/legacy naming.
-- Discord is not presented as an active approval channel while Telegram/web approval remains the intended direction.
+- Packet generation is called automatically after runner completion.
+- Hermes packets are stored and accessible via API.
+- Decision classification drives status updates consistently.
+- Documentation reflects actual implementation (no speculative language).
+- Broken connections (if any) are documented clearly as future work.
 
 ## Backlog
 

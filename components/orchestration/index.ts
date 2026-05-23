@@ -1,5 +1,4 @@
 export { DispatchStatusPanel } from "./DispatchStatusPanel";
-export { DiscordApprovalPreviewCard } from "./DiscordApprovalPreviewCard";
 export { ProgressManagerStatusView } from "./ProgressManagerStatusView";
 export { FeedbackLoopSummaryCard } from "./FeedbackLoopSummaryCard";
 export { ResultCollectionPanel } from "./ResultCollectionPanel";

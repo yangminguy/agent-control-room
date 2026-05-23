@@ -381,7 +381,7 @@ export function ChatControlRoom({
             </button>
           </div>
           <p className="mt-3 text-xs leading-5 text-text-secondary">
-            실행 버튼을 누르기 전까지는 planning-only입니다. 고위험 작업은 실행 이후에도 별도 승인 게이트에서 멈춥니다.
+            실행 버튼을 누르기 전까지는 planning-only입니다. 실행 후에는 Vercel이 직접 CLI를 실행하지 않고 로컬 Mac runner/workbench가 작업을 가져가 수행합니다.
           </p>
         </section>
 
@@ -389,11 +389,11 @@ export function ChatControlRoom({
           <section className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
             <p className="text-sm font-semibold text-emerald-200">실행 루프 시작됨</p>
             <p className="mt-1 text-xs text-emerald-100">
-              {run.startedTasks.length}개 작업이 큐에 등록됐고 Vibe Kanban 추적이 준비됐습니다.
+              {run.startedTasks.length}개 작업이 로컬 runner 큐에 등록됐고 Vibe Kanban 추적이 준비됐습니다.
             </p>
             {run.approvalRequired && (
               <p className="mt-2 text-xs text-amber-200">
-                일부 고위험 작업은 별도 승인이 필요합니다.
+                Critical 작업은 별도 승인 또는 수동 처리 후 진행됩니다.
               </p>
             )}
             <a

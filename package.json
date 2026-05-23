@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "local-runner": "node scripts/local-runner-daemon.mjs",
     "test": "jest"
   },
   "dependencies": {
