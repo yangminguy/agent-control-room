@@ -7,7 +7,10 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import type { ProjectContext } from "@/lib/orchestration/project-context-manager";
 
-const PROJECT_CONTEXTS_DIR = path.join(process.cwd(), "data", "project-contexts");
+// Support project contexts directory override via environment for test isolation
+const PROJECT_CONTEXTS_DIR = process.env.PROJECT_CONTEXTS_DIR
+  ? path.resolve(process.cwd(), process.env.PROJECT_CONTEXTS_DIR)
+  : path.join(process.cwd(), "data", "project-contexts");
 
 const globalWithProjectContexts = globalThis as typeof globalThis & {
   __projectContextMemoryStore?: Map<string, ProjectContext>;

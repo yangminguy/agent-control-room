@@ -191,7 +191,7 @@ describe("generateInsightsFromExecution", () => {
 
 describe("HermesInsightRecorder", () => {
   it("should record and retrieve insights", () => {
-    const recorder = new HermesInsightRecorder();
+    const recorder = new HermesInsightRecorder(false); // 파일 저장 비활성화 (테스트용)
 
     const insight = {
       id: "test-1",
@@ -213,7 +213,7 @@ describe("HermesInsightRecorder", () => {
   });
 
   it("should filter by severity", () => {
-    const recorder = new HermesInsightRecorder();
+    const recorder = new HermesInsightRecorder(false);
 
     recorder.recordInsight({
       id: "critical-1",
@@ -243,7 +243,7 @@ describe("HermesInsightRecorder", () => {
   });
 
   it("should aggregate duplicate insights", () => {
-    const recorder = new HermesInsightRecorder();
+    const recorder = new HermesInsightRecorder(false);
 
     const now = new Date().toISOString();
 
@@ -280,7 +280,7 @@ describe("HermesInsightRecorder", () => {
   });
 
   it("should filter recent insights by hours", () => {
-    const recorder = new HermesInsightRecorder();
+    const recorder = new HermesInsightRecorder(false);
 
     const now = new Date();
     const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);

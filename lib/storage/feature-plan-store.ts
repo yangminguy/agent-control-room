@@ -3,7 +3,8 @@ import path from "path";
 import type { FeaturePlan, PlanTask, PlanTaskStatus } from "@/lib/types";
 import { getSupabaseClient } from "./supabase-client";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Support DATA_DIR override via environment for test isolation
+const DATA_DIR = process.env.FEATURE_PLANS_DATA_DIR || path.join(process.cwd(), "data");
 const FEATURE_PLANS_FILE = "feature-plans.json";
 
 type DbRow = Record<string, string | number | boolean | null | unknown[] | object>;

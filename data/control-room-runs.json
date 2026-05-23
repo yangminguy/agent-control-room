@@ -1,5 +1,56 @@
 [
   {
+    "id": "test-run-1779532552142",
+    "planId": "test-plan-1779532552142",
+    "featurePlanId": "feature-plan-1779532552142",
+    "status": "queued",
+    "startedAt": "2026-05-23T10:35:52.142Z",
+    "message": "Test run",
+    "startedTasks": [],
+    "vibeIssues": [],
+    "hermesPacket": "test packet",
+    "approvalRequired": false
+  },
+  {
+    "id": "smoke-test-run",
+    "planId": "smoke-test-plan",
+    "featurePlanId": "smoke-test-feature-plan",
+    "status": "queued",
+    "startedAt": "2026-05-23T10:35:52.152Z",
+    "message": "Smoke test execution started",
+    "startedTasks": [
+      {
+        "id": "smoke-test-job",
+        "taskId": "smoke-test-task",
+        "phaseId": "smoke-phase",
+        "featurePlanId": "smoke-test-feature-plan",
+        "agentId": "claude-code",
+        "riskLevel": "low",
+        "status": "queued",
+        "executionSurface": "local_runner",
+        "createdAt": "2026-05-23T10:35:52.152Z",
+        "retryCount": 0,
+        "maxRetries": 2,
+        "prompt": "Create docs/smoke-test.md"
+      }
+    ],
+    "vibeIssues": [],
+    "hermesPacket": "",
+    "approvalRequired": false
+  },
+  {
+    "id": "test-run-1779532544970",
+    "planId": "test-plan-1779532544971",
+    "featurePlanId": "feature-plan-1779532544971",
+    "status": "queued",
+    "startedAt": "2026-05-23T10:35:44.971Z",
+    "message": "Test run",
+    "startedTasks": [],
+    "vibeIssues": [],
+    "hermesPacket": "test packet",
+    "approvalRequired": false
+  },
+  {
     "id": "smoke-e2e-run",
     "planId": "smoke-e2e-plan",
     "featurePlanId": "smoke-e2e-feature-plan",

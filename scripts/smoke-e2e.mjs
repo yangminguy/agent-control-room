@@ -17,10 +17,12 @@ const SMOKE_FEATURE_PLAN_ID = `${SMOKE_TEST_ID}-feature-plan`;
 const EXPECTED_FILE = "docs/smoke-test.md";
 const EXPECTED_CONTENT = "Agent Control Room E2E smoke test passed.\n";
 
+// Data isolation: use /data/.test/ directory for smoke tests
+const smokeDataDir = path.join(projectRoot, "data", ".test");
 const dataDir = path.join(projectRoot, "data");
-const plansFile = path.join(dataDir, "control-room-plans.json");
-const runsFile = path.join(dataDir, "control-room-runs.json");
-const featurePlansFile = path.join(dataDir, "feature-plans.json");
+const plansFile = path.join(smokeDataDir, "control-room-plans.json");
+const runsFile = path.join(smokeDataDir, "control-room-runs.json");
+const featurePlansFile = path.join(smokeDataDir, "feature-plans.json");
 const smokeTestFile = path.join(projectRoot, EXPECTED_FILE);
 
 let mode = "dry";
@@ -446,10 +448,27 @@ async function runRunnerMode() {
 
   try {
     // Ensure npm-global bin is in PATH when spawning Claude
+    // Set environment variables to isolate smoke test data to /data/.test/
     const env = {
       ...process.env,
       PATH: `${process.env.HOME}/.npm-global/bin:${process.env.PATH}`,
+      // Data isolation environment variables for all stores
+      FEATURE_PLANS_DATA_DIR: smokeDataDir,
+      CONTROL_ROOM_DATA_DIR: smokeDataDir,
+      ROADMAP_DATA_DIR: smokeDataDir,
+      JSON_STORE_DATA_DIR: smokeDataDir,
+      EXECUTION_LOG_DATA_DIR: smokeDataDir,
+      HERMES_INSIGHTS_DATA_DIR: smokeDataDir,
+      AGENT_STATUS_DATA_DIR: smokeDataDir,
+      PROJECT_CONTEXTS_DIR: path.join(smokeDataDir, "project-contexts"),
+      ORCHESTRATION_LOG_PATH: path.join(smokeDataDir, "orchestration-logs.ndjson"),
+      APPROVAL_REQUESTS_PATH: path.join(smokeDataDir, "approval-requests.json"),
     };
+
+    // Create smoke data directory if needed
+    if (!fs.existsSync(smokeDataDir)) {
+      fs.mkdirSync(smokeDataDir, { recursive: true });
+    }
 
     const result = await runCommand(claudeCommand, ["-p", prompt], {
       stdio: "inherit",

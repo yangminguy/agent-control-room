@@ -2,7 +2,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import type { AgentResult, AgentType, ControlRoomExecutionRun, ControlRoomPlan, DispatchJob } from "@/lib/types";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Support DATA_DIR override via environment for test isolation
+const DATA_DIR = process.env.CONTROL_ROOM_DATA_DIR || path.join(process.cwd(), "data");
 const PLANS_FILE = "control-room-plans.json";
 const RUNS_FILE = "control-room-runs.json";
 const RESULTS_FILE = "control-room-results.json";

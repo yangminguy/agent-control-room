@@ -7,6 +7,8 @@
  * - 계획으로부터의 드리프트
  * - 성능 저하
  * - 보안 문제
+ *
+ * Phase 3-P0 업데이트: 로컬 JSON 파일에 Insights 영구 저장
  */
 
 import type {
@@ -14,6 +16,10 @@ import type {
   DecisionClassification,
   PlanTask,
 } from "@/lib/types";
+import {
+  readHermesInsights,
+  writeHermesInsights,
+} from "@/lib/storage/hermes-insight-store";
 
 /**
  * Hermes 인사이트 레코드
@@ -36,12 +42,24 @@ export type HermesInsight = {
 
 /**
  * 인사이트 생성 엔진
+ *
+ * Phase 3-P0 업데이트:
+ * - 메모리 저장소 유지 (기존 호환성)
+ * - recordInsight() 호출 시 로컬 파일에도 저장
+ * - getAllInsights() 호출 시 파일에서 읽음 (또는 메모리)
+ * - 동기 메서드만 유지 (레코더는 빠른 기록이 목표)
  */
 export class HermesInsightRecorder {
   private insights: HermesInsight[] = [];
+  private useFileStorage: boolean = true;
+
+  constructor(useFileStorage: boolean = true) {
+    this.useFileStorage = useFileStorage;
+  }
 
   /**
    * 새로운 인사이트 기록
+   * 파일 저장은 별도의 flushToFile() 호출 필요
    */
   recordInsight(insight: HermesInsight): void {
     // 중복 확인: 같은 유형의 최근 인사이트가 있으면 frequency 증가
@@ -66,6 +84,7 @@ export class HermesInsightRecorder {
 
   /**
    * 모든 인사이트 반환
+   * (동기 메서드 - 메모리 캐시에서 반환)
    */
   getAllInsights(): HermesInsight[] {
     return [...this.insights];
@@ -86,6 +105,26 @@ export class HermesInsightRecorder {
     return this.insights.filter(
       (i) => new Date(i.createdAt).getTime() > cutoff,
     );
+  }
+
+  /**
+   * 메모리 상태를 로컬 파일에 저장
+   * 이 메서드는 비동기이며, 주로 실행 완료 후 호출됨
+   */
+  async flushToFile(): Promise<void> {
+    if (this.useFileStorage) {
+      await writeHermesInsights(this.insights);
+    }
+  }
+
+  /**
+   * 파일에서 insights 로드하기
+   * 앱 시작 시 또는 명시적으로 호출
+   */
+  async loadFromFile(): Promise<void> {
+    if (this.useFileStorage) {
+      this.insights = await readHermesInsights();
+    }
   }
 }
 

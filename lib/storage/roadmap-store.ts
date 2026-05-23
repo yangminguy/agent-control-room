@@ -4,7 +4,8 @@ import type { Roadmap, FeaturePlan, RoadmapStatus } from "@/lib/types";
 import { getSupabaseClient } from "./supabase-client";
 import { convertFeaturePlansToRoadmap } from "@/lib/roadmap";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Support DATA_DIR override via environment for test isolation
+const DATA_DIR = process.env.ROADMAP_DATA_DIR || path.join(process.cwd(), "data");
 const ROADMAP_FILE = "roadmap.json";
 
 type DbRow = Record<string, string | number | boolean | null | unknown[] | object>;

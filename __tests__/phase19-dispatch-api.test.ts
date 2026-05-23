@@ -1,8 +1,9 @@
-import { describe, expect, it, afterEach } from "@jest/globals";
+import { describe, expect, it, afterEach, beforeEach } from "@jest/globals";
 import { POST } from "../app/api/orchestration/dispatch/route";
 import type { DispatchJob } from "../lib/types";
 import { AntigravityCliAdapter } from "../lib/dispatch/adapters/antigravity-cli-adapter";
 import { classifyCodexOutput } from "../lib/dispatch/adapters/codex-cli-adapter";
+import { ApprovalRequestStore } from "../lib/approval/approval-request-store";
 
 const baseJob: DispatchJob = {
   id: "job-test-001",

@@ -3,7 +3,8 @@ import path from "path";
 import type { AgentStatus, Handoff, Project, SessionReport, Task } from "@/lib/types";
 import { getSupabaseClient } from "./supabase-client";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Support DATA_DIR override via environment for test isolation
+const DATA_DIR = process.env.JSON_STORE_DATA_DIR || path.join(process.cwd(), "data");
 
 const globalWithJsonStore = globalThis as typeof globalThis & {
   __jsonStorageMemoryStore?: Map<string, unknown>;

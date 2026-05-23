@@ -20,20 +20,18 @@ planning intent
 ## active_phase
 
 Phase 2 (Multi-Agent Orchestration) — Completed  
-Phase 3 (Documentation & Integration Verification) — In Progress
+Phase 3 (Documentation & Integration Verification) — Completed  
+Phase 3-P0 (Critical Fixes) — ✅ Completed  
+Phase 4 (E2E Testing with Codex) — Ready to start
 
 ## active_task
 
-Phase 3: Update documentation to reflect Phase 2 multi-agent orchestration completion and prepare for final E2E verification:
-- Roadmap remains the main UI.
-- Kanban remains detailed task inspection.
-- Approval gates block high/critical risk work.
-- Local runner returns logs, diffs, and checks.
-- Hermes packet builder, decision classifier, and insight recorder fully implemented.
-- Result normalizer extracts status from ExecutionLog; packets are auto-generated on execution completion.
-- Multi-agent orchestration complete: Claude Code, Codex (QA-only, auto-run disabled), Antigravity (manual-only, auto-run disabled).
-- Automated E2E smoke test runner validates main flow.
-- Phase 3 will finalize documentation and verify all surfaces work together.
+Phase 3-P0: Critical fixes now complete:
+- ✅ P0-1: Smoke-E2E test isolation (production data pollution fixed)
+- ✅ P0-2: Approval enforcement in dispatch loop (high/critical risk blocking)
+- ✅ P0-3: Hermes persistent insight storage (hermes-insights.json)
+
+Next: Begin Phase 4 E2E testing with Codex agent for real CLI execution verification
 
 ## current_agent
 
@@ -85,21 +83,13 @@ Codex for bounded verification and doc consistency checks. Claude Code for archi
 
 ## next_task
 
-Phase 3: Final documentation update and E2E verification:
+Phase 4: E2E Testing with Codex Agent
 
-1. ✅ Update TASKS.md to reflect Phase 2 multi-agent orchestration completion
-2. ✅ Update AGENT_STATE.md to clarify auto-run restrictions as intentional safety
-3. ⏳ Update HANDOFF.md with Phase 2 context
-4. ⏳ Update ARCHITECTURE.md to mark Hermes packet wiring as complete
-5. ⏳ Run E2E smoke tests to verify main flow end-to-end:
-   - planning input creates/updates roadmap tasks
-   - task shows agent, risk, and scheduling recommendation
-   - approval gate blocks risky execution
-   - local runner streams logs for supported execution
-   - diff/check results are captured
-   - Hermes packet is generated and displayed
-   - roadmap and kanban status update
-   - recommendations propagate to next task
+1. Validate actual Claude Code CLI execution end-to-end
+2. Verify approval enforcement with real execution scenarios
+3. Test Hermes packet generation with actual execution results
+4. Confirm roadmap status updates after real execution completion
+5. Verify PM UX with non-developer user feedback
 
 ## key_constraints
 
