@@ -7,7 +7,12 @@ export type MonitorPacketKind =
   | "handoff-pack"
   | "failed-task-review"
   | "background-research"
-  | "obsidian-note";
+  | "obsidian-note"
+  | "phase-completion"
+  | "failure"
+  | "drift-detection"
+  | "approval-request"
+  | "re-orchestration";
 
 export interface MonitorPacket {
   id: string;
@@ -21,6 +26,19 @@ export interface MonitorPacket {
   content: {
     sections: MonitorSection[];
     metadata?: Record<string, unknown>;
+  };
+
+  // Execution context (Phase G additions)
+  executionContext?: {
+    planId?: string;
+    runId?: string;
+    taskId?: string;
+    dispatchJobId?: string;
+    agentId?: string;
+    status?: string;
+    riskLevel?: string;
+    recommendedNextAction?: string;
+    source?: "worker" | "execution" | "manual" | "mock";
   };
 }
 

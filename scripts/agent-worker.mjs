@@ -4,21 +4,25 @@
  * Agent Recovery Worker
  *
  * Dry-run worker that monitors waiting tasks and proposes recovery actions.
+ * Phase G: Generates Hermes packets for execution results.
  *
  * Usage:
- * npm run agent:worker -- --dry
+ * npm run agent:worker -- --dry (dry-run mode, no file writes)
+ * npm run agent:worker (actual mode, saves packets to data/hermes-packets.json)
+ * npm run agent:worker -- --notify (actual mode + verbose Telegram preview)
  *
  * Does NOT execute dangerous work.
  * Does NOT execute high/critical work without approval.
  * Only proposes recovery and prints recommendations.
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const isDryRun = process.argv.includes("--dry");
+const isNotify = process.argv.includes("--notify");
 
 // Read runtime decisions and release gate requests
 function readJsonFile(filePath) {
@@ -59,8 +63,10 @@ function getPendingReleaseGates() {
 }
 
 function main() {
+  const mode = isDryRun ? "Dry-Run" : "실제 모드";
   console.log("═══════════════════════════════════════════════════");
-  console.log("Agent Recovery Worker — Dry-Run");
+  console.log(`Agent Recovery Worker — ${mode}`);
+  if (isNotify) console.log("📤 Telegram 알림 미리보기 활성화");
   console.log("═══════════════════════════════════════════════════\n");
 
   const waitingTasks = getWaitingTasks();
@@ -68,6 +74,8 @@ function main() {
 
   console.log(`📊 실행 작업 대기열(Waiting Tasks): ${waitingTasks.length}`);
   console.log(`🔒 승인 대기 중(Pending Release Gates): ${pendingGates.length}\n`);
+
+  const packets = [];
 
   if (waitingTasks.length === 0 && pendingGates.length === 0) {
     console.log("✅ 현재 대기 중인 작업이나 승인 요청이 없습니다.");
@@ -140,14 +148,130 @@ function main() {
     `\n📈 Summary: ${readyForRetry.length} tasks ready for retry, ${pendingGates.length} awaiting approval\n`
   );
 
+  // Phase G: Generate Hermes packets if tasks are waiting
+  if (waitingTasks.length > 0) {
+    const packet = generateWaitingTasksPacket(waitingTasks, readyForRetry);
+    packets.push(packet);
+
+    if (isNotify || !isDryRun) {
+      console.log("📦 Hermes Packet Generated:");
+      formatPacketForConsole(packet);
+    }
+
+    // Save to local store (not in dry-run)
+    if (!isDryRun) {
+      saveHermesPacket(packet);
+      console.log(`✅ Packet saved to data/hermes-packets.json`);
+    }
+  }
+
   if (isDryRun) {
-    console.log("🏃 DRY RUN: No actions taken. Script completed successfully.");
-    console.log(
-      "To execute recovery actions, remove --dry flag and re-run.\n"
-    );
+    console.log("🏃 DRY RUN: No file writes. To persist packets, remove --dry flag.\n");
+  } else if (!isDryRun && packets.length > 0) {
+    console.log("✅ Packets saved to local store. Ready for Hermes supervision.\n");
   }
 
   process.exit(0);
+}
+
+/**
+ * Generate a waiting tasks packet (Phase G)
+ */
+function generateWaitingTasksPacket(waitingTasks, readyForRetry) {
+  const now = new Date().toISOString();
+  const taskSummary = waitingTasks
+    .map(
+      (t) =>
+        `- ${t.id}: ${t.executionMode} (${t.agent}) — ready: ${readyForRetry.some((r) => r.id === t.id) ? "✅" : "⏳"}`
+    )
+    .join("\n");
+
+  return {
+    id: `packet-${Date.now()}`,
+    kind: "re-orchestration",
+    title: "대기 작업 현황",
+    description: `현재 ${waitingTasks.length}개 작업이 대기 중입니다.`,
+    createdAt: now,
+    updatedAt: now,
+    content: {
+      sections: [
+        {
+          id: `section-1`,
+          title: "대기 작업 목록",
+          level: 2,
+          body: taskSummary || "대기 작업 없음",
+          format: "markdown",
+        },
+        {
+          id: `section-2`,
+          title: "다음 행동",
+          level: 2,
+          body: `${readyForRetry.length} task(s) ready for immediate retry.`,
+          format: "markdown",
+        },
+      ],
+      metadata: {
+        totalWaiting: waitingTasks.length,
+        readyForRetry: readyForRetry.length,
+        source: "agent-worker",
+      },
+    },
+    executionContext: {
+      status: "waiting_for_recovery",
+      riskLevel: "medium",
+      recommendedNextAction: readyForRetry.length > 0 ? "retry_same_agent" : undefined,
+      source: "worker",
+    },
+  };
+}
+
+/**
+ * Save Hermes packet to local store
+ */
+function saveHermesPacket(packet) {
+  const packetsFile = join(__dirname, "../data/hermes-packets.json");
+  const dataDir = join(__dirname, "../data");
+
+  // Ensure data directory exists
+  if (!existsSync(dataDir)) {
+    require("fs").mkdirSync(dataDir, { recursive: true });
+  }
+
+  let store = { packets: [], lastUpdated: new Date().toISOString() };
+  if (existsSync(packetsFile)) {
+    try {
+      const content = readFileSync(packetsFile, "utf-8");
+      store = JSON.parse(content);
+    } catch (e) {
+      console.warn("Could not parse existing packets file, starting fresh");
+    }
+  }
+
+  // Add or update packet
+  const existingIndex = store.packets.findIndex((p) => p.id === packet.id);
+  if (existingIndex >= 0) {
+    store.packets[existingIndex] = packet;
+  } else {
+    store.packets.push(packet);
+  }
+
+  store.lastUpdated = new Date().toISOString();
+  writeFileSync(packetsFile, JSON.stringify(store, null, 2));
+}
+
+/**
+ * Format packet for console output
+ */
+function formatPacketForConsole(packet) {
+  console.log(`  Kind: ${packet.kind}`);
+  console.log(`  Title: ${packet.title}`);
+  if (packet.content.sections.length > 0) {
+    console.log(`  Sections: ${packet.content.sections.length}`);
+  }
+  if (packet.executionContext?.recommendedNextAction) {
+    console.log(`  Action: ${packet.executionContext.recommendedNextAction}`);
+  }
+  console.log();
 }
 
 main();
