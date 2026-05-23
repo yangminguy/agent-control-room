@@ -268,22 +268,27 @@ export function OrchestrationPageLayout() {
                           }}
                         />
                         {approval.status === "pending" && (
-                          <div className="flex gap-2 px-1">
-                            <button
-                              type="button"
-                              onClick={() => mockApprove(approval.id)}
-                              className="px-3 py-1.5 rounded border border-emerald-700 bg-emerald-950 text-emerald-300 text-xs font-medium hover:bg-emerald-900 transition-colors"
-                            >
-                              [개발용] 모의 승인
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => mockReject(approval.id)}
-                              className="px-3 py-1.5 rounded border border-red-700 bg-red-950 text-red-300 text-xs font-medium hover:bg-red-900 transition-colors"
-                            >
-                              [개발용] 모의 거절
-                            </button>
-                          </div>
+                          <details className="group">
+                            <summary className="cursor-pointer text-xs font-medium text-text-secondary hover:text-text-primary flex items-center px-1">
+                              <span className="mr-2">▶</span> 개발자용 모의 승인/거절
+                            </summary>
+                            <div className="mt-2 flex gap-2 px-1 pl-4">
+                              <button
+                                type="button"
+                                onClick={() => mockApprove(approval.id)}
+                                className="px-2 py-1 rounded border border-zinc-600 bg-zinc-900 text-zinc-400 text-xs font-medium hover:bg-zinc-800 transition-colors opacity-60 hover:opacity-80"
+                              >
+                                [dev] 모의 승인
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => mockReject(approval.id)}
+                                className="px-2 py-1 rounded border border-zinc-600 bg-zinc-900 text-zinc-400 text-xs font-medium hover:bg-zinc-800 transition-colors opacity-60 hover:opacity-80"
+                              >
+                                [dev] 모의 거절
+                              </button>
+                            </div>
+                          </details>
                         )}
                         {approval.status !== "pending" && (
                           <p className="text-xs text-text-secondary px-1">

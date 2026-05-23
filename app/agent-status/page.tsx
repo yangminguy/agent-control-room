@@ -19,6 +19,39 @@ const STATUS_COLORS: Record<AgentStatusValue, string> = {
   manual_only: "bg-surface-2 text-text-secondary border border-border/60",
 };
 
+const STATUS_DESCRIPTIONS: Record<AgentStatusValue, { korean: string; can: string; cannot: string; next: string }> = {
+  available: {
+    korean: "사용 가능",
+    can: "모든 작업 자동 실행 가능",
+    cannot: "없음",
+    next: "작업 할당 시 자동 실행됩니다",
+  },
+  limited: {
+    korean: "사용량 제한",
+    can: "수동으로 지정된 작업만 실행",
+    cannot: "자동 작업 할당",
+    next: "쿼터 회복 후 사용 가능 상태로 복원해주세요",
+  },
+  cooling_down: {
+    korean: "회복 중",
+    can: "없음",
+    cannot: "모든 작업 (자동/수동 포함)",
+    next: "예상 시간 이후 자동으로 복구될 예정입니다",
+  },
+  blocked: {
+    korean: "차단됨",
+    can: "없음",
+    cannot: "모든 작업",
+    next: "문제 해결 후 상태를 복구해주세요",
+  },
+  manual_only: {
+    korean: "수동 제어 전용",
+    can: "명시적으로 지정된 작업만 실행",
+    cannot: "자동 작업 할당",
+    next: "기획 UI에서 명확히 지정할 때만 실행됩니다",
+  },
+};
+
 type AgentStatusResponse = {
   updated: AgentStatus;
   recommendedAgent?: AgentType | null;
@@ -193,18 +226,34 @@ export default function AgentStatusPage() {
                       STATUS_COLORS[currentStatus?.status || "available"]
                     }`}
                   >
-                    {(currentStatus?.status || "available").replace("_", " ")}
+                    {STATUS_DESCRIPTIONS[currentStatus?.status || "available"].korean}
                   </span>
                 </div>
+
+                {/* 상태 설명 */}
+                <div className="mt-4 space-y-2 text-sm">
+                  <div>
+                    <p className="text-text-tertiary font-medium">할 수 있는 일</p>
+                    <p className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].can}</p>
+                  </div>
+                  <div>
+                    <p className="text-text-tertiary font-medium">제한되는 일</p>
+                    <p className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].cannot}</p>
+                  </div>
+                  <div>
+                    <p className="text-text-tertiary font-medium">다음 행동</p>
+                    <p className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].next}</p>
+                  </div>
+                </div>
+
                 {currentStatus?.reason && (
-                  <p className="text-sm text-text-secondary mt-3">
-                    {currentStatus.reason}
+                  <p className="text-sm text-text-secondary mt-4 italic">
+                    &quot;{currentStatus.reason}&quot;
                   </p>
                 )}
                 {currentStatus?.nextAvailableAt && (
-                  <p className="text-sm text-text-tertiary mt-2">
-                    복구 예상:{" "}
-                    {new Date(currentStatus.nextAvailableAt).toLocaleString()}
+                  <p className="text-sm text-text-tertiary mt-3 font-medium">
+                    ⏰ 예상 복구: {new Date(currentStatus.nextAvailableAt).toLocaleString("ko-KR")}
                   </p>
                 )}
               </div>

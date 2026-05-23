@@ -29,6 +29,42 @@ planning → roadmap → local CLI execution → Hermes supervision → result a
 - Antigravity auto-run is DISABLED (UI designer, not CLI agent).
 - Telegram full bot, Obsidian filesystem sync, Supabase durable storage, GitHub PR automation, production deployment automation, and Discord Webhook are backlog.
 
+## Phase F Status (Current — 2026-05-24)
+
+**Browser E2E QA + UI Stabilization: ✅ COMPLETE**
+
+### What Was Done
+1. **Regression QA Fix**: JSON 테스트 데이터 4개 제거, clean commit 생성
+2. **UI Localization**: 모든 라벨과 메시지 한글화 (5개 컴포넌트, 1개 스크립트)
+3. **P2 UI Stabilization**:
+   - Mock 버튼: "[개발용]" 표시 + 아코디언 접기 + 회색 스타일
+   - Agent Status: PM 친화적 카드형 + "할 수 있는 일 / 제한되는 일 / 다음 행동" 3단 안내
+   - Empty States: 친절한 한글 안내 ("다음에 무엇을 하는지" 설명)
+
+### Test Results
+- typecheck: ✅ 0 errors
+- lint: ✅ 0 warnings
+- build: ✅ Success
+- test: ✅ 442 passing (14 pre-existing timeouts, 0 new failures)
+- smoke:e2e:dry: ✅ PASS
+
+### Docs Updated
+- docs/UI_BROWSER_QA_BACKLOG.md: P1 5개 항목 fixed로 표시
+- docs/QA_STATUS.md: 신규 생성 (회귀 QA + P2 UI 변경 사항)
+
+### Current Readiness
+- ✅ MVP 기본 UI 안정화 완료
+- ✅ PM 사용성 개선 (한글화, 3단 안내)
+- 🟡 Hermes-Worker 연결: 구조는 준비됨, 패킷 연동은 Phase G
+- ⚠️ 실제 실행 루프: dry-run 검증 완료, 외부 API 호출은 아직 미구현
+
+### Remaining for Phase G
+- Hermes 패킷을 실제 dispatch 결과에 연동
+- Worker 상태 메시지를 Telegram/터미널에 연결
+- Recovery 판단 로직 완전 통합
+
+---
+
 ## Phase 2 Implementation Summary (Completed 2026-05-23)
 
 Agent Control Room now includes full multi-agent orchestration:
