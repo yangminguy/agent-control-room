@@ -1,5 +1,29 @@
 [
   {
+    "id": "test-run-1779574206734",
+    "planId": "test-plan-1779574206734",
+    "featurePlanId": "feature-plan-1779574206734",
+    "status": "queued",
+    "startedAt": "2026-05-23T22:10:06.734Z",
+    "message": "Test run",
+    "startedTasks": [],
+    "vibeIssues": [],
+    "hermesPacket": "test packet",
+    "approvalRequired": false
+  },
+  {
+    "id": "test-run-1779573805338",
+    "planId": "test-plan-1779573805338",
+    "featurePlanId": "feature-plan-1779573805338",
+    "status": "queued",
+    "startedAt": "2026-05-23T22:03:25.338Z",
+    "message": "Test run",
+    "startedTasks": [],
+    "vibeIssues": [],
+    "hermesPacket": "test packet",
+    "approvalRequired": false
+  },
+  {
     "id": "test-run-1779545984392",
     "planId": "test-plan-1779545984392",
     "featurePlanId": "feature-plan-1779545984392",
@@ -40,7 +64,7 @@
     "planId": "smoke-test-plan",
     "featurePlanId": "smoke-test-feature-plan",
     "status": "queued",
-    "startedAt": "2026-05-23T14:19:44.399Z",
+    "startedAt": "2026-05-23T22:10:06.739Z",
     "message": "Smoke test execution started",
     "startedTasks": [
       {
@@ -52,7 +76,7 @@
         "riskLevel": "low",
         "status": "queued",
         "executionSurface": "local_runner",
-        "createdAt": "2026-05-23T14:19:44.399Z",
+        "createdAt": "2026-05-23T22:10:06.739Z",
         "retryCount": 0,
         "maxRetries": 2,
         "prompt": "Create docs/smoke-test.md"
