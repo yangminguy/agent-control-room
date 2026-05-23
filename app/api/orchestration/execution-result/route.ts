@@ -4,10 +4,13 @@ import { normalizeExecutionResult } from "@/lib/runner/execution-result-normaliz
 import { buildHermesPacket } from "@/lib/hermes/packet-builder";
 import { classifyExecutionResult } from "@/lib/orchestration/decision-classifier";
 import { applyStatusUpdate } from "@/lib/orchestration/status-updater";
+import { saveHermesPacket } from "@/lib/storage/hermes-packet-store";
+import { buildPhaseCompletionPacket, buildFailurePacket } from "@/lib/monitor/execution-packet-builder";
 import type {
   HermesExecutionInput,
   RiskLevel,
   CheckResult,
+  DispatchJob,
 } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -115,7 +118,57 @@ export async function POST(request: Request) {
       checksPass,
     }, decision);
 
-    return Response.json({ summary, packet, decision, statusUpdate: statusResult });
+    // ── Phase G+: Generate and save execution packet ──────────────────────────
+    // Create a minimal DispatchJob-like object for packet builders
+    const mockDispatchJob: DispatchJob = {
+      id: `job-${taskId}-${Date.now()}`,
+      taskId,
+      planId,
+      agentId: (log.agent as "claude-code" | "codex" | "antigravity") || "claude-code",
+      riskLevel: hermesInput.riskLevel || "low",
+      status: log.status === "failed" ? "failed" : "completed",
+      createdAt: log.startedAt || new Date().toISOString(),
+      retryCount: 0,
+    };
+
+    // Generate appropriate packet based on execution status
+    let executionPacket;
+    if (log.status === "failed" || log.status === "boundary_violation") {
+      executionPacket = buildFailurePacket({
+        dispatchJob: mockDispatchJob,
+        errorSummary: summary.failureReason || log.status,
+        rootCause: summary.logSummary?.slice(0, 300),
+        recommendations: [decision.reason],
+        recommendedNextAction: ("manual_review" as const),
+      });
+    } else {
+      // Convert checksResult to verification booleans
+      const verifications: Record<string, boolean> = {};
+      Object.entries(checksResult).forEach(([check, status]) => {
+        verifications[check] = status === "pass";
+      });
+
+      executionPacket = buildPhaseCompletionPacket({
+        dispatchJob: mockDispatchJob,
+        result: undefined as any,
+        checklist: Object.entries(checksResult)
+          .map(([check, status]) => `${check}: ${status}`)
+          .filter(Boolean),
+        verificationResults: verifications,
+        nextSteps: [decision.reason],
+      });
+    }
+
+    // Save packet to local store
+    saveHermesPacket(executionPacket);
+
+    return Response.json({
+      summary,
+      packet,
+      decision,
+      statusUpdate: statusResult,
+      executionPacket,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return Response.json({ error: message }, { status: 500 });

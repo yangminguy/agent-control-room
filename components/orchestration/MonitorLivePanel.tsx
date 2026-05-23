@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useOrchestration } from "@/lib/dispatch/orchestration-context";
 import type { MonitorAnalysis } from "@/lib/types";
+import type { MonitorPacket } from "@/lib/monitor/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -19,6 +20,8 @@ type PanelState = {
   savedPath: string | null;
   error: string | null;
   apiStatus: ApiStatus | null;
+  hermesPackets: MonitorPacket[];
+  loadingPackets: boolean;
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -88,7 +91,35 @@ export function MonitorLivePanel() {
     savedPath: null,
     error: null,
     apiStatus: null,
+    hermesPackets: [],
+    loadingPackets: true,
   });
+
+  // Fetch Hermes packets on mount
+  useEffect(() => {
+    const fetchPackets = async () => {
+      try {
+        const response = await fetch("/api/hermes/packets?limit=5");
+        if (!response.ok) throw new Error("Failed to fetch packets");
+        const data = await response.json() as { packets: MonitorPacket[] };
+        setState((prev) => ({
+          ...prev,
+          hermesPackets: data.packets || [],
+          loadingPackets: false,
+        }));
+      } catch (error) {
+        console.error("Error fetching Hermes packets:", error);
+        setState((prev) => ({
+          ...prev,
+          loadingPackets: false,
+        }));
+      }
+    };
+
+    fetchPackets();
+    const interval = setInterval(fetchPackets, 10000); // Refresh every 10s
+    return () => clearInterval(interval);
+  }, []);
 
   // Build orchestration state from context
   function buildOrchestrationState() {
@@ -301,6 +332,80 @@ export function MonitorLivePanel() {
           </p>
         </div>
       )}
+
+      {/* Phase G+: Hermes Execution Packets */}
+      <section className="rounded-lg border border-border bg-surface-1 p-4 space-y-3">
+        <h3 className="text-xs font-semibold text-text-primary uppercase tracking-wide">
+          📦 Hermes Execution Packets
+        </h3>
+
+        {state.loadingPackets ? (
+          <div className="space-y-2">
+            <div className="h-10 rounded bg-surface-2 animate-pulse" />
+            <div className="h-10 rounded bg-surface-2 animate-pulse" />
+          </div>
+        ) : state.hermesPackets.length === 0 ? (
+          <p className="text-xs text-text-secondary text-center py-4">
+            아직 Hermes 패킷이 없습니다. 작업이 완료되면 여기에 표시됩니다.
+          </p>
+        ) : (
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {state.hermesPackets.map((packet) => {
+              const kindEmoji: Record<string, string> = {
+                "phase-completion": "✅",
+                failure: "❌",
+                "drift-detection": "⚠️",
+                "approval-request": "🔒",
+                "re-orchestration": "🔄",
+              };
+
+              const emoji = kindEmoji[packet.kind] || "📌";
+              const ctx = packet.executionContext;
+
+              return (
+                <div
+                  key={packet.id}
+                  className="rounded bg-surface-2 p-2.5 text-xs border border-border/40 hover:border-border transition-colors"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-sm">{emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-text-primary truncate">
+                        {packet.title}
+                      </p>
+                      <p className="text-text-secondary line-clamp-1">
+                        {packet.description}
+                      </p>
+                      {ctx && (
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {ctx.taskId && (
+                            <span className="inline-block rounded bg-surface px-1.5 py-0.5 font-mono text-[10px] text-text-secondary">
+                              task: {ctx.taskId}
+                            </span>
+                          )}
+                          {ctx.status && (
+                            <span className="inline-block rounded bg-surface px-1.5 py-0.5 font-mono text-[10px] text-text-secondary">
+                              {ctx.status}
+                            </span>
+                          )}
+                          {ctx.recommendedNextAction && (
+                            <span className="inline-block rounded bg-surface px-1.5 py-0.5 font-mono text-[10px] text-amber-300">
+                              → {ctx.recommendedNextAction}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <p className="text-[10px] text-text-tertiary mt-1">
+                        {new Date(packet.createdAt).toLocaleTimeString("ko-KR")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
