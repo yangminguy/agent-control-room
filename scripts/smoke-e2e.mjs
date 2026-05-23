@@ -58,22 +58,27 @@ function writeJson(filePath, data) {
 
 function runCommand(cmd, args, options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, {
+    const spawnOptions = {
       cwd: projectRoot,
-      stdio: "pipe",
+      stdio: options.stdio || "pipe",
       ...options,
-    });
+    };
+
+    const child = spawn(cmd, args, spawnOptions);
 
     let stdout = "";
     let stderr = "";
 
-    child.stdout?.on("data", (data) => {
-      stdout += data.toString();
-    });
+    // Only collect output if stdio is "pipe"
+    if (spawnOptions.stdio === "pipe") {
+      child.stdout?.on("data", (data) => {
+        stdout += data.toString();
+      });
 
-    child.stderr?.on("data", (data) => {
-      stderr += data.toString();
-    });
+      child.stderr?.on("data", (data) => {
+        stderr += data.toString();
+      });
+    }
 
     child.on("close", (code) => {
       resolve({ code, stdout, stderr });
@@ -93,16 +98,71 @@ function getGitStatus() {
   return result.trim();
 }
 
-function checkClaudeCodeAvailable() {
+function resolveClaudeCommand() {
+  // 1. Check CLAUDE_CMD environment variable (explicit override)
+  if (process.env.CLAUDE_CMD) {
+    try {
+      if (fs.existsSync(process.env.CLAUDE_CMD)) {
+        return process.env.CLAUDE_CMD;
+      }
+    } catch {
+      // Fall through to other detection methods
+    }
+  }
+
+  // 2. Try 'claude' from PATH using command -v
   try {
-    const result = require("child_process").execSync("which claude", {
+    const result = require("child_process").execSync("command -v claude", {
+      cwd: projectRoot,
+      stdio: "pipe",
+      encoding: "utf-8",
+      shell: true,
+    });
+    const commandPath = result.trim();
+    if (commandPath && fs.existsSync(commandPath)) {
+      return commandPath;
+    }
+  } catch {
+    // Fall through to next detection method
+  }
+
+  // 3. Check ${HOME}/.npm-global/bin/claude
+  const homeNpmGlobalBin = path.join(process.env.HOME || "", ".npm-global", "bin", "claude");
+  if (fs.existsSync(homeNpmGlobalBin)) {
+    return homeNpmGlobalBin;
+  }
+
+  // 4. Check common npm global locations
+  const commonLocations = [
+    "/usr/local/bin/claude",
+    "/opt/homebrew/bin/claude",
+  ];
+  for (const location of commonLocations) {
+    if (fs.existsSync(location)) {
+      return location;
+    }
+  }
+
+  // Not found
+  return null;
+}
+
+function checkClaudeCodeAvailable() {
+  const claudeCmd = resolveClaudeCommand();
+  if (!claudeCmd) {
+    return { available: false, command: null };
+  }
+
+  try {
+    // Verify it's actually the Claude Code CLI by checking version
+    const result = require("child_process").execSync(`"${claudeCmd}" --version`, {
       cwd: projectRoot,
       stdio: "pipe",
       encoding: "utf-8",
     });
-    return !!result.trim();
+    return { available: true, command: claudeCmd, version: result.trim() };
   } catch {
-    return false;
+    return { available: false, command: claudeCmd };
   }
 }
 
@@ -240,12 +300,36 @@ async function runRunnerMode() {
 
   // 1. Check Claude Code availability
   log.info("Checking Claude Code CLI availability...");
-  if (!checkClaudeCodeAvailable()) {
+  const claudeCheck = checkClaudeCodeAvailable();
+
+  if (!claudeCheck.available) {
     log.error("Claude Code CLI not found");
-    log.info("\nTo install: npm install -g @anthropic-sdk/claude-code");
+    log.info("\n📍 Detection Diagnostics:");
+    log.info(`  HOME: ${process.env.HOME}`);
+    log.info(`  PATH: ${process.env.PATH}`);
+
+    if (claudeCheck.command) {
+      log.info(`  Checked path: ${claudeCheck.command} (not found)`);
+    } else {
+      log.info(`  Checked paths:`);
+      log.info(`    - ~/.npm-global/bin/claude`);
+      log.info(`    - /usr/local/bin/claude`);
+      log.info(`    - /opt/homebrew/bin/claude`);
+      log.info(`    - which claude`);
+    }
+
+    log.info("\n💡 Suggested fixes:");
+    log.info(`  CLAUDE_CMD=/Users/wonminyang/.npm-global/bin/claude npm run smoke:e2e`);
+    log.info(`  or: npm install -g @anthropic-sdk/claude-code`);
     process.exit(1);
   }
-  log.success("Claude Code CLI available");
+
+  log.success(`Claude Code CLI available: ${claudeCheck.command}`);
+  if (claudeCheck.version) {
+    log.info(`  Version: ${claudeCheck.version}`);
+  }
+
+  const claudeCommand = claudeCheck.command;
 
   // 2. Check working tree clean
   log.info("Checking working tree status...");
@@ -347,8 +431,15 @@ async function runRunnerMode() {
   const prompt = `Create docs/smoke-test.md with exactly this content:\n\n${EXPECTED_CONTENT}`;
 
   try {
-    const result = await runCommand("claude", ["-p", prompt], {
+    // Ensure npm-global bin is in PATH when spawning Claude
+    const env = {
+      ...process.env,
+      PATH: `${process.env.HOME}/.npm-global/bin:${process.env.PATH}`,
+    };
+
+    const result = await runCommand(claudeCommand, ["-p", prompt], {
       stdio: "inherit",
+      env,
     });
 
     if (result.code !== 0) {
