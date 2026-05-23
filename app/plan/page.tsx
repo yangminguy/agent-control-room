@@ -43,7 +43,10 @@ export default async function PlanPage() {
 
   const latestRun = runs[0] ?? null;
   const roadmap = roadmaps[0] ?? null;
-  const featurePlan = featurePlans[0] ?? null;
+  // Prefer latestRun's featurePlan over seed data
+  const featurePlan = (latestRun?.featurePlanId
+    ? featurePlans.find((p) => p.id === latestRun.featurePlanId)
+    : null) ?? featurePlans[0] ?? null;
   const projectPath =
     projects.find((project) => project.id === featurePlan?.projectId)?.path ?? "";
   const phases = roadmap?.stages ?? latestPlan?.phases ?? [];
@@ -147,6 +150,20 @@ export default async function PlanPage() {
 
   const approvalRequired = latestRun?.approvalRequired || agentsList.some(a => a.availability === "approval_required");
 
+  // Calculate workbench URL for active runs
+  const firstActiveJob = latestRun?.startedTasks.find(
+    (j) => j.status === "queued" || j.status === "running" || j.status === "approved"
+  ) ?? latestRun?.startedTasks[0];
+
+  const workbenchUrl =
+    latestRun?.featurePlanId && firstActiveJob?.taskId
+      ? `/workbench?planId=${latestRun.featurePlanId}&taskId=${firstActiveJob.taskId}`
+      : null;
+
+  const hasActiveRun =
+    workbenchUrl !== null &&
+    (latestRun?.status === "queued" || latestRun?.status === "running");
+
   // 4. Map Stages for RoadmapTimeline
   const mappedStages: UIRoadmapStage[] = phases.map(p => ({
     id: p.id,
@@ -230,12 +247,13 @@ export default async function PlanPage() {
         <div className="space-y-8 min-w-0">
           
           {/* Your Next Move (Promoted Decisions) */}
-          {hasItemsForNextMove(userDecisions, blockers, approvalRequired) && (
+          {hasItemsForNextMove(userDecisions, blockers, approvalRequired, hasActiveRun) && (
             <section className="scroll-mt-6" id="your-next-move">
-              <YourNextMove 
+              <YourNextMove
                 userDecisions={userDecisions}
                 blockers={blockers}
                 approvalRequired={approvalRequired}
+                workbenchUrl={hasActiveRun ? workbenchUrl : undefined}
               />
             </section>
           )}
@@ -314,6 +332,6 @@ export default async function PlanPage() {
   );
 }
 
-function hasItemsForNextMove(decisions: any[], blockers: any[], approvalRequired: boolean) {
-  return decisions.length > 0 || blockers.length > 0 || approvalRequired;
+function hasItemsForNextMove(decisions: any[], blockers: any[], approvalRequired: boolean, hasActiveRun: boolean = false) {
+  return decisions.length > 0 || blockers.length > 0 || approvalRequired || hasActiveRun;
 }

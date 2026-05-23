@@ -30,11 +30,19 @@ export async function POST(request: Request) {
       vibeStatusId: body.vibeStatusId,
     });
 
+    // Construct workbench URL for resume
+    const firstJob = run.startedTasks[0];
+    const workbenchUrl =
+      run.featurePlanId && firstJob?.taskId
+        ? `/workbench?planId=${run.featurePlanId}&taskId=${firstJob.taskId}`
+        : null;
+
     return NextResponse.json({
       success: true,
       message:
         "Execution plan queued after explicit user approval. Agent runner execution still requires the workbench approval gate.",
       run,
+      workbenchUrl,
     });
   } catch (error) {
     return NextResponse.json(

@@ -24,12 +24,14 @@ interface YourNextMoveProps {
   userDecisions: DecisionItem[];
   blockers: BlockerItem[];
   approvalRequired: boolean;
+  workbenchUrl?: string;
 }
 
 export function YourNextMove({
   userDecisions,
   blockers,
   approvalRequired,
+  workbenchUrl,
 }: YourNextMoveProps) {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
@@ -53,7 +55,7 @@ export function YourNextMove({
     }, 600);
   };
 
-  const hasItems = userDecisions.length > 0 || blockers.length > 0 || approvalRequired;
+  const hasItems = userDecisions.length > 0 || blockers.length > 0 || approvalRequired || !!workbenchUrl;
 
   return (
     <div className="rounded-xl border border-pink-primary/20 bg-surface p-5 shadow-lg relative overflow-hidden animate-fade-in">
@@ -73,7 +75,33 @@ export function YourNextMove({
         </div>
       ) : (
         <div className="mt-4 space-y-4">
-          {/* 1. Approval Required from Hermes */}
+          {/* 1. Active Run Resume */}
+          {workbenchUrl && (
+            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <ArrowRight className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-sm font-semibold text-emerald-200">
+                    진행 중인 작업 이어가기
+                  </h3>
+                  <p className="text-xs text-text-secondary mt-1">
+                    현재 로컬 러너에서 실행 중인 작업이 있습니다. 워크벤치에서 실시간으로 모니터링할 수 있습니다.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+                <Link
+                  href={workbenchUrl}
+                  className="inline-flex items-center gap-1.5 rounded bg-emerald-500/20 border border-emerald-500/40 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/30 hover:border-emerald-500/50 transition-colors"
+                >
+                  워크벤치에서 계속하기
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* 2. Approval Required from Hermes */}
           {approvalRequired && (
             <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
               <div className="flex items-start gap-3">
@@ -106,7 +134,7 @@ export function YourNextMove({
             </div>
           )}
 
-          {/* 2. User Decisions Needed */}
+          {/* 3. User Decisions Needed */}
           {userDecisions.map((decision) => {
             const isDone = completedActions[decision.id];
             return (
@@ -175,7 +203,7 @@ export function YourNextMove({
             );
           })}
 
-          {/* 3. Blockers */}
+          {/* 4. Blockers */}
           {blockers.map((blocker) => (
             <div
               key={blocker.id}
