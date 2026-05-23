@@ -222,6 +222,24 @@ function main() {
     }
   }
 
+  // ── Part 4: Notify (if --notify flag) ──────────────────────────────────
+  if (isNotify && hermesPackets.length > 0) {
+    console.log("📤 Telegram 알림 미리보기:\n");
+    const recentPackets = hermesPackets.slice(0, 3);
+    for (const packet of recentPackets) {
+      const emoji = {
+        "phase-completion": "✅",
+        failure: "❌",
+        "drift-detection": "⚠️",
+        "approval-request": "🔒",
+        "re-orchestration": "🔄",
+      }[packet.kind] || "📌";
+      console.log(`${emoji} ${packet.title}`);
+      console.log(`   → ${packet.description}`);
+    }
+    console.log("");
+  }
+
   // Watch mode: continuous monitoring
   if (isWatch) {
     console.log("👀 연속 모니터링 시작... (10초 간격)\n");
