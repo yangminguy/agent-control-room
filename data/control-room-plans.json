@@ -1,1 +1,31 @@
-[]
+[
+  {
+    "id": "smoke-e2e-plan",
+    "projectId": "agent-control-room",
+    "projectName": "Agent Control Room",
+    "title": "E2E Smoke Test",
+    "productVision": "Verify state persistence and execution flow",
+    "conversationState": "completed",
+    "assistantReply": "Plan ready for execution",
+    "clarifyingQuestions": [],
+    "phases": [
+      {
+        "id": "smoke-phase-1",
+        "title": "Create Smoke Test File",
+        "description": "Safe file creation task",
+        "tasks": [
+          "smoke-e2e-task"
+        ]
+      }
+    ],
+    "assumptions": [],
+    "finalPlanReady": true,
+    "executionReadiness": "ready",
+    "requiresUserDecision": false,
+    "riskLevel": "low",
+    "openAiRequired": false,
+    "source": "smoke-test",
+    "createdAt": "2026-05-23T08:53:45.838Z",
+    "updatedAt": "2026-05-23T08:53:45.838Z"
+  }
+]

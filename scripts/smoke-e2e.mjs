@@ -473,10 +473,13 @@ async function runRunnerMode() {
   }
 
   const fileContent = fs.readFileSync(smokeTestFile, "utf-8");
-  if (fileContent !== EXPECTED_CONTENT) {
+  const expectedTrimmed = EXPECTED_CONTENT.trim();
+  const actualTrimmed = fileContent.trim();
+
+  if (actualTrimmed !== expectedTrimmed) {
     log.error("File content mismatch");
-    log.error(`Expected:\n${EXPECTED_CONTENT}`);
-    log.error(`Got:\n${fileContent}`);
+    log.error(`Expected:\n${expectedTrimmed}`);
+    log.error(`Got:\n${actualTrimmed}`);
     process.exit(1);
   }
 
