@@ -86,6 +86,8 @@ export interface PromptCompilerInput {
   userRequest: string; // Raw request from the user
   taskTitle?: string;
   acceptanceCriteria?: string[];
+  allowedFiles?: string[]; // Task-specific allowed files (if provided, use these instead of defaults)
+  doNotTouchFiles?: string[]; // Task-specific files to never modify
   preferredAgent?: AgentType | "auto";
   isRisky?: boolean; // Hint: user explicitly says this is risky
 }

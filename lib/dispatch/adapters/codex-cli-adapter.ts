@@ -95,7 +95,7 @@ export class CodexCliAdapter implements AgentAdapter {
     if (this.mockMode) {
       console.log(`Dispatching to Codex (MOCK): ${job.prompt ?? "(no prompt)"}`);
       await new Promise((resolve) => setTimeout(resolve, 500));
-      return makeResult(job, `[MOCK] Codex job ${job.id} completed`, "pass");
+      return makeResult(job, `[MOCK] Codex job ${job.id} — 모의 실행 완료. 실제 파일 변경은 없습니다. Workbench에서 실제 실행하세요.`, "blocked");
     }
 
     logOrchestrationEvent({

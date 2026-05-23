@@ -16,32 +16,41 @@
 
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 
+const mockFeaturePlan = {
+  id: "plan-1",
+  projectId: "proj-1",
+  title: "Test Plan",
+  userGoal: "test",
+  status: "running" as const,
+  tasks: [],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+const mockRoadmap = {
+  id: "roadmap-1",
+  projectId: "proj-1",
+  title: "Test Roadmap",
+  version: "1.0.0",
+  productVision: "test vision",
+  stages: [],
+  overallProgress: 0,
+  completedStageCount: 0,
+  activeStageCount: 0,
+  blockedStageCount: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
 // ── Mock storage modules so we don't touch the filesystem ───────────────────
 jest.mock("../lib/storage/feature-plan-store", () => ({
-  updatePlanTaskStatus: jest.fn().mockResolvedValue(undefined),
-  updateKanbanCardResult: jest.fn().mockResolvedValue({ tasks: [] }),
-  getFeaturePlanById: jest.fn().mockResolvedValue({
-    id: "plan-1",
-    projectId: "proj-1",
-    title: "Test Plan",
-    userGoal: "test",
-    status: "running",
-    tasks: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }),
+  updatePlanTaskStatus: jest.fn(() => Promise.resolve(mockFeaturePlan)),
+  updateKanbanCardResult: jest.fn(() => Promise.resolve(mockFeaturePlan)),
+  getFeaturePlanById: jest.fn(() => Promise.resolve(mockFeaturePlan)),
 }));
 
 jest.mock("../lib/storage/roadmap-store", () => ({
-  updateRoadmapStageStatus: jest.fn().mockResolvedValue({
-    projectId: "proj-1",
-    stages: [],
-    overallProgress: 0,
-    completedStageCount: 0,
-    activeStageCount: 0,
-    blockedStageCount: 0,
-    updatedAt: new Date().toISOString(),
-  }),
+  updateRoadmapStageStatus: jest.fn(() => Promise.resolve(mockRoadmap)),
 }));
 
 import { applyStatusUpdate } from "../lib/orchestration/status-updater";
@@ -76,27 +85,10 @@ function makeResult(overrides: Partial<ExecutionResultSummary> = {}): ExecutionR
 describe("applyStatusUpdate — status mapping", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUpdatePlanTaskStatus.mockResolvedValue(undefined);
-    mockUpdateKanbanCardResult.mockResolvedValue({ tasks: [], id: "plan-1", projectId: "proj-1", title: "", userGoal: "", status: "done", createdAt: "", updatedAt: "" });
-    mockGetFeaturePlanById.mockResolvedValue({
-      id: "plan-1",
-      projectId: "proj-1",
-      title: "Test Plan",
-      userGoal: "test",
-      status: "running",
-      tasks: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-    mockUpdateRoadmapStageStatus.mockResolvedValue({
-      projectId: "proj-1",
-      stages: [],
-      overallProgress: 0,
-      completedStageCount: 0,
-      activeStageCount: 0,
-      blockedStageCount: 0,
-      updatedAt: new Date().toISOString(),
-    } as never);
+    mockUpdatePlanTaskStatus.mockResolvedValue(mockFeaturePlan);
+    mockUpdateKanbanCardResult.mockResolvedValue({ ...mockFeaturePlan, status: "done" });
+    mockGetFeaturePlanById.mockResolvedValue(mockFeaturePlan);
+    mockUpdateRoadmapStageStatus.mockResolvedValue(mockRoadmap);
   });
 
   it("pass + checksPass=true → done", async () => {
@@ -151,8 +143,8 @@ describe("applyStatusUpdate — safety gates", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetFeaturePlanById.mockResolvedValue({
-      id: "plan-1", projectId: "proj-1", title: "", userGoal: "", status: "planned", tasks: [],
-      createdAt: "", updatedAt: "",
+      ...mockFeaturePlan,
+      status: "planned",
     });
   });
 
@@ -186,13 +178,13 @@ describe("applyStatusUpdate — safety gates", () => {
 describe("applyStatusUpdate — roadmap update", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUpdatePlanTaskStatus.mockResolvedValue(undefined);
-    mockUpdateKanbanCardResult.mockResolvedValue({ tasks: [], id: "plan-1", projectId: "proj-1", title: "", userGoal: "", status: "done", createdAt: "", updatedAt: "" });
+    mockUpdatePlanTaskStatus.mockResolvedValue(mockFeaturePlan);
+    mockUpdateKanbanCardResult.mockResolvedValue({ ...mockFeaturePlan, status: "done" });
     mockGetFeaturePlanById.mockResolvedValue({
-      id: "plan-1", projectId: "proj-1", title: "", userGoal: "", status: "planned", tasks: [],
-      createdAt: "", updatedAt: "",
+      ...mockFeaturePlan,
+      status: "planned",
     });
-    mockUpdateRoadmapStageStatus.mockResolvedValue({ stages: [] } as never);
+    mockUpdateRoadmapStageStatus.mockResolvedValue(mockRoadmap);
   });
 
   it("pass decision triggers roadmap stage update with completed status", async () => {

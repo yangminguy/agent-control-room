@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { type DispatchJob, type DispatchJobStatus, type RiskLevel } from "@/lib/types";
 
 // ── Badge configs ─────────────────────────────────────────
@@ -124,12 +125,13 @@ export function DispatchStatusPanel({
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_1fr_auto_auto_1fr] gap-3 px-4 py-2 bg-surface-2 border-b border-border text-xs font-semibold text-text-secondary uppercase tracking-wide">
+          <div className="grid grid-cols-[1fr_1fr_auto_auto_1fr_auto] gap-3 px-4 py-2 bg-surface-2 border-b border-border text-xs font-semibold text-text-secondary uppercase tracking-wide">
             <span>Job / Task</span>
             <span>Agent</span>
             <span>Risk</span>
             <span>Status</span>
             <span>Timestamps</span>
+            <span>Action</span>
           </div>
 
           {/* Rows */}
@@ -137,10 +139,11 @@ export function DispatchStatusPanel({
             {filtered.map((job) => {
               const statusCfg = STATUS_BADGE[job.status];
               const riskCfg = RISK_BADGE[job.riskLevel];
+              const canRunInWorkbench = job.featurePlanId && job.taskId;
               return (
                 <div
                   key={job.id}
-                  className="grid grid-cols-[1fr_1fr_auto_auto_1fr] gap-3 px-4 py-3 items-start hover:bg-surface-2 transition-colors"
+                  className="grid grid-cols-[1fr_1fr_auto_auto_1fr_auto] gap-3 px-4 py-3 items-start hover:bg-surface-2 transition-colors"
                 >
                   {/* ID / Task */}
                   <div className="min-w-0">
@@ -169,6 +172,20 @@ export function DispatchStatusPanel({
                     {job.completedAt && <p>Completed: {formatTs(job.completedAt)}</p>}
                     {job.retryCount > 0 && (
                       <p className="text-orange-400">Retries: {job.retryCount}</p>
+                    )}
+                  </div>
+
+                  {/* Workbench action */}
+                  <div className="self-center">
+                    {canRunInWorkbench ? (
+                      <Link
+                        href={`/workbench?planId=${job.featurePlanId}&taskId=${job.taskId}`}
+                        className="inline-flex items-center px-2 py-1 rounded border border-pink-primary text-pink-primary text-xs font-medium hover:bg-pink-primary/10 transition-colors whitespace-nowrap"
+                      >
+                        워크벤치
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-text-secondary">—</span>
                     )}
                   </div>
                 </div>

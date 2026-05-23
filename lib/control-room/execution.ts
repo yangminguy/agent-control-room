@@ -199,6 +199,8 @@ export async function executeControlRoomPlan(
         userRequest: firstPhase.goal,
         taskTitle: task.title,
         acceptanceCriteria: task.acceptanceCriteria,
+        allowedFiles: task.allowedFiles && task.allowedFiles.length > 0 ? task.allowedFiles : undefined,
+        doNotTouchFiles: task.doNotTouchFiles && task.doNotTouchFiles.length > 0 ? task.doNotTouchFiles : undefined,
         preferredAgent: task.assignedAgent,
       });
       compiledPrompt = compiled.generatedPromptMarkdown;
