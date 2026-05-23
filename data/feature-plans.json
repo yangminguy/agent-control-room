@@ -128,7 +128,7 @@
             "summary": "components/runner/RunnerLogView.tsx 구현 완료 (터미널 스타일 로그, 실시간 SSE 스트리밍)"
           }
         ],
-        "generatedPrompt": null,
+        "generatedPrompt": "lib/runner/git-utils.ts, lib/runner/spawn-runner.ts, app/api/runner/route.ts, components/runner/RunnerLogView.tsx, lib/storage/execution-log-store.ts를 검토하고, Claude Code CLI 실행과 SSE 로그 스트리밍이 올바르게 작동하는지 확인하세요.",
         "changedFiles": [
           "lib/runner/git-utils.ts",
           "lib/runner/spawn-runner.ts",
