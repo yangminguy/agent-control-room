@@ -62,7 +62,7 @@ export function YourNextMove({
 
       <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
         <span className="flex h-2 w-2 rounded-full bg-pink-primary animate-status-ping" />
-        Your Next Move
+        다음 자동 실행 작업
       </h2>
 
       {!hasItems ? (
@@ -80,33 +80,28 @@ export function YourNextMove({
                 <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <h3 className="text-sm font-semibold text-amber-200">
-                    실행 승인 대기 중 (High-Risk Task Approval)
+                    고위험 작업 승인 대기
                   </h3>
                   <p className="text-xs text-text-secondary mt-1">
-                    현재 디스패치 큐에 고위험 작업이 승인 대기 중입니다. 계속하려면 소스 검증 후 진행을 선택하세요.
+                    현재 디스패치 큐에 고위험 작업이 승인 대기 중입니다. 계속하려면 변경된 내용 확인 후 승인을 진행하세요.
                   </p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
-                <button
-                  disabled
-                  className="rounded bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 text-xs font-semibold text-amber-300 cursor-not-allowed"
+                <Link
+                  href="/orchestration"
+                  className="inline-flex items-center gap-1.5 rounded bg-amber-500/20 border border-amber-500/40 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/30 hover:border-amber-500/50 transition-colors"
                 >
-                  Approve (Manual action required in chat or telegram)
-                </button>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                  승인 확인
+                </Link>
                 <Link
                   href="/result-review"
                   className="inline-flex items-center gap-1 rounded bg-pink-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-soft transition-colors"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  Review Diffs & Code
+                  변경된 파일 내용 확인
                 </Link>
-                <button
-                  disabled
-                  className="rounded bg-surface-2 border border-border px-3 py-1.5 text-xs font-semibold text-text-secondary cursor-not-allowed"
-                >
-                  Hold (Coming soon)
-                </button>
               </div>
             </div>
           )}
@@ -164,13 +159,13 @@ export function YourNextMove({
                         disabled={!selectedOptions[decision.id] || loading[decision.id]}
                         className="inline-flex items-center gap-1.5 rounded bg-pink-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {loading[decision.id] ? "선택 저장 중..." : "Confirm Decision"}
+                        {loading[decision.id] ? "선택 저장 중..." : "결정 확인"}
                       </button>
                       <a
                         href={`#phase-${decision.stageId}`}
                         className="inline-flex items-center gap-1 text-xs font-medium text-text-secondary hover:text-pink-soft transition-colors"
                       >
-                        Open Details
+                        상세 보기
                         <ArrowRight className="w-3.5 h-3.5" />
                       </a>
                     </div>
