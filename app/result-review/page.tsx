@@ -4,7 +4,7 @@ export const metadata = { title: "Result Review — Agent Control Room" };
 
 export default function ResultReviewPage() {
   return (
-    <main className="container mx-auto py-8 px-4">
+    <main className="mx-auto max-w-6xl px-4 pb-8 pt-14">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-text-primary">Result Review</h1>
         <p className="text-text-secondary mt-2">

@@ -16,14 +16,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="dark">
-      <body className="bg-background text-text-primary min-h-screen flex flex-col">
+    <html lang="ko" className="light">
+      <body className="bg-zinc-50 text-zinc-900 min-h-screen flex flex-col">
         <TopHeader />
         <div className="flex-1 grid md:grid-cols-[240px_1fr] grid-cols-1">
           <div className="hidden md:block">
             <Sidebar />
           </div>
-          <main className="overflow-auto relative">
+          <main className="overflow-auto relative bg-zinc-50">
             <ControlTowerNav />
             {children}
           </main>

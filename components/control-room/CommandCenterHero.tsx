@@ -28,10 +28,8 @@ export function CommandCenterHero({
   const isCompleted = latestRunStatus === "completed";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 animate-fade-in shadow-xl">
-      {/* Premium Radial Glow & Grid Overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.15),transparent_45%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none" />
+    <div className="relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-6 sm:p-8 animate-fade-in shadow-sm">
+      <div className="absolute inset-x-0 top-0 h-1 bg-pink-primary" />
 
       <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6 z-10">
         <div className="space-y-2 max-w-2xl">
@@ -41,7 +39,7 @@ export function CommandCenterHero({
               컨트롤 타워 활성화됨
             </span>
             {activePhaseNumber && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-2 text-text-secondary border border-border">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-50 text-zinc-600 border border-zinc-200">
                 현재 진행 중: 단계 {activePhaseNumber}
               </span>
             )}
@@ -58,7 +56,7 @@ export function CommandCenterHero({
           )}
 
           {latestRunMessage && (
-            <div className="mt-3 flex items-center gap-2 text-xs text-text-secondary/80 bg-surface-2/60 border border-border/50 px-3 py-2 rounded-lg max-w-lg">
+            <div className="mt-3 flex items-center gap-2 text-xs text-zinc-600 bg-zinc-50 border border-zinc-200 px-3 py-2 rounded-lg max-w-lg">
               <div className={`w-2 h-2 rounded-full shrink-0 ${
                 isRunning ? "bg-blue-400 animate-status-ping" :
                 isBlocked ? "bg-red-400" :
@@ -76,7 +74,7 @@ export function CommandCenterHero({
             <span className="text-xl font-bold text-pink-primary">{overallProgress}%</span>
           </div>
 
-          <div className="w-full h-2.5 overflow-hidden rounded-full bg-surface-2 border border-border/50">
+          <div className="w-full h-2.5 overflow-hidden rounded-full bg-zinc-100 border border-zinc-200">
             <div
               className="h-full rounded-full bg-gradient-to-r from-pink-primary to-pink-soft transition-all duration-500 ease-out"
               style={{ width: `${overallProgress}%` }}

@@ -107,7 +107,7 @@ export function DispatchStatusPanel({
               onClick={() => onStatusFilterChange?.(s)}
               className={`px-3 py-1 rounded text-xs font-medium border transition-colors ${
                 isActive
-                  ? "border-pink-primary bg-pink-primary text-white"
+                  ? "border-zinc-950 bg-zinc-900 text-white"
                   : "border-border bg-surface text-text-secondary hover:bg-surface-2"
               }`}
             >
@@ -149,7 +149,7 @@ export function DispatchStatusPanel({
                   {/* ID / Task */}
                   <div className="min-w-0">
                     <p className="text-xs font-mono text-text-primary truncate">{job.id}</p>
-                    <p className="text-xs text-text-secondary truncate mt-0.5">Task: {job.taskId}</p>
+                    <p className="text-xs text-text-secondary truncate mt-0.5">태스크 ID: {job.taskId}</p>
                   </div>
 
                   {/* Agent */}
@@ -183,7 +183,7 @@ export function DispatchStatusPanel({
                         href={`/workbench?planId=${job.featurePlanId}&taskId=${job.taskId}`}
                         className="inline-flex items-center px-2 py-1 rounded border border-pink-primary text-pink-primary text-xs font-medium hover:bg-pink-primary/10 transition-colors whitespace-nowrap"
                       >
-                        워크벤치
+                        워크벤치에서 확인
                       </Link>
                     ) : (
                       <span className="text-xs text-text-secondary">—</span>

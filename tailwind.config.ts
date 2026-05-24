@@ -9,16 +9,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Black & Pink Dark Mode Palette
-        background: "#0A0A0A",
-        surface: "#111111",
-        "surface-2": "#18181B",
-        border: "#27272A",
-        "text-primary": "#FAFAFA",
-        "text-secondary": "#A1A1AA",
-        "pink-primary": "#EC4899",
-        "pink-soft": "#F472B6",
-        "pink-muted": "#BE185D",
+        background: "var(--background)",
+        surface: "var(--surface)",
+        "surface-2": "var(--surface-2)",
+        border: "var(--border)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "text-tertiary": "var(--text-tertiary)",
+        "pink-primary": "var(--pink-primary)",
+        "pink-soft": "var(--pink-soft)",
+        "pink-muted": "var(--pink-muted)",
         gray: {
           600: "#52525B",
           700: "#3F3F46",

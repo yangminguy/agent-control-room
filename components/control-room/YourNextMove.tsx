@@ -125,7 +125,7 @@ export function YourNextMove({
                 </Link>
                 <Link
                   href="/result-review"
-                  className="inline-flex items-center gap-1 rounded bg-pink-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-soft transition-colors"
+                  className="inline-flex items-center gap-1 rounded bg-zinc-900 border border-zinc-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800 transition-colors"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   변경된 파일 내용 확인
@@ -185,7 +185,7 @@ export function YourNextMove({
                         type="button"
                         onClick={() => handleConfirmDecision(decision.id)}
                         disabled={!selectedOptions[decision.id] || loading[decision.id]}
-                        className="inline-flex items-center gap-1.5 rounded bg-pink-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1.5 rounded bg-zinc-900 border border-zinc-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {loading[decision.id] ? "선택 저장 중..." : "결정 확인"}
                       </button>
@@ -226,7 +226,7 @@ export function YourNextMove({
               <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-1 rounded bg-pink-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-soft transition-colors"
+                  className="inline-flex items-center gap-1 rounded bg-zinc-900 border border-zinc-950 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800 transition-colors"
                 >
                   기획 채팅에서 논의하기
                   <ArrowRight className="w-3.5 h-3.5" />

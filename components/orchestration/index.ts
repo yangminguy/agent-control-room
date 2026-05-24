@@ -19,3 +19,5 @@ export { AgentRoutingSummary } from "./AgentRoutingSummary";
 export { ExecutionBoundaryCard } from "./ExecutionBoundaryCard";
 export { MonitorMemoryPreview as HermesMemoryPreview } from "./MonitorMemoryPreview";
 export { OrchestrationDecisionPanel } from "./OrchestrationDecisionPanel";
+export { ExecutionPacketPanel } from "./ExecutionPacketPanel";
+export { ExternalToolsStatusPanel } from "./ExternalToolsStatusPanel";

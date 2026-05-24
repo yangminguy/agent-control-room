@@ -1,278 +1,191 @@
-# Design System v2 — Agent Control Room
-## Dark First Color Palette (Black & Pink)
+# Design System — Agent Control Tower Brightline
 
-## 색상 팔레트
+Source reference: `/Users/wonminyang/Downloads/Agent Control Tower UI Redesign.zip`
 
-### Background & Surface (Dark First)
-- **Background**: #0A0A0A (Main page background)
-- **Surface**: #111111 (Cards, panels)
-- **Surface-2**: #18181B (Elevated surfaces, hover states)
-- **Border**: #27272A (Subtle borders)
+## Product UI Direction
 
-### Text
-- **Text-Primary**: #FAFAFA (Main text, high contrast)
-- **Text-Secondary**: #A1A1AA (Secondary text, labels)
+Agent Control Tower uses the **Brightline** direction:
 
-### Primary Accent (Pink)
-- **Pink-Primary**: #EC4899 (Main accent, CTAs, active states)
-- **Pink-Soft**: #F472B6 (Hover states, secondary pink)
-- **Pink-Muted**: #BE185D (Pressed/dark state)
-
-### Semantic Colors
-- **Success**: #16A34A (Completed tasks, success states)
-- **Warning**: #F59E0B (Partial completion, warnings)
-- **Error**: #DC2626 (Blocked, errors, critical issues)
-
-### Supporting
-- **Gray-600**: #52525B (Tertiary text, disabled)
-- **Gray-700**: #3F3F46 (Quiet borders, dividers)
-
-## 타이포그래피
-
-### Font Family
-- **Primary**: Inter, -apple-system, BlinkMacSystemFont
-- **Monospace**: IBM Plex Mono (코드)
-
-### Scale
-| Type | Size | Weight | Line Height | Usage |
-|------|------|--------|-------------|-------|
-| Display | 32px | 700 | 1.2 | Page titles |
-| Heading 1 | 28px | 700 | 1.3 | Section headings |
-| Heading 2 | 24px | 600 | 1.4 | Subsection headings |
-| Heading 3 | 20px | 600 | 1.4 | Card titles |
-| Body Large | 16px | 400 | 1.6 | Main content |
-| Body | 14px | 400 | 1.6 | Standard text |
-| Small | 12px | 400 | 1.5 | Labels, captions |
-| Tiny | 11px | 400 | 1.4 | Metadata |
-
-## Spacing System
-
-```
-xs: 4px    (internal padding, small gaps)
-sm: 8px    (button padding, small margins)
-md: 16px   (standard padding, card gaps)
-lg: 24px   (section padding, major margins)
-xl: 32px   (page margins)
-2xl: 48px  (hero sections)
+```text
+Bright shell.
+Black structure.
+Pink decision.
 ```
 
-## 컴포넌트 정의
+The product should feel like a minimal agent command dashboard for non-developer PMs. It is not a dark terminal, a prompt gallery, or a decorative pink SaaS landing page.
 
-### Button
-```typescript
-// Variants
-- Primary (fill, pink-primary #EC4899, text: #0A0A0A bold)
-- Secondary (outline, border: gray-600, text: text-primary, bg: surface hover: surface-2)
-- Ghost (transparent, text: text-primary, hover: bg-surface-2)
-- Danger (fill, error #DC2626, text: #FAFAFA)
+## Core UX Promise
 
-// Sizes
-- sm: 8px 12px, 12px font
-- md: 10px 16px, 14px font (default)
-- lg: 12px 20px, 16px font
+Every primary screen must answer these questions within five seconds:
 
-// States
-- Default
-- Hover (pink: → pink-soft, others: bg darkens)
-- Active (pink: → pink-muted, others: darker)
-- Disabled (opacity 40%, cursor not-allowed)
-- Loading (spinner icon, disabled state)
-```
+- What is the current overall state?
+- Which phase is active?
+- Which agent is doing what?
+- What is blocked, risky, or waiting for approval?
+- What decision does the PM need to make now?
+- What happens if the PM clicks the primary action?
 
-### Card
-```typescript
-// Default (Dark Mode)
-- Elevated (shadow: 0 4px 12px rgba(0,0,0,0.5), bg: surface #111111)
-- Outlined (border: 1px border-gray #27272A, bg: surface #111111)
-- Flat (bg: background #0A0A0A, no border)
+If a screen cannot answer those questions quickly, reduce visual noise before adding new UI.
 
-// Hover States
-- Elevated (shadow: 0 6px 16px rgba(0,0,0,0.6), bg: surface-2 #18181B)
-- Outlined (border: 1px border-gray, bg: surface-2)
-```
+## Visual Principles
 
-### Badge
-```typescript
-// Types
-- Primary (fill: surface-2, text: pink-primary, small font)
-- Success (fill: surface-2, text: success, small font)
-- Warning (fill: surface-2, text: warning, small font)
-- Error (fill: surface-2, text: error, small font)
-- Outline (border: pink-primary, text: pink-primary)
+### 1. Bright Shell
 
-// Sizes
-- sm: 4px 8px, 11px font
-- md: 6px 12px, 12px font (default)
-```
+Use a light app shell and calm white surfaces.
 
-### Input
-```typescript
-// States
-- Default (border: border-gray #27272A, bg: surface-2, text: text-primary)
-- Focus (border: pink-primary, ring: 2px pink-primary at 25% opacity)
-- Error (border: error, ring: 2px error at 25% opacity)
-- Disabled (bg: surface, opacity: 40%, cursor not-allowed)
+- Page background: `#FAFAFA`
+- Primary surface: `#FFFFFF`
+- Subtle/inset surface: `#F4F4F5` or `#F7F7F8`
+- Hairline borders: `#ECECEE` / `#D7D7DB`
 
-// Sizes
-- md: 8px 12px, 14px font (default)
-- lg: 12px 16px, 16px font
-```
+Do not make the main product feel like dark mode. Black is for structure and key commands, not for entire page sections.
 
-### Status Badge (태스크 상태)
-Status badges now use Lucide icons with Pink/Neutral color scheme:
+### 2. Black Structure
 
-```typescript
-Planned:      bg-surface-2, text-text-secondary, Circle icon
-Ready:        bg-surface-2, text-pink-primary, Clock icon
-Running:      bg-surface-2, text-pink-primary, Loader2 (animated) icon
-Done:         bg-surface-2, text-success, CheckCircle2 icon
-Partial:      bg-surface-2, text-warning, AlertCircle icon
-Blocked:      bg-surface-2, text-error, AlertTriangle icon
-Needs Review: bg-surface-2, text-pink-primary, Eye icon
-```
+Use black and near-black for:
 
-## Responsive Breakpoints — Desktop First
+- Primary text
+- Important headings
+- Primary command buttons
+- Dense structural anchors when needed
 
-```
-Desktop:     > 1024px (default, optimized)
-Tablet:      768px - 1024px (graceful degradation)
-Mobile:      < 768px (functional, not optimized)
+Do not use black as the default card background. Avoid large black panels except for genuine terminal/log details hidden behind advanced views.
 
-Key breakpoints for Agent Control Room:
-- 1440px (standard desktop, 16:9 wide)
-- 1024px (desktop → tablet threshold)
-- 768px (tablet → mobile threshold)
-- 390px (modern mobile baseline)
+### 3. Pink Decision
 
-Strategy: Build for 1440px first, ensure 1024px readable, accept mobile as "not broken"
-```
+Pink is a scarce signal. Use it for:
 
-## Dark Mode Implementation
+- Primary PM decision CTA
+- Approval required
+- Current selection
+- Important active alert
+- Small brand mark
 
-### Default
-- **Always starts in Dark mode** (`theme: 'dark'` in localStorage and Tailwind config)
-- Optional toggle available in settings (if user explicitly switches, respect localStorage)
-- No `prefers-color-scheme` detection at startup — Dark is the explicit default
+Do not use pink for generic decoration, every hover state, broad gradients, secondary buttons, or non-action labels.
 
-### CSS Implementation
+Pink budget guideline: the screen should not read as pink. Pink should occupy roughly **7% or less** of the visible UI.
+
+## Color Tokens
+
 ```css
-/* Dark mode is default (no dark: prefix needed in most cases) */
-body { background: #0A0A0A; color: #FAFAFA; }
+:root {
+  --background: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --surface-inset: #f7f7f8;
+  --border: #ececee;
+  --border-strong: #d7d7db;
 
-/* Use light: prefix only for light mode variants (rarely needed) */
-/* Example: light:bg-white light:text-black (for exceptional cases) */
-```
+  --text-primary: #111114;
+  --text-secondary: #4b4b55;
+  --text-tertiary: #8b8b95;
 
-## 아이콘 (lucide-react)
+  --pink-primary: #ff2e7e;
+  --pink-soft: #ffe3ee;
+  --pink-muted: #e5176e;
 
-### Standard Icons
-- ✓ CheckCircle2 (완료)
-- ⚠ AlertTriangle (에러/주의)
-- ⏱ Clock (대기)
-- ⚙ Loader2 (실행 중, animate-spin)
-- 👁 Eye (표시 중)
-- 🔗 GitBranch (Git)
-- 📄 FileCode2 (코드)
-- 🤖 Bot (에이전트)
-- 📋 ListChecks (작업 목록)
-- ➡ ChevronRight (네비게이션)
-
-## 접근성 (WCAG AA)
-
-### 색상 명암비
-- Text on background: 최소 4.5:1 (AA)
-- Large text (18px+): 최소 3:1 (AA)
-- UI components: 최소 3:1 (AA)
-
-### 검증된 조합 (Dark Mode)
-- Text-Primary (#FAFAFA) on Background (#0A0A0A): ✅ 18:1
-- Text-Secondary (#A1A1AA) on Background (#0A0A0A): ✅ 6.7:1
-- Pink-Primary (#EC4899) on Surface (#111111): ✅ 5.2:1
-- Success (#16A34A) on Surface (#111111): ✅ 3.8:1
-- Error (#DC2626) on Surface (#111111): ✅ 4.5:1
-- Warning (#F59E0B) on Surface (#111111): ✅ 5.8:1
-
-### 키보드 네비게이션
-- Tab key: 모든 인터랙티브 요소 순회 가능
-- Enter/Space: 버튼, 체크박스 활성화
-- Escape: 모달 종료
-- Arrow keys: 메뉴, 탭 네비게이션
-
-### 스크린 리더
-- Alt text: 모든 이미지에 필수
-- ARIA labels: 아이콘 버튼, form labels
-- Role 속성: Dialog, Menu, Status, Alert
-
-## 성능 최적화
-
-### CSS
-- Tailwind purge enabled (production용)
-- CSS-in-JS 최소화
-- Critical CSS inline
-
-### 이미지
-- WebP format (fallback PNG)
-- Lazy loading (loading="lazy")
-- Responsive images (srcset)
-- Max size: 100KB per image
-
-### 번들
-- Code splitting per route
-- Dynamic imports for heavy components
-- Tree shaking enabled
-
-## 구현 가이드
-
-### Tailwind 설정
-```javascript
-module.exports = {
-  darkMode: 'class', // or 'media'
-  theme: {
-    colors: {
-      background: '#0A0A0A',
-      surface: '#111111',
-      'surface-2': '#18181B',
-      border: '#27272A',
-      'text-primary': '#FAFAFA',
-      'text-secondary': '#A1A1AA',
-      'pink-primary': '#EC4899',
-      'pink-soft': '#F472B6',
-      'pink-muted': '#BE185D',
-      success: '#16A34A',
-      warning: '#F59E0B',
-      error: '#DC2626',
-      'gray-600': '#52525B',
-      'gray-700': '#3F3F46',
-    },
-    spacing: {
-      xs: '4px',
-      sm: '8px',
-      md: '16px',
-      lg: '24px',
-      xl: '32px',
-      '2xl': '48px',
-    },
-  },
+  --success: #15a45f;
+  --success-bg: #e8f6ee;
+  --warning: #b66a0a;
+  --warning-bg: #fbf1df;
+  --danger: #c8362e;
+  --danger-bg: #fbe7e5;
+  --info: #2c5be0;
+  --info-bg: #e7edfb;
 }
 ```
 
-### shadcn/ui 커스터마이징
-- Button: 모든 variant 새로운 색상으로 커스텀
-- Card: Tailwind utility 기반 (shadcn 제거)
-- Badge: 새로운 색상 스키마 추가
-- Input: Focus ring 스타일 변경
+## Layout Model
 
-### 컴포넌트 구조
-```
-components/
-  ├── ui/              (shadcn 또는 커스텀 기본 UI)
-  │   ├── button.tsx
-  │   ├── card.tsx
-  │   ├── badge.tsx
-  │   └── input.tsx
-  ├── plan/            (Plan 페이지 컴포넌트)
-  │   ├── KanbanCard.tsx (새 디자인)
-  │   └── KanbanBoard.tsx
-  └── dashboard/       (대시보드 컴포넌트)
-      └── ProjectCard.tsx
-```
+Use five information zones. Do not duplicate the same information in multiple zones.
+
+| Zone | Purpose |
+|---|---|
+| Left navigation | Stable app map and route switching. |
+| Top status | Overall system state, active phase, and one primary command. |
+| Center work stream | Active phase, planning flow, roadmap/timeline, or selected content. |
+| Right decision queue | Approval, risk, blockers, Hermes recovery suggestions, and agent pulse. |
+| Bottom memory/log | Recent events, QA summaries, insight history, raw logs only when needed. |
+
+## Route Expectations
+
+### `/`
+
+Main Control Room.
+
+- Show current plan/phase/readiness first.
+- Show planning stream as a work surface, not a black chat terminal.
+- Show Hermes as a supervision summary, not a raw system event log.
+- Keep execution CTA black and explicit.
+
+### `/plan`
+
+Main roadmap control panel.
+
+- Roadmap is the source of truth.
+- Current phase must be visually distinct.
+- User decisions and approval needs must appear before detailed task lists.
+- Vibe Kanban is a detail/workbench entry point, not the main product.
+
+### `/orchestration`
+
+Execution command and decision flow.
+
+- Natural language request -> phase decomposition -> agent assignment should be understandable.
+- Dev/mock tools must be clearly labeled and tucked away.
+- External tool status must read as system readiness, not fake live integration.
+
+### `/agent-status`
+
+Agent pulse.
+
+- First show Claude / Codex / Antigravity / Hermes status and next action.
+- State-changing controls are secondary.
+- Blocked, limited, cooling down, and approval-required states must be impossible to miss.
+
+### `/hermes-packets`
+
+PM-readable supervision and recovery.
+
+- First show PM summary, root cause, risk, and recommended recovery.
+- Raw Markdown/JSON is secondary and collapsible.
+- Hermes must never look like a coding agent.
+
+### `/result-review`
+
+PM decision after execution.
+
+- First show verdict: pass / conditional pass / fail / blocked.
+- Show remaining risk and recommended next agent/action.
+- Changed files and raw output are supporting details, not the top-level experience.
+
+## Component Rules
+
+- Prefer list rows and section bands over many floating cards.
+- Cards are for repeated items, modals, and framed tools only.
+- Use 8px radius or less by default; 12px is allowed for major panels.
+- Use icons for familiar actions and keep labels for destructive/high-risk actions.
+- Keep command buttons explicit: `실제 실행 시작`, `승인하고 계속 진행`, `Codex QA로 전달`.
+- PM-facing copy must avoid raw developer terms unless paired with explanation.
+
+## Forbidden UI Patterns
+
+- Dark mode as default product theme.
+- Neon pink gradients or pink-washed screens.
+- Large black panels for ordinary content.
+- Raw terminal logs as first-level PM content.
+- Mock/dev buttons styled like production actions.
+- Duplicate status cards that compete with the decision queue.
+- Hero/marketing layout on operational routes.
+
+## QA Checklist For Future UI Work
+
+- The route is bright at first glance.
+- Pink is limited to current selection, approval/decision, or primary CTA.
+- The PM can identify the next action in five seconds.
+- Approval/risk/blocker states are above the fold.
+- Agent status and phase status are distinct.
+- Hermes content starts with PM summary, not raw Markdown/JSON.
+- Result review starts with verdict, risk, and next recommendation.
+- No horizontal overflow at 390px and 1280px.
+- `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` pass.

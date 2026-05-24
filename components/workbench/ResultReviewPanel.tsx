@@ -13,11 +13,11 @@ import { type AgentResult, type DispatchJob, type ResultStatus } from "@/lib/typ
 // ── AgentResult badge config ───────────────────────────────
 
 const RESULT_STATUS_BADGE: Record<ResultStatus, { label: string; cls: string }> = {
-  pass: { label: "Pass", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
-  minor_fix: { label: "Minor Fix", cls: "bg-yellow-900 text-yellow-300 border-yellow-700" },
-  qa_needed: { label: "QA Needed", cls: "bg-orange-900 text-orange-300 border-orange-700" },
-  blocked: { label: "Blocked", cls: "bg-red-900 text-red-300 border-red-700" },
-  safety_violation: { label: "Safety Violation", cls: "bg-red-950 text-red-200 border-red-800 font-bold" },
+  pass: { label: "Pass", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  minor_fix: { label: "Minor Fix", cls: "bg-yellow-50 text-yellow-700 border-yellow-200" },
+  qa_needed: { label: "QA Needed", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+  blocked: { label: "Blocked", cls: "bg-red-50 text-red-700 border-red-200" },
+  safety_violation: { label: "Safety Violation", cls: "bg-red-50 text-red-800 border-red-300 font-bold" },
 };
 
 const CLASSIFICATION_CONFIG: Record<
@@ -26,23 +26,23 @@ const CLASSIFICATION_CONFIG: Record<
 > = {
   Pass: {
     label: "Pass",
-    badgeCls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    btnCls: "border-emerald-500/30 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10",
+    badgeCls: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    btnCls: "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
   },
   MinorFix: {
     label: "MinorFix",
-    badgeCls: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    btnCls: "border-amber-500/30 bg-amber-500/5 text-amber-400 hover:bg-amber-500/10",
+    badgeCls: "bg-amber-50 text-amber-700 border-amber-200",
+    btnCls: "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
   },
   QA: {
     label: "QA",
-    badgeCls: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    btnCls: "border-blue-500/30 bg-blue-500/5 text-blue-400 hover:bg-blue-500/10",
+    badgeCls: "bg-blue-50 text-blue-700 border-blue-200",
+    btnCls: "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100",
   },
   Blocked: {
     label: "Blocked",
-    badgeCls: "bg-red-500/10 text-red-400 border-red-500/20",
-    btnCls: "border-red-500/30 bg-red-500/5 text-red-400 hover:bg-red-500/10",
+    badgeCls: "bg-red-50 text-red-700 border-red-200",
+    btnCls: "border-red-200 bg-red-50 text-red-700 hover:bg-red-100",
   },
 };
 
@@ -196,11 +196,42 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
   }
 
   const cfg = classification ? CLASSIFICATION_CONFIG[classification] : null;
+  const verdictLabel = classification
+    ? classification === "Pass"
+      ? "통과"
+      : classification === "MinorFix"
+        ? "조건부 통과"
+        : classification === "QA"
+          ? "QA 필요"
+          : "막힘"
+    : "결과 대기";
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-5xl">
+      <section className="grid gap-3 md:grid-cols-3">
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">판정</p>
+          <p className="mt-2 text-xl font-bold text-zinc-950">{verdictLabel}</p>
+          <p className="mt-1 text-xs text-zinc-500">PM이 바로 다음 행동을 고르는 기준입니다.</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">남은 리스크</p>
+          <p className="mt-2 text-xl font-bold text-zinc-950">
+            {classification ? (classification === "Pass" ? "낮음" : "확인 필요") : "미분류"}
+          </p>
+          <p className="mt-1 text-xs text-zinc-500">실패, QA 필요, 변경 파일을 함께 확인하세요.</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">권장 다음 단계</p>
+          <p className="mt-2 text-xl font-bold text-zinc-950">
+            {classification ? AGENT_SUGGESTION[classification] : "결과 붙여넣기"}
+          </p>
+          <p className="mt-1 text-xs text-zinc-500">자동 분류 후 복사/업로드 액션이 열립니다.</p>
+        </div>
+      </section>
+
       {/* Vibe Kanban import section */}
-      <div className="rounded-lg border border-border bg-surface-2">
+      <div className="rounded-lg border border-zinc-200 bg-white shadow-sm">
         <button
           type="button"
           onClick={() => {
@@ -255,7 +286,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
               type="button"
               onClick={handleVibeKanbanImport}
               disabled={importLoading}
-              className="inline-flex items-center gap-1.5 rounded bg-pink-primary px-4 py-1.5 text-xs font-medium text-white hover:bg-pink-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded bg-zinc-900 border border-zinc-950 px-4 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {importLoading ? "임포트 중..." : "임포트"}
             </button>
@@ -270,7 +301,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
       )}
 
       {/* Input area */}
-      <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
+      <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-3 shadow-sm">
         <label
           htmlFor="result-input"
           className="block text-sm font-semibold text-text-primary"
@@ -290,7 +321,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
       {classification && cfg && (
         <>
           {/* Auto classification badge */}
-          <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
+          <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-3 shadow-sm">
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
               자동 분류
             </p>
@@ -333,7 +364,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
           </div>
 
           {/* Changed files */}
-          <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-2">
+          <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-2 shadow-sm">
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
               변경 파일 (자동 추출){" "}
               {changedFiles.length > 0 && (
@@ -357,7 +388,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
           </div>
 
           {/* Suggested agent */}
-          <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-1">
+          <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-1 shadow-sm">
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
               다음 에이전트 추천
             </p>
@@ -367,7 +398,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
           </div>
 
           {/* Retry candidate */}
-          <div className="rounded-lg border border-border bg-surface-2 p-4">
+          <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -382,7 +413,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
           </div>
 
           {/* Next actions */}
-          <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
+          <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-3 shadow-sm">
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
               권장 행동
             </p>
@@ -399,7 +430,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
             <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
               <button
                 onClick={copyToClipboard}
-                className="inline-flex items-center gap-1.5 rounded bg-pink-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-pink-soft transition-colors"
+                className="inline-flex items-center gap-1.5 rounded bg-zinc-900 border border-zinc-950 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
               >
                 {copied ? (
                   <Check className="h-3.5 w-3.5 text-emerald-300" />
@@ -447,7 +478,7 @@ export function ResultReviewPanel({ agentResult, dispatchJob }: ResultReviewPane
 
       {/* AgentResult section (Phase 13 integration) */}
       {agentResult && (
-        <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-3 shadow-sm">
           <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
             Collected Agent Result
           </p>
