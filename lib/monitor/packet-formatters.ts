@@ -1,74 +1,4 @@
 import { MonitorPacket, MonitorPacketKind } from "./types";
-import { getHermesLLMClient } from "./hermes-llm-client";
-
-// Generator: Create example Hermes packets for each kind
-
-export async function generateSessionSummaryPacket(
-  sessionName: string,
-  workDone: string[],
-  nextSteps: string[]
-): Promise<MonitorPacket> {
-  const client = getHermesLLMClient();
-  return client.generatePacket("session-summary", { sessionName, workDone, nextSteps });
-}
-
-export async function generateContextPackPacket(
-  projectName: string,
-  completedPhases: string[],
-  remainingWork: string[],
-  importantDecisions: string[]
-): Promise<MonitorPacket> {
-  const client = getHermesLLMClient();
-  return client.generatePacket("context-pack", {
-    projectName,
-    completedPhases,
-    remainingWork,
-    importantDecisions,
-  });
-}
-
-export async function generateHandoffPackPacket(
-  fromAgent: string,
-  toAgent: string,
-  changedFiles: string[],
-  nextPrompt: string
-): Promise<MonitorPacket> {
-  const client = getHermesLLMClient();
-  return client.generatePacket("handoff-pack", { fromAgent, toAgent, changedFiles, nextPrompt });
-}
-
-export async function generateFailedTaskReviewPacket(
-  taskName: string,
-  errorSummary: string,
-  rootCause: string,
-  recommendations: string[]
-): Promise<MonitorPacket> {
-  const client = getHermesLLMClient();
-  return client.generatePacket("failed-task-review", {
-    taskName,
-    errorSummary,
-    rootCause,
-    recommendations,
-  });
-}
-
-export async function generateBackgroundResearchPacket(
-  topic: string,
-  findings: string[],
-  sources: string[]
-): Promise<MonitorPacket> {
-  const client = getHermesLLMClient();
-  return client.generatePacket("background-research", { topic, findings, sources });
-}
-
-export async function generateObsidianNotePacket(
-  insightTitle: string,
-  insightBody: string,
-  tags: string[]
-): Promise<MonitorPacket> {
-  const client = getHermesLLMClient();
-  return client.generatePacket("obsidian-note", { insightTitle, insightBody, tags });
-}
 
 function formatPacketTimestamp(value: string): string {
   const date = new Date(value);
@@ -77,7 +7,7 @@ function formatPacketTimestamp(value: string): string {
   return date.toISOString().replace("T", " ").replace(".000Z", " UTC");
 }
 
-// Renderer: Convert Hermes packet to Markdown
+// Client-safe renderer: do not import task-packets because that module loads Hermes CLI helpers.
 export function renderMonitorPacketMarkdown(packet: MonitorPacket): string {
   let markdown = `# ${packet.title}\n\n`;
   markdown += `*${packet.description}*\n\n`;
@@ -98,17 +28,14 @@ export function renderMonitorPacketMarkdown(packet: MonitorPacket): string {
   return markdown;
 }
 
-// Export as Markdown (copy-friendly)
 export function exportMonitorPacketMarkdown(packet: MonitorPacket): string {
   return renderMonitorPacketMarkdown(packet);
 }
 
-// Export as JSON (for structured handling)
 export function exportMonitorPacketJSON(packet: MonitorPacket): string {
   return JSON.stringify(packet, null, 2);
 }
 
-// List all supported kinds with descriptions
 export const HERMES_PACKET_KINDS: Record<
   MonitorPacketKind,
   { label: string; description: string }

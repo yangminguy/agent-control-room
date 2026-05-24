@@ -45,8 +45,52 @@ export class DefaultMonitorValidator implements MonitorLLMValidator {
   ): Promise<MonitorValidationResult> {
     // Delegate to HermesLLMClient: compares acceptance criteria and returns a confidence score.
     // Falls back to heuristics automatically when the API key is unavailable.
+    if (process.env.NODE_ENV === "test" || process.env.HERMES_DISABLE_CLI === "true") {
+      return this.createHeuristicValidation(request);
+    }
+
     const client = getHermesLLMClient();
-    return client.validateCompletion(request);
+    const result = await client.validateCompletion(request);
+
+    if (result.suggestedAction === "manual_review" && result.confidenceScore === 0) {
+      return this.createHeuristicValidation(request);
+    }
+
+    return result;
+  }
+
+  private createHeuristicValidation(
+    request: MonitorValidationRequest
+  ): MonitorValidationResult {
+    const normalizedCompleted = request.completedWork.map((work) => work.toLowerCase());
+    const matched = request.acceptanceCriteria.filter((criterion) => {
+      const normalizedCriterion = criterion.toLowerCase();
+      return normalizedCompleted.some(
+        (work) => work.includes(normalizedCriterion) || normalizedCriterion.includes(work)
+      );
+    }).length;
+    const ratio = request.acceptanceCriteria.length > 0
+      ? matched / request.acceptanceCriteria.length
+      : 0;
+    const confidenceScore = Math.round(ratio * 100);
+
+    return {
+      validationId: `validation-${this.getCacheKey(request)}`,
+      requestId: request.id,
+      isValid: confidenceScore >= this.config.confidenceThreshold,
+      confidenceScore,
+      reasoning: `Heuristic validation matched ${matched}/${request.acceptanceCriteria.length} acceptance criteria.`,
+      suggestedAction: confidenceScore >= this.config.confidenceThreshold
+        ? "approve"
+        : confidenceScore < 50
+          ? "reject"
+          : "manual_review",
+      risks: request.riskFlags ?? [],
+      recommendations: confidenceScore >= this.config.confidenceThreshold
+        ? ["Acceptance criteria appear satisfied."]
+        : ["Review incomplete acceptance criteria before approval."],
+      timestamp: new Date().toISOString(),
+    };
   }
 
   private createFallbackValidation(
