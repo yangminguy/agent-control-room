@@ -11,6 +11,7 @@ import {
 import { getAgentRuntime } from "@/lib/agents/runtime-registry";
 import { parseQuotaError, applyQuotaParseResult } from "@/lib/agents/quota-parser";
 import { updateRuntimeDecisionStatus } from "@/lib/storage/runtime-decision-store";
+import { notifyExecutionResult } from "@/lib/monitor/hermes-packet-notifier";
 
 /**
  * /api/runner — Internal Local Runner Endpoint
@@ -253,6 +254,15 @@ export async function POST(request: Request) {
                     controller.enqueue(encode(`[REVIEW_BLOCKED] Why it matters: ${boundaryCheck.reason}`, "system"));
                     controller.enqueue(encode(`[REVIEW_BLOCKED] What to do next: ${boundaryCheck.nextAction}`, "system"));
                   }
+
+                  // Telegram 알림 (비동기, non-blocking)
+                  const notifyStatus = boundaryViolation ? "drift" : exitCode === 0 ? "success" : "failure";
+                  const notifySummary = boundaryViolation
+                    ? `File boundary violation: ${boundaryCheck.forbiddenFiles.join(", ")}`
+                    : exitCode === 0
+                      ? `Task "${planTask.title}" completed by ${agent}`
+                      : `Task "${planTask.title}" failed (exit ${exitCode})`;
+                  notifyExecutionResult(taskId, notifyStatus, notifySummary).catch(() => {});
 
                   controller.enqueue(encode(`[DONE] Exit code: ${exitCode}`, "system"));
                   controller.close();

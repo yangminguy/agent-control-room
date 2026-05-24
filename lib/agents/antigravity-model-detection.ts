@@ -1,18 +1,53 @@
 /**
  * Antigravity Model Detection & Switch Capability
  *
- * Detects current Antigravity model from session metadata or transcript.
- * Provides capability information for automatic model switching.
+ * Detects current Antigravity model from settings.json.
+ * Provides capability information for automatic model switching via config_write.
  */
+import fs from "fs";
+import os from "os";
+import path from "path";
+import {
+  readAntigravitySettings,
+  writeAntigravitySettings,
+  backupAntigravitySettings,
+  getAntigravitySettingsPath,
+} from "./antigravity-settings";
+
+/** Resolve the agy binary path without importing the runner (avoids circular dep). */
+function resolveAgyBinaryPath(): string {
+  const candidates = [
+    path.join(os.homedir(), ".local", "bin", "agy"),
+    path.join("/opt", "homebrew", "bin", "agy"),
+    path.join("/usr", "local", "bin", "agy"),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return "agy";
+}
 
 export type AntigravityModelSwitchCapability = {
   canDetectCurrentModel: boolean;
   canSwitchAutomatically: boolean;
-  switchMethod?: "tty" | "session_state" | "unsupported";
+  switchMethod?: "config_write" | "tty" | "session_state" | "unsupported";
   currentModel?: string;
+  settingsPath?: string;
+  binaryPath?: string;
   lastCheckedAt: string;
   failureReason?: string;
 };
+
+export type AntigravityModelSwitchResult = {
+  success: boolean;
+  previousModel?: string;
+  targetModel?: string;
+  backupPath?: string;
+  message: string;
+};
+
+// Re-exported from runner for backward compatibility
+export type { AntigravityRunOptions } from "./antigravity-runner";
 
 // Expected Antigravity models
 const ANTIGRAVITY_MODELS = [
@@ -37,62 +72,98 @@ const MODEL_DISPLAY_TO_ID: Record<string, string> = {
 };
 
 /**
- * Detect current Antigravity model from session metadata
- *
- * Approach B: Check for recent model selection metadata in Antigravity brain directory
- * Path: ~/.gemini/antigravity-cli/brain/
- *
- * For now, returns detection capability status without actually reading files.
- * In production, would read:
- * - ~/.gemini/antigravity-cli/settings.json for current model setting
- * - transcript metadata for model selection events
+ * Detect current Antigravity model from settings.json.
+ * Returns the model string if the key exists, undefined otherwise.
  */
 export async function detectAntigravityCurrentModel(): Promise<
   string | undefined
 > {
-  // TODO: Implement actual detection from ~/.gemini/antigravity-cli/brain
-  // For now, this is a placeholder that returns undefined (no current model detected)
-  // Production implementation would:
-  // 1. Check ~/.gemini/antigravity-cli/settings.json
-  // 2. Parse recent model selection metadata
-  // 3. Return detected model name or undefined
-
-  return undefined;
+  const result = await readAntigravitySettings();
+  if (!result.success || !result.settings) {
+    return undefined;
+  }
+  const model = result.settings.model;
+  return typeof model === "string" ? model : undefined;
 }
 
 /**
- * Get Antigravity model switch capability status
- *
- * Determines:
- * - Whether we can detect the current model
- * - Whether we can switch models automatically
- * - What method would be used (TTY, session state, or unsupported)
+ * Get Antigravity model switch capability status synchronously.
+ * Uses only sync I/O so it can be called without await (backward compatible).
+ * For full async detection (reads settings.json model), use checkAntigravityModelSwitchCapability().
  */
 export function getAntigravityModelSwitchCapability(): AntigravityModelSwitchCapability {
-  // Current status: TTY-based automation is not yet implemented
-  // Session state detection is possible but not yet wired
-  // Fallback behavior is implemented instead
+  const binaryPath = resolveAgyBinaryPath();
+  const settingsPath = getAntigravitySettingsPath();
+
+  const binaryExists = fs.existsSync(binaryPath);
+  if (!binaryExists) {
+    return {
+      canDetectCurrentModel: false,
+      canSwitchAutomatically: false,
+      switchMethod: "unsupported",
+      binaryPath,
+      settingsPath,
+      lastCheckedAt: new Date().toISOString(),
+      failureReason: `agy binary not found at ${binaryPath}`,
+    };
+  }
+
+  const settingsExists = fs.existsSync(settingsPath);
+  if (!settingsExists) {
+    return {
+      canDetectCurrentModel: false,
+      canSwitchAutomatically: false,
+      switchMethod: "unsupported",
+      binaryPath,
+      settingsPath,
+      lastCheckedAt: new Date().toISOString(),
+      failureReason: `settings.json does not exist at ${settingsPath}`,
+    };
+  }
 
   return {
-    canDetectCurrentModel: false,
-    canSwitchAutomatically: false,
-    switchMethod: "unsupported",
+    canDetectCurrentModel: true,
+    canSwitchAutomatically: true,
+    switchMethod: "config_write",
+    binaryPath,
+    settingsPath,
     lastCheckedAt: new Date().toISOString(),
-    failureReason:
-      "TTY-based model switching not yet implemented. System will fallback to suitable agent instead.",
   };
 }
 
 /**
- * Check if automatic model switch is possible
+ * Full async capability check — also reads settings.json to detect current model.
  */
-export function canSwitchAntigravityModelAutomatically(): boolean {
-  const capability = getAntigravityModelSwitchCapability();
-  return capability.canSwitchAutomatically;
+export async function checkAntigravityModelSwitchCapability(): Promise<AntigravityModelSwitchCapability> {
+  const base = getAntigravityModelSwitchCapability();
+  if (!base.canDetectCurrentModel) return base;
+
+  const settingsResult = await readAntigravitySettings();
+  if (!settingsResult.success) {
+    return {
+      ...base,
+      canDetectCurrentModel: false,
+      canSwitchAutomatically: false,
+      switchMethod: "unsupported",
+      failureReason: `settings.json parse error: ${settingsResult.error}`,
+    };
+  }
+
+  return {
+    ...base,
+    currentModel: settingsResult.settings?.model as string | undefined,
+  };
 }
 
 /**
- * Get description of why automatic switching is not available
+ * Check if automatic model switch is possible (sync).
+ */
+export function canSwitchAntigravityModelAutomatically(): boolean {
+  return getAntigravityModelSwitchCapability().canSwitchAutomatically;
+}
+
+/**
+ * Get description of why automatic switching is not available (sync).
  */
 export function getAntigravityModelSwitchExplanation(): string {
   const capability = getAntigravityModelSwitchCapability();
@@ -162,24 +233,74 @@ export function recommendAntigravityModel(taskComplexity: "light" | "medium" | "
 }
 
 /**
- * For future TTY-based implementation:
- * Skeleton for sending /model command to interactive agy session
+ * Attempt to switch Antigravity model via config_write.
+ * Backs up settings.json, updates only the model key, preserves all other keys.
  */
 export async function attemptAntigravityModelSwitch(
-  _targetModelName: string
-): Promise<{
-  success: boolean;
-  message: string;
-}> {
-  // This is where TTY-based automation would go:
-  // 1. Start agy interactive process
-  // 2. Send "/model" command
-  // 3. Select model by name
-  // 4. Confirm and return to prompt
+  targetModelName: string
+): Promise<AntigravityModelSwitchResult> {
+  const readResult = await readAntigravitySettings();
+  if (!readResult.success || !readResult.settings) {
+    const settingsPath = getAntigravitySettingsPath();
+    return {
+      success: false,
+      targetModel: targetModelName,
+      message: `settings.json does not exist at ${settingsPath}`,
+    };
+  }
+
+  const previousModel = readResult.settings.model as string | undefined;
+
+  const backup = await backupAntigravitySettings();
+  if (!backup) {
+    const settingsPath = getAntigravitySettingsPath();
+    return {
+      success: false,
+      previousModel,
+      targetModel: targetModelName,
+      message: `Failed to write settings.json: backup failed for ${settingsPath}`,
+    };
+  }
+
+  const updated = { ...readResult.settings, model: targetModelName };
+  const writeResult = await writeAntigravitySettings(updated);
+
+  if (!writeResult.success) {
+    return {
+      success: false,
+      previousModel,
+      targetModel: targetModelName,
+      backupPath: backup.backupPath,
+      message: writeResult.error ?? `Failed to write settings.json: unknown error`,
+    };
+  }
 
   return {
-    success: false,
-    message:
-      "TTY-based Antigravity model switching not yet implemented. System will fallback to suitable agent instead.",
+    success: true,
+    previousModel,
+    targetModel: targetModelName,
+    backupPath: backup.backupPath,
+    message: `Switched model from ${previousModel ?? "(none)"} to ${targetModelName}`,
   };
+}
+
+/**
+ * Execute fn() with a temporary Antigravity model change.
+ * Restores the previous model in a finally block — even if fn() throws.
+ */
+export async function withAntigravityModel<T>(
+  targetModel: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  const previousModel = await detectAntigravityCurrentModel();
+
+  await attemptAntigravityModelSwitch(targetModel);
+
+  try {
+    return await fn();
+  } finally {
+    if (previousModel !== undefined) {
+      await attemptAntigravityModelSwitch(previousModel);
+    }
+  }
 }

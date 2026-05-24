@@ -3,11 +3,34 @@
 import { useEffect, useState } from "react";
 import { DashboardSnapshot } from "@/lib/types";
 import { Activity, BarChart3, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import { ActiveWorkspacesCard, type ActiveWorkspace } from "@/components/ops/ActiveWorkspacesCard";
+import { ApprovalNeededCard, type PendingAction } from "@/components/ops/ApprovalNeededCard";
+import { RuntimeStatusCard, type AgentRuntimeRow } from "@/components/ops/RuntimeStatusCard";
+import { AntigravityCapabilityCard, type AgtSwitchCapability, type AgtReadiness } from "@/components/ops/AntigravityCapabilityCard";
+
+type OpsData = {
+  workspaces: ActiveWorkspace[];
+  pendingActions: PendingAction[];
+  agents: AgentRuntimeRow[];
+  antigravity: {
+    currentModel: string | null;
+    switchCapability: AgtSwitchCapability;
+    binaryPath: string | null;
+    readiness: AgtReadiness;
+    failureReason?: string;
+  } | null;
+};
 
 export default function DashboardPage() {
   const [snapshot, setSnapshot] = useState<DashboardSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<string>("");
+  const [ops, setOps] = useState<OpsData>({
+    workspaces: [],
+    pendingActions: [],
+    agents: [],
+    antigravity: null,
+  });
 
   useEffect(() => {
     const fetchSnapshot = async () => {
@@ -25,9 +48,51 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchOps = async () => {
+      try {
+        const [wsRes, envRes, rtRes, agtRes] = await Promise.all([
+          fetch("/api/ops/workspaces"),
+          fetch("/api/ops/envelopes"),
+          fetch("/api/ops/runtimes"),
+          fetch("/api/ops/antigravity"),
+        ]);
+
+        const wsData = wsRes.ok ? await wsRes.json() : { workspaces: [] };
+        const envData = envRes.ok ? await envRes.json() : { envelopes: [] };
+        const rtData = rtRes.ok ? await rtRes.json() : { agents: [] };
+        const agtData = agtRes.ok ? await agtRes.json() : null;
+
+        const workspaces: ActiveWorkspace[] = (wsData.workspaces ?? []).map((ws: {
+          id: string; taskId: string; primaryAgent: string; status: string; branchName: string;
+        }) => ({
+          id: ws.id.slice(0, 8),
+          task: ws.taskId,
+          primaryAgent: ws.primaryAgent,
+          status: (["running", "needs_review", "approved"].includes(ws.status) ? ws.status : "running") as ActiveWorkspace["status"],
+          branch: ws.branchName,
+        }));
+
+        const pendingActions: PendingAction[] = (envData.envelopes ?? []).map((e: {
+          taskId: string; actionType: string; riskLevel: string; createdAt: string; expiresAt?: string;
+        }) => ({
+          taskId: e.taskId,
+          actionType: e.actionType,
+          riskLevel: (["medium", "high", "critical"].includes(e.riskLevel) ? e.riskLevel : "medium") as PendingAction["riskLevel"],
+          createdAt: e.createdAt,
+          expiresAt: e.expiresAt,
+        }));
+
+        setOps({ workspaces, pendingActions, agents: rtData.agents ?? [], antigravity: agtData });
+      } catch {
+        // ops fetch failure is non-blocking
+      }
+    };
+
     fetchSnapshot();
+    fetchOps();
     const interval = setInterval(fetchSnapshot, 30000);
-    return () => clearInterval(interval);
+    const opsInterval = setInterval(fetchOps, 15000);
+    return () => { clearInterval(interval); clearInterval(opsInterval); };
   }, [selectedProject]);
 
   if (loading || !snapshot) {
@@ -82,6 +147,27 @@ export default function DashboardPage() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Ops Cards */}
+        <div className="mb-8">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-pink-primary mb-3">
+            Live Operations
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <ActiveWorkspacesCard workspaces={ops.workspaces} />
+            <ApprovalNeededCard pendingActions={ops.pendingActions} />
+            <RuntimeStatusCard agents={ops.agents} />
+            {ops.antigravity && (
+              <AntigravityCapabilityCard
+                currentModel={ops.antigravity.currentModel}
+                switchCapability={ops.antigravity.switchCapability}
+                binaryPath={ops.antigravity.binaryPath}
+                readiness={ops.antigravity.readiness}
+                failureReason={ops.antigravity.failureReason}
+              />
+            )}
           </div>
         </div>
 

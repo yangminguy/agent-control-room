@@ -1,4 +1,22 @@
 {
-  "decisions": [],
-  "lastUpdated": "2026-05-23T22:10:06.703Z"
+  "decisions": [
+    {
+      "id": "rd-1779664142349",
+      "taskId": "task-approval-test",
+      "planId": "plan-approval-test",
+      "decision": {
+        "taskKind": "implementation",
+        "recommendedAgentId": "claude-code",
+        "recommendedModelId": "claude-sonnet-4-6",
+        "reason": "Task 'implementation' routes to claude-code with Claude Sonnet 4.6 (fast speed, high reasoning depth)",
+        "canAutoRun": true,
+        "requiresApproval": false,
+        "requiresModelSwitch": false,
+        "executionMode": "auto",
+        "riskNotes": []
+      },
+      "storedAt": "2026-05-24T23:09:02.350Z"
+    }
+  ],
+  "lastUpdated": "2026-05-24T23:09:02.350Z"
 }

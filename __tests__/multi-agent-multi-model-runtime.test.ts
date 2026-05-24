@@ -345,13 +345,19 @@ describe("Multi-Agent Multi-Model Runtime", () => {
       expect(capability.lastCheckedAt).toBeDefined();
     });
 
-    test("should report automatic switching as unsupported", () => {
-      expect(canSwitchAntigravityModelAutomatically()).toBe(false);
+    test("should report automatic switching capability as a boolean", () => {
+      const canSwitch = canSwitchAntigravityModelAutomatically();
+      expect(typeof canSwitch).toBe("boolean");
     });
 
-    test("should have explanation for unsupported switching", () => {
-      const explanation = getAntigravityModelSwitchCapability();
-      expect(explanation.failureReason).toBeDefined();
+    test("should provide failureReason when switching is not possible", () => {
+      const capability = getAntigravityModelSwitchCapability();
+      if (!capability.canSwitchAutomatically) {
+        expect(capability.failureReason).toBeDefined();
+      } else {
+        // agy binary and settings.json found — no failure reason expected
+        expect(capability.switchMethod).toBe("config_write");
+      }
     });
   });
 
