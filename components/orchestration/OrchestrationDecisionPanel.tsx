@@ -148,7 +148,7 @@ export function OrchestrationDecisionPanel({
           type="button"
           onClick={handleGenerateDecision}
           disabled={isLoading}
-          className="w-full px-4 py-2 rounded bg-pink-primary text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="w-full px-4 py-2 rounded bg-zinc-900 border border-zinc-950 text-white text-sm font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
         >
           {isLoading ? "생성 중..." : "결정 생성"}
         </button>

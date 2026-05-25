@@ -137,6 +137,7 @@ Backlog items include Telegram full approval bot integration, Obsidian filesyste
 13. `docs/HERMES_BACKGROUND_WORKER.md`
 14. `docs/AGENT_RUN_POLICY.md`
 15. `docs/AGENT_SCHEDULING_POLICY.md`
+16. `docs/DESIGN_SYSTEM.md`
 
 ## Coding Rules
 
@@ -148,6 +149,7 @@ Backlog items include Telegram full approval bot integration, Obsidian filesyste
 - Do not expand automatic execution beyond supported approval-gated runner flows.
 - Do not make Hermes a coding agent.
 - Do not make Kanban or Vibe Kanban the main product surface.
+- For UI work, follow `docs/DESIGN_SYSTEM.md`: Bright shell, black structure, pink decision. Keep Hermes and result-review surfaces PM-readable before raw logs or JSON.
 
 ## Report Format After Each Coding Session
 

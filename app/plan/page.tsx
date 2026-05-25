@@ -212,7 +212,7 @@ export default async function PlanPage() {
           </Link>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-lg bg-pink-primary px-4 py-2 text-xs font-semibold text-white hover:bg-pink-soft transition-colors shadow-lg shadow-pink-primary/20"
+            className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 border border-zinc-950 px-4 py-2 text-xs font-semibold text-white hover:bg-zinc-800 transition-colors shadow-sm"
           >
             기획 채팅
             <ArrowRight className="h-4 w-4" />
@@ -266,7 +266,7 @@ export default async function PlanPage() {
                 총 {phases.length} 단계
               </span>
             </div>
-            <div className="bg-surface rounded-xl border border-border p-4 sm:p-6 lg:p-8">
+            <div className="bg-white rounded-xl border border-zinc-200 p-4 sm:p-6 lg:p-8 shadow-sm">
               <RoadmapTimeline stages={mappedStages} />
             </div>
           </section>
@@ -302,7 +302,7 @@ export default async function PlanPage() {
 
           <section className="space-y-4">
             <h2 className="text-lg font-bold text-text-primary">에이전트 실시간 현황</h2>
-            <div className="bg-surface rounded-xl border border-border p-4">
+            <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-sm">
               <AgentStatusPanel agents={agentsList} />
             </div>
           </section>
@@ -314,7 +314,7 @@ export default async function PlanPage() {
       <section className="mt-16 pt-8 border-t border-border/40">
         <details className="group">
           <summary className="flex cursor-pointer items-center justify-between rounded-lg bg-surface-2 p-4 border border-border/60 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-2/80">
-            <span>상세 작업 보기 (Kanban)</span>
+            <span>상세 작업 보기 (Vibe Kanban)</span>
             <ChevronDown className="h-5 w-5 text-text-secondary transition-transform group-open:rotate-180" />
           </summary>
           {featurePlan ? (

@@ -33,9 +33,9 @@ function CopyButton({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="px-2 py-1 text-xs rounded border border-border bg-surface-2 text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+      className="px-2 py-1 text-xs rounded border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
     >
-      {copied ? "Copied!" : "Copy"}
+      {copied ? "복사됨" : "복사"}
     </button>
   );
 }
@@ -50,14 +50,14 @@ function InsightSection({
   content: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface-1 p-4 space-y-2">
+    <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-2 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
         <CopyButton text={content} />
       </div>
-      <pre className="whitespace-pre-wrap max-h-64 overflow-y-auto text-xs text-text-secondary font-mono leading-relaxed">
+      <p className="whitespace-pre-wrap max-h-64 overflow-y-auto text-sm text-zinc-600 leading-relaxed">
         {content}
-      </pre>
+      </p>
     </div>
   );
 }
@@ -91,9 +91,9 @@ export function MonitorInsightPanel() {
   return (
     <div className="space-y-4">
       {/* Safety banner */}
-      <div className="rounded-lg border border-amber-700 bg-amber-950 px-4 py-2.5 flex items-start gap-2">
-        <span className="text-amber-400 text-sm mt-0.5">!</span>
-        <p className="text-xs text-amber-300">
+      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 flex items-start gap-2">
+        <span className="text-amber-700 text-sm mt-0.5">!</span>
+        <p className="text-xs text-amber-800">
           <strong>Hermes is observing only — not executing.</strong> These insights
           are generated from current dispatch queue state. No code is run. No files
           are modified.
@@ -126,11 +126,11 @@ export function MonitorInsightPanel() {
         <button
           type="button"
           onClick={handleExportAll}
-          className="px-4 py-2 rounded border border-border bg-surface-2 text-text-secondary text-sm hover:text-text-primary hover:bg-surface-3 transition-colors"
+          className="px-4 py-2 rounded border border-zinc-200 bg-white text-zinc-600 text-sm hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
         >
           {exportCopied
-            ? "Copied to clipboard!"
-            : "Export All as Obsidian Note"}
+            ? "클립보드에 복사됨"
+            : "전체 내용을 Obsidian 메모로 복사"}
         </button>
       </div>
     </div>

@@ -3,16 +3,26 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --muted: #a1a1aa;
-  --border: #27272a;
-  --panel: #111111;
-  --accent: #ec4899;
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #09090b;
+  --muted: #71717a;
+  --border: #e4e4e7;
+  --panel: #ffffff;
+  --accent: #db2777;
   --accent-strong: #be185d;
   --success: #16a34a;
-  --warning: #f59e0b;
+  --warning: #ea580c;
+
+  /* Custom variables matching tailwind theme variables */
+  --text-primary: #09090b;
+  --text-secondary: #71717a;
+  --text-tertiary: #a1a1aa;
+  --pink-primary: #db2777;
+  --pink-soft: #ec4899;
+  --pink-muted: #be185d;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
 }
 
 * {
@@ -41,15 +51,15 @@ select {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #18181b;
+  background: #ffffff;
   color: var(--foreground);
 }
 
 textarea:focus,
 input:focus,
 select:focus {
-  border-color: var(--accent);
-  outline: 2px solid rgb(236 72 153 / 0.25);
+  border-color: var(--pink-primary);
+  outline: 2px solid rgb(219 39 119 / 0.15);
 }
 
 /* Custom Animation Utilities */

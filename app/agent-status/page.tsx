@@ -12,11 +12,11 @@ const AGENT_DISPLAY_NAMES: Record<AgentType, string> = {
 };
 
 const STATUS_COLORS: Record<AgentStatusValue, string> = {
-  available: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-  limited: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  cooling_down: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
-  blocked: "bg-red-500/10 text-red-400 border border-red-500/20",
-  manual_only: "bg-surface-2 text-text-secondary border border-border/60",
+  available: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  limited: "bg-amber-50 text-amber-700 border border-amber-200",
+  cooling_down: "bg-orange-50 text-orange-700 border border-orange-200",
+  blocked: "bg-red-50 text-red-700 border border-red-200",
+  manual_only: "bg-zinc-50 text-zinc-600 border border-zinc-200",
 };
 
 const STATUS_DESCRIPTIONS: Record<AgentStatusValue, { korean: string; can: string; cannot: string; next: string }> = {
@@ -200,182 +200,214 @@ export default function AgentStatusPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-text-primary">에이전트 상태</h1>
-        <p className="text-text-secondary mt-2">
+        <h1 className="text-2xl font-bold text-text-primary">에이전트 상태</h1>
+        <p className="text-text-secondary mt-1 text-sm">
           에이전트 상태를 관리하고 필요시 자동 핸드오프를 생성합니다.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <section className="grid gap-3 md:grid-cols-3">
         {["claude-code", "codex", "antigravity"].map((agent) => {
           const agentType = agent as AgentType;
           const currentStatus = statuses.find((s) => s.agent === agentType);
-          const handoff = generatedHandoffs[agentType];
-          const recommendation = recommendations[agentType];
-
           return (
-            <div key={agent} className="rounded-xl border border-border bg-surface-2 p-6">
-              {/* 헤더 */}
-              <div className="mb-4">
-                <h2 className="text-xl font-bold text-text-primary">
-                  {AGENT_DISPLAY_NAMES[agentType]}
-                </h2>
-                <div className="mt-3 flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      STATUS_COLORS[currentStatus?.status || "available"]
-                    }`}
-                  >
-                    {STATUS_DESCRIPTIONS[currentStatus?.status || "available"].korean}
-                  </span>
-                </div>
-
-                {/* 상태 설명 */}
-                <div className="mt-4 space-y-2 text-sm">
-                  <div>
-                    <p className="text-text-tertiary font-medium">할 수 있는 일</p>
-                    <p className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].can}</p>
-                  </div>
-                  <div>
-                    <p className="text-text-tertiary font-medium">제한되는 일</p>
-                    <p className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].cannot}</p>
-                  </div>
-                  <div>
-                    <p className="text-text-tertiary font-medium">다음 행동</p>
-                    <p className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].next}</p>
-                  </div>
-                </div>
-
-                {currentStatus?.reason && (
-                  <p className="text-sm text-text-secondary mt-4 italic">
-                    &quot;{currentStatus.reason}&quot;
-                  </p>
-                )}
-                {currentStatus?.nextAvailableAt && (
-                  <p className="text-sm text-text-tertiary mt-3 font-medium">
-                    ⏰ 예상 복구: {new Date(currentStatus.nextAvailableAt).toLocaleString("ko-KR")}
-                  </p>
-                )}
-              </div>
-
-              {/* 상태 변경 폼 */}
-              <div className="space-y-4 border-t border-border/50 pt-5 mt-2">
-                <div>
-                  <label className="block text-sm font-semibold text-text-primary mb-1.5">
-                    상태 변경
-                  </label>
-                  <select
-                    value={selectedStatuses[agentType]}
-                    onChange={(e) =>
-                      setSelectedStatuses({
-                        ...selectedStatuses,
-                        [agentType]: e.target.value as AgentStatusValue,
-                      })
-                    }
-                    className="block w-full rounded-lg border border-border/60 bg-surface px-3 py-2 text-sm text-text-primary focus:border-pink-primary focus:ring-1 focus:ring-pink-primary/30 outline-none transition-colors"
-                  >
-                    <option value="available">사용 가능 (Available)</option>
-                    <option value="limited">사용량 제한 (Limited)</option>
-                    <option value="cooling_down">회복 중 (Cooling Down)</option>
-                    <option value="blocked">차단됨 (Blocked)</option>
-                    <option value="manual_only">수동 제어 전용 (Manual Only)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-text-primary mb-1.5">
-                    사유 (선택사항)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="상태 변경 이유"
-                    value={reasons[agentType]}
-                    onChange={(e) =>
-                      setReasons({
-                        ...reasons,
-                        [agentType]: e.target.value,
-                      })
-                    }
-                    className="block w-full rounded-lg border border-border/60 bg-surface px-3 py-2 text-sm text-text-primary placeholder-text-tertiary focus:border-pink-primary focus:ring-1 focus:ring-pink-primary/30 outline-none transition-colors"
-                  />
-                </div>
-
-                {["cooling_down", "blocked"].includes(
-                  selectedStatuses[agentType]
-                ) && (
-                  <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-1.5">
-                      복구 예상 시간 (선택사항)
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={nextAvailableTimes[agentType]}
-                      onChange={(e) =>
-                        setNextAvailableTimes({
-                          ...nextAvailableTimes,
-                          [agentType]: e.target.value,
-                        })
-                      }
-                      className="block w-full rounded-lg border border-border/60 bg-surface px-3 py-2 text-sm text-text-primary focus:border-pink-primary focus:ring-1 focus:ring-pink-primary/30 outline-none transition-colors [color-scheme:dark]"
-                    />
-                  </div>
-                )}
-
-                <button
-                  onClick={() => handleUpdateStatus(agentType)}
-                  disabled={updatingAgent === agentType}
-                  className="w-full rounded-lg bg-pink-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-soft disabled:bg-surface-2 disabled:text-text-tertiary disabled:border disabled:border-border transition-colors"
+            <div key={agent} className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                {AGENT_DISPLAY_NAMES[agentType]}
+              </p>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <span
+                  className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    STATUS_COLORS[currentStatus?.status || "available"]
+                  }`}
                 >
-                  {updatingAgent === agentType
-                    ? "업데이트 중..."
-                    : "상태 업데이트"}
-                </button>
+                  {STATUS_DESCRIPTIONS[currentStatus?.status || "available"].korean}
+                </span>
+                <span className="text-xs text-zinc-500">다음: {STATUS_DESCRIPTIONS[currentStatus?.status || "available"].next}</span>
               </div>
-
-              {recommendation && (
-                <div className="mt-5 rounded-lg border border-pink-primary/30 bg-pink-primary/5 p-4 text-sm text-pink-primary">
-                  <div className="flex items-start gap-2.5">
-                    <AlertCircle className="mt-0.5 h-4 w-4 flex-none" />
-                    <div className="space-y-1.5">
-                      <p className="leading-relaxed">{recommendation.reason}</p>
-                      {recommendation.agent && (
-                        <p className="flex items-center gap-2 font-bold mt-2 text-pink-primary">
-                          <span>{AGENT_DISPLAY_NAMES[agentType]}</span>
-                          <ArrowRight className="h-4 w-4" />
-                          <span>
-                            {AGENT_DISPLAY_NAMES[recommendation.agent]}
-                          </span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {handoff && (
-                <div className="mt-5 rounded-lg border border-border bg-surface p-4 text-sm font-medium text-text-secondary flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-blue-400" />
-                  아래에 핸드오프 프롬프트가 생성되었습니다.
-                </div>
-              )}
             </div>
           );
         })}
+      </section>
+
+      <div className="flex flex-col border border-zinc-200 bg-white rounded-xl overflow-hidden shadow-sm">
+        {/* Table Header */}
+        <div className="hidden lg:grid grid-cols-[180px_1fr_120px_340px] items-center gap-4 px-6 py-3 border-b border-zinc-200 bg-zinc-50 text-xs font-bold text-zinc-500 uppercase tracking-wider">
+          <div>에이전트 정보</div>
+          <div>할 수 있는 일 / 제한 / 다음 행동</div>
+          <div>상태</div>
+          <div>상태 제어</div>
+        </div>
+
+        {/* Rows */}
+        <div className="divide-y divide-zinc-200 bg-white">
+          {["claude-code", "codex", "antigravity"].map((agent) => {
+            const agentType = agent as AgentType;
+            const currentStatus = statuses.find((s) => s.agent === agentType);
+            const handoff = generatedHandoffs[agentType];
+            const recommendation = recommendations[agentType];
+
+            return (
+              <div key={agent} className="flex flex-col">
+                <div className="grid grid-cols-1 lg:grid-cols-[180px_1fr_120px_340px] items-center gap-4 px-6 py-4">
+                  {/* 에이전트 이름 및 설명 */}
+                  <div className="min-w-0">
+                    <h2 className="text-base font-bold text-text-primary">
+                      {AGENT_DISPLAY_NAMES[agentType]}
+                    </h2>
+                    <p className="text-xs text-text-secondary mt-0.5">
+                      {agentType === "claude-code"
+                        ? "Architecture & Reasoning"
+                        : agentType === "codex"
+                        ? "Implementation & QA"
+                        : "UI/UX & Frontend"}
+                    </p>
+                  </div>
+
+                  {/* 할 수 있는 일 / 제한되는 일 / 다음 행동 */}
+                  <div className="space-y-1 text-xs">
+                    <div>
+                      <span className="text-text-tertiary font-medium">할 수 있는 일: </span>
+                      <span className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].can}</span>
+                    </div>
+                    <div>
+                      <span className="text-text-tertiary font-medium">제한되는 일: </span>
+                      <span className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].cannot}</span>
+                    </div>
+                    <div>
+                      <span className="text-text-tertiary font-medium">다음 행동: </span>
+                      <span className="text-text-secondary">{STATUS_DESCRIPTIONS[currentStatus?.status || "available"].next}</span>
+                    </div>
+                    {currentStatus?.reason && (
+                      <p className="text-xs text-pink-primary mt-1 italic font-medium">
+                        &quot;{currentStatus.reason}&quot;
+                      </p>
+                    )}
+                    {currentStatus?.nextAvailableAt && (
+                      <p className="text-[11px] text-text-tertiary mt-0.5">
+                        ⏰ 예상 복구: {new Date(currentStatus.nextAvailableAt).toLocaleString("ko-KR")}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 상태 배지 */}
+                  <div>
+                    <span
+                      className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        STATUS_COLORS[currentStatus?.status || "available"]
+                      }`}
+                    >
+                      {STATUS_DESCRIPTIONS[currentStatus?.status || "available"].korean}
+                    </span>
+                  </div>
+
+                  {/* 상태 변경 폼 */}
+                  <div className="space-y-2 border-t border-dashed border-border/60 lg:border-t-0 pt-3 lg:pt-0">
+                    <div className="flex gap-2">
+                      <select
+                        value={selectedStatuses[agentType]}
+                        onChange={(e) =>
+                          setSelectedStatuses({
+                            ...selectedStatuses,
+                            [agentType]: e.target.value as AgentStatusValue,
+                          })
+                        }
+                        className="text-xs px-2 py-1.5 rounded-lg border border-zinc-200 bg-white text-zinc-900 focus:border-pink-primary outline-none max-w-[140px]"
+                      >
+                        <option value="available">사용 가능</option>
+                        <option value="limited">사용량 제한</option>
+                        <option value="cooling_down">회복 중</option>
+                        <option value="blocked">차단됨</option>
+                        <option value="manual_only">수동 전용</option>
+                      </select>
+                      <input
+                        type="text"
+                        placeholder="상태 변경 이유"
+                        value={reasons[agentType]}
+                        onChange={(e) =>
+                          setReasons({
+                            ...reasons,
+                            [agentType]: e.target.value,
+                          })
+                        }
+                        className="text-xs px-2 py-1.5 rounded-lg border border-zinc-200 bg-white text-zinc-900 placeholder-text-tertiary focus:border-pink-primary outline-none flex-1"
+                      />
+                    </div>
+
+                    {["cooling_down", "blocked"].includes(
+                      selectedStatuses[agentType]
+                    ) && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-text-secondary shrink-0">복구 예상:</span>
+                        <input
+                          type="datetime-local"
+                          value={nextAvailableTimes[agentType]}
+                          onChange={(e) =>
+                            setNextAvailableTimes({
+                              ...nextAvailableTimes,
+                              [agentType]: e.target.value,
+                            })
+                          }
+                          className="text-[10px] px-2 py-1 rounded border border-zinc-200 bg-white text-zinc-900 focus:border-pink-primary outline-none w-full [color-scheme:light]"
+                        />
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => handleUpdateStatus(agentType)}
+                      disabled={updatingAgent === agentType}
+                      className="w-full text-xs font-semibold py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white transition-colors disabled:opacity-40 border border-zinc-950 shadow-sm"
+                    >
+                      {updatingAgent === agentType ? "업데이트 중..." : "상태 업데이트"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* 추천 및 핸드오프 정보 */}
+                {(recommendation || handoff) && (
+                  <div className="px-6 py-3 bg-pink-primary/5 border-t border-border flex flex-col gap-2">
+                    {recommendation && (
+                      <div className="flex items-start gap-2 text-xs text-pink-primary">
+                        <AlertCircle className="mt-0.5 h-3.5 w-3.5 flex-none" />
+                        <div>
+                          <p className="leading-relaxed font-medium">{recommendation.reason}</p>
+                          {recommendation.agent && (
+                            <p className="flex items-center gap-2 font-bold mt-1 text-pink-primary">
+                              <span>{AGENT_DISPLAY_NAMES[agentType]}</span>
+                              <ArrowRight className="h-3 w-3" />
+                              <span>{AGENT_DISPLAY_NAMES[recommendation.agent]}</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {handoff && (
+                      <div className="flex items-center gap-2 text-xs text-text-secondary font-medium">
+                        <AlertCircle className="h-3.5 w-3.5 text-blue-500" />
+                        아래에 에이전트 핸드오프 프롬프트가 추가로 로드되었습니다.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {Object.values(generatedHandoffs).some(Boolean) && (
-        <section className="space-y-5 pt-8 border-t border-border">
+        <section className="space-y-4 pt-6 border-t border-border">
           <div>
-            <h2 className="text-2xl font-bold text-text-primary">생성된 핸드오프</h2>
-            <p className="mt-1.5 text-sm text-text-secondary">
-              최근 수동 상태 변경으로 생성된 프롬프트입니다. 복사하여 사용할 수 있습니다.
+            <h2 className="text-xl font-bold text-text-primary">생성된 핸드오프</h2>
+            <p className="mt-1 text-xs text-text-secondary">
+              상태 변경 과정에서 추출된 자동 복구 및 핸드오프 지시 프롬프트입니다.
             </p>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {Object.entries(generatedHandoffs).map(([agent, handoff]) =>
               handoff ? (
-                <div key={agent} className="space-y-3 bg-surface-2 p-6 rounded-xl border border-border">
-                  <h3 className="font-bold text-lg text-text-primary">
+                <div key={agent} className="space-y-2 bg-white p-4 rounded-xl border border-zinc-200">
+                  <h3 className="font-bold text-sm text-text-primary">
                     {AGENT_DISPLAY_NAMES[agent as AgentType]} 상태 핸드오프
                   </h3>
                   <HandoffPreview handoff={handoff} />

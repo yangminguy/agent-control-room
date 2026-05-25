@@ -70,12 +70,18 @@ export async function generateObsidianNotePacket(
   return client.generatePacket("obsidian-note", { insightTitle, insightBody, tags });
 }
 
-// Renderer: Convert Hermes packet to Markdown
+function formatPacketTimestamp(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
 
+  return date.toISOString().replace("T", " ").replace(".000Z", " UTC");
+}
+
+// Renderer: Convert Hermes packet to Markdown
 export function renderMonitorPacketMarkdown(packet: MonitorPacket): string {
   let markdown = `# ${packet.title}\n\n`;
   markdown += `*${packet.description}*\n\n`;
-  markdown += `**Created:** ${new Date(packet.createdAt).toLocaleString()}\n\n`;
+  markdown += `**Created:** ${formatPacketTimestamp(packet.createdAt)}\n\n`;
   markdown += "---\n\n";
 
   for (const section of packet.content.sections) {
@@ -84,8 +90,6 @@ export function renderMonitorPacketMarkdown(packet: MonitorPacket): string {
 
     if (section.format === "code") {
       markdown += `\`\`\`\n${section.body}\n\`\`\`\n\n`;
-    } else if (section.format === "checklist") {
-      markdown += `${section.body}\n\n`;
     } else {
       markdown += `${section.body}\n\n`;
     }
@@ -95,19 +99,16 @@ export function renderMonitorPacketMarkdown(packet: MonitorPacket): string {
 }
 
 // Export as Markdown (copy-friendly)
-
 export function exportMonitorPacketMarkdown(packet: MonitorPacket): string {
   return renderMonitorPacketMarkdown(packet);
 }
 
 // Export as JSON (for structured handling)
-
 export function exportMonitorPacketJSON(packet: MonitorPacket): string {
   return JSON.stringify(packet, null, 2);
 }
 
 // List all supported kinds with descriptions
-
 export const HERMES_PACKET_KINDS: Record<
   MonitorPacketKind,
   { label: string; description: string }
@@ -135,5 +136,25 @@ export const HERMES_PACKET_KINDS: Record<
   "obsidian-note": {
     label: "Obsidian Note",
     description: "Personal knowledge management note (Obsidian-compatible).",
+  },
+  "phase-completion": {
+    label: "Phase Completion",
+    description: "Task or phase successfully completed.",
+  },
+  failure: {
+    label: "Execution Failure",
+    description: "Task execution failed — review and recovery required.",
+  },
+  "drift-detection": {
+    label: "Drift Detection",
+    description: "Execution drifted from plan — re-orchestration needed.",
+  },
+  "approval-request": {
+    label: "Approval Request",
+    description: "High-risk operation waiting for user approval.",
+  },
+  "re-orchestration": {
+    label: "Re-Orchestration",
+    description: "Plan adjustment or re-prioritization signal.",
   },
 };

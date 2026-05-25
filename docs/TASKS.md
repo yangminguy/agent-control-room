@@ -180,3 +180,4 @@ Acceptance criteria:
 - Critical production actions remain manual unless a future phase adds a dedicated approval and rollback design.
 - Hermes is a Background Execution Supervisor for monitoring, checks, packets, and reports only.
 - Roadmap remains the main surface; Kanban remains detail view.
+- Future UI work must follow `docs/DESIGN_SYSTEM.md` Brightline direction: bright shell, black structure, pink decision, PM-readable summaries before raw logs.

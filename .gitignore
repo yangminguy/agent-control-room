@@ -17,3 +17,5 @@ data/.test/
 .vercel
 external/vibe-kanban/node_modules/
 external/vibe-kanban/target/
+claude-design/
+qa-artifacts/

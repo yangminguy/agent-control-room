@@ -22,11 +22,11 @@ function formatAge(createdAt: string): string {
 }
 
 const STATUS_BADGE: Partial<Record<DispatchJobStatus, { label: string; cls: string }>> = {
-  queued: { label: "Queued", cls: "bg-zinc-700 text-zinc-300 border-zinc-600" },
-  running: { label: "Running", cls: "bg-blue-900 text-blue-300 border-blue-700" },
-  approved: { label: "Approved", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
-  completed: { label: "Completed", cls: "bg-emerald-900 text-emerald-300 border-emerald-700" },
-  failed: { label: "Failed", cls: "bg-red-900 text-red-300 border-red-700" },
+  queued: { label: "Queued", cls: "bg-zinc-100 text-zinc-700 border-zinc-200" },
+  running: { label: "Running", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+  approved: { label: "Approved", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  completed: { label: "Completed", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  failed: { label: "Failed", cls: "bg-red-50 text-red-700 border-red-200" },
 };
 
 function Badge({ label, cls }: { label: string; cls: string }) {
@@ -57,7 +57,7 @@ interface ProgressManagerStatusViewProps {
 // ── Sub-components ────────────────────────────────────────
 
 function JobRow({ job }: { job: DispatchJob }) {
-  const badgeCfg = STATUS_BADGE[job.status] ?? { label: job.status, cls: "bg-zinc-700 text-zinc-300 border-zinc-600" };
+  const badgeCfg = STATUS_BADGE[job.status] ?? { label: job.status, cls: "bg-zinc-100 text-zinc-700 border-zinc-200" };
   return (
     <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
       <div className="min-w-0 mr-3">
@@ -98,7 +98,7 @@ function RiskyJobRow({
         <div className="flex items-center gap-2 mt-1.5">
           <span className="text-xs text-text-secondary">Approval timeout:</span>
           <span className={`text-xs font-mono ${countdownCls}`}>{formatCountdown(remaining)}</span>
-          <div className="flex-1 h-1 rounded-full bg-zinc-800 overflow-hidden">
+          <div className="flex-1 h-1 rounded-full bg-zinc-100 overflow-hidden">
             <div
               className={`h-full rounded-full ${isRed ? "bg-red-500" : isYellow ? "bg-yellow-500" : "bg-emerald-500"}`}
               style={{ width: job.timeoutAt ? `${Math.min(100, Math.max(0, (remaining / (new Date(job.timeoutAt).getTime() - new Date(job.createdAt).getTime())) * 100))}%` : "0%" }}
@@ -124,7 +124,7 @@ export function ProgressManagerStatusView({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Safe jobs section */}
-      <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
+      <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-3 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Safe Tasks</p>
@@ -134,13 +134,13 @@ export function ProgressManagerStatusView({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-xs text-emerald-400 font-medium">{safeJobs.length} total</span>
+            <span className="text-xs text-emerald-700 font-medium">{safeJobs.length} total</span>
           </div>
         </div>
 
         {/* Progress bar */}
         {safeJobs.length > 0 && (
-          <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+          <div className="h-1.5 rounded-full bg-zinc-100 overflow-hidden">
             <div
               className="h-full rounded-full bg-emerald-500 transition-all"
               style={{ width: `${(safeCompleted / safeJobs.length) * 100}%` }}
@@ -160,7 +160,7 @@ export function ProgressManagerStatusView({
       </div>
 
       {/* Risky jobs section */}
-      <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
+      <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-3 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Risky Tasks</p>
@@ -170,7 +170,7 @@ export function ProgressManagerStatusView({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-orange-500" />
-            <span className="text-xs text-orange-400 font-medium">Approval required</span>
+            <span className="text-xs text-orange-700 font-medium">Approval required</span>
           </div>
         </div>
 

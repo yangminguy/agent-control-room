@@ -112,16 +112,16 @@ export function RoadmapStageCard({
                 isActive && !isBlocked && !needsUserInput
                   ? "text-pink-primary"
                   : isCompleted
-                    ? "text-emerald-400"
+                    ? "text-emerald-700"
                     : isBlocked
-                      ? "text-red-400"
+                      ? "text-red-700"
                       : needsUserInput
-                        ? "text-amber-400"
+                        ? "text-amber-700"
                         : "text-text-primary"
               }`}
             >
               {isCompleted && (
-                <CheckCircle2 className="inline w-4 h-4 mr-1.5 text-emerald-400 align-[-2px]" />
+                <CheckCircle2 className="inline w-4 h-4 mr-1.5 text-emerald-600 align-[-2px]" />
               )}
               {stage.title}
             </h3>
@@ -146,15 +146,15 @@ export function RoadmapStageCard({
         {/* ── Blocked alert ── */}
         {isBlocked && stage.blockerReason && (
           <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-3 flex gap-3 text-xs">
-            <AlertCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-red-400" />
-            <div className="space-y-1 text-red-200">
+            <AlertCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-red-600" />
+            <div className="space-y-1 text-red-700">
               <p className="font-semibold">차단 이유</p>
               <p className="opacity-90 leading-relaxed">{stage.blockerReason}</p>
               {stage.blockerUnlockAction && (
                 <div className="flex items-start gap-1.5 mt-2 pt-2 border-t border-red-500/10">
                   <Unlock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" />
                   <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-red-400/80 block mb-0.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-red-600 block mb-0.5">
                       해제 방법
                     </span>
                     <span>{stage.blockerUnlockAction}</span>
@@ -173,21 +173,21 @@ export function RoadmapStageCard({
         {/* ── User input needed ── */}
         {needsUserInput && stage.userQuestion && (
           <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 flex gap-3 text-xs">
-            <HelpCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-amber-400" />
-            <div className="space-y-1.5 text-amber-200 w-full">
+            <HelpCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-amber-600" />
+            <div className="space-y-1.5 text-amber-700 w-full">
               <p className="font-semibold">사용자 확인 필요</p>
               <p className="opacity-90 leading-relaxed">{stage.userQuestion}</p>
               {stage.userDecisionOptions &&
                 stage.userDecisionOptions.length > 0 && (
                   <div className="mt-2 pt-2 border-t border-amber-500/10">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/80 mb-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 mb-1">
                       선택 가능한 옵션 (상단 Your Next Move에서 입력 가능)
                     </p>
                     <ol className="space-y-0.5">
                       {stage.userDecisionOptions.map((opt, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-xs text-amber-300"
+                          className="flex items-start gap-2 text-xs text-amber-700"
                         >
                           <span className="font-bold shrink-0">{i + 1}.</span>
                           <span>{opt}</span>
@@ -267,4 +267,3 @@ export function RoadmapStageCard({
     </div>
   );
 }
-

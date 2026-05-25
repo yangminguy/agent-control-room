@@ -7,7 +7,12 @@ export type MonitorPacketKind =
   | "handoff-pack"
   | "failed-task-review"
   | "background-research"
-  | "obsidian-note";
+  | "obsidian-note"
+  | "phase-completion"
+  | "failure"
+  | "drift-detection"
+  | "approval-request"
+  | "re-orchestration";
 
 export interface MonitorPacket {
   id: string;

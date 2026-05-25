@@ -7,6 +7,7 @@
  */
 
 import type { RiskLevel } from "../types";
+import type { AgentTeamPlan } from "./subagent-types";
 
 export type { RiskLevel };
 
@@ -67,6 +68,9 @@ export type OrchestrationDecision = {
   contextPackReason?: string;
   hermesMemoryRecommended: boolean;
   vibeKanbanRecommended: boolean;
+  subagentTeamRecommended?: boolean;
+  subagentTeam?: AgentTeamPlan;
+  subagentReuseReason?: string;
   nextAction: string;
   reasoning: string[];
   createdAt: string;

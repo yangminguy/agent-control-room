@@ -110,14 +110,16 @@ export type OrchestrationState = {
   approvals: ApprovalRequest[];
   feedbackOutputs: FeedbackLoopOutput[];
   statusFilter: DispatchJobStatus | "all";
+  isDemoMode: boolean;
 };
 
 const INITIAL_STATE: OrchestrationState = {
-  jobs: SEED_JOBS,
+  jobs: [],
   results: [],
-  approvals: [SEED_APPROVAL],
-  feedbackOutputs: [SEED_FEEDBACK],
+  approvals: [],
+  feedbackOutputs: [],
   statusFilter: "all",
+  isDemoMode: false,
 };
 
 // ── Reducer ───────────────────────────────────────────────────────────────────
@@ -129,7 +131,8 @@ type Action =
   | { type: "COLLECT_RESULT"; payload: AgentResult }
   | { type: "MOCK_APPROVE"; payload: string }
   | { type: "MOCK_REJECT"; payload: string }
-  | { type: "ADD_FEEDBACK_OUTPUT"; payload: FeedbackLoopOutput };
+  | { type: "ADD_FEEDBACK_OUTPUT"; payload: FeedbackLoopOutput }
+  | { type: "TOGGLE_DEMO_MODE" };
 
 function reducer(state: OrchestrationState, action: Action): OrchestrationState {
   switch (action.type) {
@@ -199,6 +202,25 @@ function reducer(state: OrchestrationState, action: Action): OrchestrationState 
         feedbackOutputs: [action.payload, ...state.feedbackOutputs],
       };
 
+    case "TOGGLE_DEMO_MODE": {
+      const nextDemo = !state.isDemoMode;
+      return {
+        ...state,
+        isDemoMode: nextDemo,
+        jobs: nextDemo
+          ? [...state.jobs, ...SEED_JOBS]
+          : state.jobs.filter((j) => !SEED_JOBS.some((s) => s.id === j.id)),
+        approvals: nextDemo
+          ? [...state.approvals, SEED_APPROVAL]
+          : state.approvals.filter((a) => a.id !== SEED_APPROVAL.id),
+        feedbackOutputs: nextDemo
+          ? [...state.feedbackOutputs, SEED_FEEDBACK]
+          : state.feedbackOutputs.filter(
+              (f) => f.nextDispatchJob?.id !== SEED_FEEDBACK.nextDispatchJob?.id
+            ),
+      };
+    }
+
     default:
       return state;
   }
@@ -214,6 +236,7 @@ type OrchestrationContextValue = OrchestrationState & {
   mockApprove: (approvalId: string) => void;
   mockReject: (approvalId: string) => void;
   addFeedbackOutput: (output: FeedbackLoopOutput) => void;
+  toggleDemoMode: () => void;
 };
 
 const OrchestrationContext = createContext<OrchestrationContextValue | null>(null);
@@ -304,6 +327,10 @@ export function OrchestrationProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "ADD_FEEDBACK_OUTPUT", payload: output });
   };
 
+  const toggleDemoMode = () => {
+    dispatch({ type: "TOGGLE_DEMO_MODE" });
+  };
+
   const value: OrchestrationContextValue = {
     ...state,
     setStatusFilter,
@@ -313,6 +340,7 @@ export function OrchestrationProvider({ children }: { children: ReactNode }) {
     mockApprove,
     mockReject,
     addFeedbackOutput,
+    toggleDemoMode,
   };
 
   return (

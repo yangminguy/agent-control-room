@@ -145,14 +145,19 @@ export function ResultCollectionPanel({
 
   return (
     <div className="space-y-6">
+      <div className="bg-red-50 text-red-800 p-3 rounded text-sm font-semibold mb-4 border border-red-200">
+        이 영역은 수동 결과 입력/개발자 검증용입니다. 일반 실행 흐름에서는 Workbench와 Runner 결과를 사용합니다.
+      </div>
+
       {/* Dispatch section */}
       <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
         <div>
-          <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-1">
-            Dispatch to Agent
+          <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-1 flex items-center">
+            <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-[10px] mr-2">[개발자용]</span>
+            에이전트 강제 디스패치
           </p>
           <p className="text-xs text-text-secondary">
-            Runs a queued safe job or an approved risky job through the server dispatch adapter.
+            대기 중인 안전 작업 또는 승인된 위험 작업을 서버 디스패치 어댑터로 실행합니다.
           </p>
         </div>
 
@@ -161,10 +166,10 @@ export function ResultCollectionPanel({
             value={selectedJobId}
             onChange={(e) => setSelectedJobId(e.target.value)}
             disabled={isDispatching || dispatchableJobs.length === 0}
-            className="min-w-0 flex-1 rounded border border-border bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-pink-primary disabled:opacity-40"
+            className="min-w-0 flex-1 rounded border border-border bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-zinc-500 disabled:opacity-40"
           >
             {dispatchableJobs.length === 0 ? (
-              <option value="">No dispatchable jobs</option>
+              <option value="">디스패치 가능한 작업 없음</option>
             ) : (
               dispatchableJobs.map((job) => (
                 <option key={job.id} value={job.id}>
@@ -177,9 +182,9 @@ export function ResultCollectionPanel({
             type="button"
             onClick={handleDispatch}
             disabled={isDispatching || dispatchableJobs.length === 0 || !selectedJobId}
-            className="px-3 py-2 rounded border border-pink-primary bg-pink-primary text-white text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+            className="px-3 py-2 rounded border border-zinc-600 bg-zinc-800 text-zinc-100 text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-700 transition-colors"
           >
-            {isDispatching ? "Dispatching..." : "Dispatch to Agent"}
+            {isDispatching ? "디스패치 중..." : "[개발자용] 대기열 작업 강제 디스패치"}
           </button>
         </div>
 
@@ -193,11 +198,12 @@ export function ResultCollectionPanel({
       {/* Input section */}
       <div className="rounded-lg border border-border bg-surface-2 p-4 space-y-3">
         <div>
-          <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-1">
-            Paste Agent Result JSON
+          <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-1 flex items-center">
+            <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-[10px] mr-2">[개발자용]</span>
+            에이전트 결과 JSON 붙여넣기
           </p>
           <p className="text-xs text-text-secondary">
-            Paste a JSON object matching the AgentResult schema. Use &quot;Parse JSON&quot; to validate before collecting.
+            AgentResult 스키마에 맞는 JSON 객체를 붙여넣고, 수집 전에 &quot;[개발자용] JSON 검증&quot;으로 확인하세요.
           </p>
         </div>
 
@@ -206,7 +212,7 @@ export function ResultCollectionPanel({
           onChange={(e) => setJsonInput(e.target.value)}
           rows={8}
           placeholder='{"id": "result-...", "dispatchJobId": "job-...", "taskId": "task-...", "agentId": "claude-code", "rawOutput": "...", "resultStatus": "pass", "timestamp": "2026-05-21T..."}'
-          className="w-full rounded border border-border bg-surface px-3 py-2 text-xs font-mono text-text-primary placeholder:text-text-secondary resize-y focus:outline-none focus:border-pink-primary"
+          className="w-full rounded border border-border bg-surface px-3 py-2 text-xs font-mono text-text-primary placeholder:text-text-secondary resize-y focus:outline-none focus:border-zinc-500"
         />
 
         <div className="flex items-center gap-2">
@@ -214,21 +220,21 @@ export function ResultCollectionPanel({
             type="button"
             onClick={handleParse}
             disabled={!jsonInput.trim()}
-            className="px-3 py-1.5 rounded border border-border bg-surface text-xs font-medium text-text-secondary hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 rounded border border-zinc-400 bg-zinc-100 text-xs font-medium text-zinc-700 hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            Parse JSON
+            [개발자용] JSON 검증
           </button>
           <button
             type="button"
             onClick={handleCollect}
             disabled={!parsed}
-            className="px-3 py-1.5 rounded border border-pink-primary bg-pink-primary text-white text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+            className="px-3 py-1.5 rounded border border-zinc-600 bg-zinc-800 text-zinc-100 text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-700 transition-colors"
           >
-            Collect Result
+            [개발자용] 결과 수집
           </button>
           {parsed && (
             <span className="text-xs text-emerald-400 font-medium">
-              Valid — ready to collect
+              JSON 검증 완료
             </span>
           )}
         </div>
@@ -241,12 +247,12 @@ export function ResultCollectionPanel({
 
         {parsed && (
           <div className="rounded border border-emerald-700 bg-emerald-950/40 px-3 py-2 space-y-1">
-            <p className="text-xs font-semibold text-emerald-300 uppercase tracking-wide">Parsed Preview</p>
+            <p className="text-xs font-semibold text-emerald-300 uppercase tracking-wide">검증 미리보기</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-text-secondary">
               <span>ID: <span className="font-mono text-text-primary">{parsed.id}</span></span>
-              <span>Agent: <span className="text-text-primary">{parsed.agentId}</span></span>
-              <span>Task: <span className="font-mono text-text-primary">{parsed.taskId}</span></span>
-              <span className="flex items-center gap-1">Status: <StatusBadge status={parsed.resultStatus} /></span>
+              <span>에이전트: <span className="text-text-primary">{parsed.agentId}</span></span>
+              <span>태스크: <span className="font-mono text-text-primary">{parsed.taskId}</span></span>
+              <span className="flex items-center gap-1">상태: <StatusBadge status={parsed.resultStatus} /></span>
             </div>
           </div>
         )}
@@ -254,13 +260,14 @@ export function ResultCollectionPanel({
 
       {/* Results list section */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide px-1">
-          Collected Results ({results.length})
+        <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide px-1 flex items-center">
+          <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-[10px] mr-2">[개발자용]</span>
+          수집된 결과 ({results.length})
         </p>
 
         {sortedResults.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border p-6 text-center">
-            <p className="text-sm text-text-secondary">No results collected yet.</p>
+            <p className="text-sm text-text-secondary">아직 수집된 결과가 없습니다.</p>
           </div>
         ) : (
           <div className="rounded-lg border border-border overflow-hidden">

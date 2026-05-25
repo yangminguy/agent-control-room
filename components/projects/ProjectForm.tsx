@@ -11,7 +11,7 @@ export function ProjectForm() {
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 bg-pink-primary text-white px-5 py-2.5 rounded-lg hover:bg-pink-soft font-bold transition-colors shadow-lg shadow-pink-primary/20"
+        className="flex items-center gap-2 bg-zinc-900 border border-zinc-950 text-white px-5 py-2.5 rounded-lg hover:bg-zinc-800 font-bold transition-colors shadow-sm"
       >
         <Plus className="w-4 h-4" />
         New Project
@@ -72,7 +72,7 @@ export function ProjectForm() {
           </button>
           <button 
             type="submit"
-            className="px-5 py-2.5 bg-pink-primary text-white font-bold rounded-lg hover:bg-pink-soft transition-colors shadow-lg shadow-pink-primary/20"
+            className="px-5 py-2.5 bg-zinc-900 border border-zinc-950 text-white font-bold rounded-lg hover:bg-zinc-800 transition-colors shadow-sm"
           >
             Save Project
           </button>

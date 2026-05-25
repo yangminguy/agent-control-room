@@ -95,7 +95,7 @@ export function ConversationToJobPanel() {
           type="button"
           onClick={handleGenerate}
           disabled={isGenerating || !prompt.trim()}
-          className="px-4 py-2 rounded bg-pink-primary text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="px-4 py-2 rounded bg-zinc-900 border border-zinc-950 text-white text-sm font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
         >
           {isGenerating ? "Generating..." : "Generate Jobs"}
         </button>

@@ -1,9 +1,10 @@
-import { describe, expect, it, afterEach, beforeEach } from "@jest/globals";
+import { describe, expect, it, afterEach, jest } from "@jest/globals";
 import { POST } from "../app/api/orchestration/dispatch/route";
 import type { DispatchJob } from "../lib/types";
 import { AntigravityCliAdapter } from "../lib/dispatch/adapters/antigravity-cli-adapter";
 import { classifyCodexOutput } from "../lib/dispatch/adapters/codex-cli-adapter";
 import { ApprovalRequestStore } from "../lib/approval/approval-request-store";
+import { resetRateLimiter } from "../lib/dispatch/rate-limiter";
 
 const baseJob: DispatchJob = {
   id: "job-test-001",
@@ -28,20 +29,34 @@ describe("Phase 19 dispatch API", () => {
   const originalPath = process.env.PATH;
 
   afterEach(() => {
+    jest.restoreAllMocks();
+    resetRateLimiter();
     delete process.env.MOCK_DISPATCH;
     delete process.env.CODEX_MOCK_MODE;
     process.env.PATH = originalPath;
   });
 
-  it("returns a valid AgentResult in default mock mode", async () => {
+  it("requires explicit mock mode for dispatch endpoint simulation", async () => {
     const response = await POST(requestFor(baseJob));
+    const payload = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(payload.success).toBe(false);
+    expect(payload.error).toContain("Use /api/runner");
+  });
+
+  it("returns a valid AgentResult when mock mode is explicitly enabled", async () => {
+    process.env.MOCK_DISPATCH = "true";
+
+    const response = await POST(requestFor({ ...baseJob, id: "job-mock-enabled-001" }));
     const payload = await response.json();
 
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
-    expect(payload.result.dispatchJobId).toBe(baseJob.id);
+    expect(payload.result.dispatchJobId).toBe("job-mock-enabled-001");
     expect(payload.result.agentId).toBe(baseJob.agentId);
-    expect(payload.result.resultStatus).toBe("pass");
+    expect(payload.result.resultStatus).toBe("blocked");
+    expect(payload.isMockExecution).toBe(true);
   });
 
   it("blocks risky jobs that are not approved", async () => {
@@ -61,6 +76,17 @@ describe("Phase 19 dispatch API", () => {
   });
 
   it("allows approved risky jobs", async () => {
+    process.env.MOCK_DISPATCH = "true";
+    jest.spyOn(ApprovalRequestStore.prototype, "getByDispatchJobId").mockResolvedValue([
+      {
+        id: "approval-risky-approved-001",
+        dispatchJobId: "job-risky-approved-001",
+        status: "approved",
+        createdAt: new Date().toISOString(),
+        resolvedAt: new Date().toISOString(),
+      },
+    ]);
+
     const response = await POST(
       requestFor({
         ...baseJob,
@@ -68,6 +94,7 @@ describe("Phase 19 dispatch API", () => {
         riskLevel: "high",
         status: "approved",
         approvedAt: new Date().toISOString(),
+        approvalToken: "approval-token-test",
       }),
     );
     const payload = await response.json();
@@ -144,7 +171,7 @@ describe("Phase 19 dispatch API", () => {
     });
 
     expect(result.agentId).toBe("antigravity");
-    expect(result.resultStatus).toBe("pass");
+    expect(result.resultStatus).toBe("blocked");
     expect(result.rawOutput).toContain("[MOCK] Antigravity job");
   });
 });

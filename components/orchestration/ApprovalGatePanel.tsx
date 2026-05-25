@@ -10,6 +10,7 @@ export interface ApprovalGatePanelProps {
   onApprove: (jobId: string, approverNote?: string) => Promise<void>;
   onReject: (jobId: string, approverNote?: string) => Promise<void>;
   isLoading?: boolean;
+  isMock?: boolean;
 }
 
 /**
@@ -23,6 +24,7 @@ export function ApprovalGatePanel({
   onApprove,
   onReject,
   isLoading = false,
+  isMock = false,
 }: ApprovalGatePanelProps) {
   const [approverNote, setApproverNote] = useState<string>("");
   const [actionInProgress, setActionInProgress] = useState<"approve" | "reject" | null>(null);
@@ -103,16 +105,24 @@ export function ApprovalGatePanel({
         <button
           onClick={handleReject}
           disabled={isLoading || actionInProgress !== null}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition disabled:cursor-not-allowed ${
+            isMock
+              ? "bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border border-zinc-600 disabled:bg-zinc-400"
+              : "bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-400"
+          }`}
         >
-          {actionInProgress === "reject" ? "거절 중..." : "거절"}
+          {actionInProgress === "reject" ? "거절 처리 중..." : (isMock ? "[개발자용] 모의 거절" : "거절하고 중단")}
         </button>
         <button
           onClick={handleApprove}
           disabled={isLoading || actionInProgress !== null}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition disabled:cursor-not-allowed ${
+            isMock
+              ? "bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border border-zinc-600 disabled:bg-zinc-400"
+              : "bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-400"
+          }`}
         >
-          {actionInProgress === "approve" ? "승인 중..." : "승인"}
+          {actionInProgress === "approve" ? "승인 처리 중..." : (isMock ? "[개발자용] 모의 승인" : "승인하고 계속 진행")}
         </button>
       </div>
 

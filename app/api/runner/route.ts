@@ -11,6 +11,14 @@ import {
 import { getAgentRuntime } from "@/lib/agents/runtime-registry";
 import { parseQuotaError, applyQuotaParseResult } from "@/lib/agents/quota-parser";
 import { updateRuntimeDecisionStatus } from "@/lib/storage/runtime-decision-store";
+import { notifyExecutionResult } from "@/lib/monitor/hermes-packet-notifier";
+import { updateWorkspaceStatus, addChangedFile } from "@/lib/workspace/workspace-store";
+import { resolveWorkspace } from "@/lib/workspace/workspace-resolver";
+import { detectDangerousCommand } from "@/lib/agents/dangerous-command-detector";
+import { createActionEnvelope, verifyActionEnvelopeExecution } from "@/lib/agents/action-envelope";
+import { saveActionEnvelope, getActionEnvelope } from "@/lib/agents/action-envelope-store";
+import { writeSubagentPerformanceRecord } from "@/lib/storage/subagent-memory-store";
+import crypto from "crypto";
 
 /**
  * /api/runner — Internal Local Runner Endpoint
@@ -127,6 +135,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // Phase B: Workspace 생성 또는 기존 workspace 조회
+    let workspace;
+    try {
+      workspace = await resolveWorkspace(taskId, agent as "claude-code" | "codex" | "antigravity");
+      await updateWorkspaceStatus(workspace.id, "running");
+    } catch (error) {
+      return new Response(
+        textEncoder.encode(`data: ${JSON.stringify({ log: `[ERROR] Failed to resolve/update workspace: ${error instanceof Error ? error.message : String(error)}`, type: "system" })}\n\n`),
+        { status: 500, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
+
     // SSE 스트림 생성
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -182,6 +202,52 @@ export async function POST(request: Request) {
           let logBuffer: string[] = [];
 
           await new Promise<void>((resolve, reject) => {
+            // Phase E: ActionEnvelope — Dangerous command detection & gate (before execution)
+            const dangerDetection = detectDangerousCommand(prompt);
+            if (dangerDetection.isDangerous) {
+              const actionType = dangerDetection.actionType || "destructive_git";
+              const envelope = createActionEnvelope({
+                taskId,
+                actionType,
+                command: prompt,
+                changedFiles: [],
+                riskLevel: "high",
+                riskExplanation: dangerDetection.reason || "Dangerous operation detected",
+                rollbackPlan: "Revert commit or manual intervention required",
+                requiredChecks: ["code_review", "safety_validation"],
+                expiresInMinutes: 30,
+              });
+
+              saveActionEnvelope(envelope).then(() => {
+                controller.enqueue(encode(`[SAFETY] Dangerous command detected: ${dangerDetection.reason}`, "system"));
+                controller.enqueue(encode(`[SAFETY] ActionEnvelope created: ${envelope.id}`, "system"));
+                controller.enqueue(encode(`[SAFETY] Execution blocked pending approval. Please review and approve in Control Room.`, "system"));
+
+                // Update execution log with boundary_violation status (using existing type)
+                updateExecutionLog(executionLog.id, {
+                  completedAt: new Date().toISOString(),
+                  exitCode: 403,
+                  logLines: [
+                    `[SAFETY] Dangerous command detected: ${dangerDetection.reason}`,
+                    `[SAFETY] ActionEnvelope: ${envelope.id}`,
+                    `[SAFETY] Execution blocked. Approval required.`,
+                  ],
+                  status: "boundary_violation",
+                }).catch((error) => {
+                  controller.enqueue(encode(`[WARNING] Failed to update execution log: ${error instanceof Error ? error.message : String(error)}`, "system"));
+                }).finally(() => {
+                  controller.close();
+                  resolve();
+                });
+              }).catch((error) => {
+                controller.enqueue(encode(`[ERROR] Failed to create ActionEnvelope: ${error instanceof Error ? error.message : String(error)}`, "system"));
+                controller.close();
+                reject(error);
+              });
+              return;
+            }
+
+            // Safe command execution
             spawnAgent({
               agent,
               prompt,
@@ -232,6 +298,28 @@ export async function POST(request: Request) {
                       ]
                     : [];
 
+                  // Phase B: Workspace에 changed files 추가
+                  try {
+                    const changedFiles = collectChangedFiles(cwd);
+                    for (const filePath of changedFiles) {
+                      await addChangedFile(workspace.id, filePath);
+                    }
+                  } catch (error) {
+                    controller.enqueue(encode(`[WARNING] Failed to record changed files in workspace: ${error instanceof Error ? error.message : String(error)}`, "system"));
+                  }
+
+                  // Phase B: Workspace 상태 업데이트
+                  const workspaceStatus = boundaryViolation
+                    ? "needs_review"
+                    : exitCode === 0
+                      ? "needs_review"
+                      : "qa_failed";
+                  try {
+                    await updateWorkspaceStatus(workspace.id, workspaceStatus);
+                  } catch (error) {
+                    controller.enqueue(encode(`[WARNING] Failed to update workspace status: ${error instanceof Error ? error.message : String(error)}`, "system"));
+                  }
+
                   // ExecutionLog 업데이트
                   await updateExecutionLog(executionLog.id, {
                     completedAt: new Date().toISOString(),
@@ -252,6 +340,55 @@ export async function POST(request: Request) {
                     controller.enqueue(encode(`[REVIEW_BLOCKED] Forbidden files touched: ${boundaryCheck.forbiddenFiles.join(", ")}`, "system"));
                     controller.enqueue(encode(`[REVIEW_BLOCKED] Why it matters: ${boundaryCheck.reason}`, "system"));
                     controller.enqueue(encode(`[REVIEW_BLOCKED] What to do next: ${boundaryCheck.nextAction}`, "system"));
+                  }
+
+                  // Telegram 알림 (비동기, non-blocking)
+                  const notifyStatus = boundaryViolation ? "drift" : exitCode === 0 ? "success" : "failure";
+                  const notifySummary = boundaryViolation
+                    ? `File boundary violation: ${boundaryCheck.forbiddenFiles.join(", ")}`
+                    : exitCode === 0
+                      ? `Task "${planTask.title}" completed by ${agent}`
+                      : `Task "${planTask.title}" failed (exit ${exitCode})`;
+                  notifyExecutionResult(taskId, notifyStatus, notifySummary).catch(() => {});
+
+                  // Phase D: SubagentPerformance auto-record (비동기, non-blocking)
+                  try {
+                    const recordId = crypto.randomUUID();
+                    const executionStartedAt = new Date(executionLog.startedAt).getTime();
+                    const executionEndedAt = new Date().getTime();
+                    const durationMs = executionEndedAt - executionStartedAt;
+
+                    const performanceStatus: "success" | "failure" | "partial" = boundaryViolation
+                      ? "partial"
+                      : exitCode === 0
+                        ? "success"
+                        : "failure";
+
+                    const changedFiles = collectChangedFiles(cwd);
+
+                    const performanceRecord: Parameters<typeof writeSubagentPerformanceRecord>[0] = {
+                      id: recordId,
+                      subagentId: agent,
+                      parentAgent: agent as "claude-code" | "codex" | "antigravity",
+                      taskId,
+                      workspaceId: workspace.id,
+                      executedAt: executionLog.startedAt,
+                      durationMs,
+                      status: performanceStatus,
+                      qualityScore: exitCode === 0 && !boundaryViolation ? 100 : boundaryViolation ? 50 : 0,
+                      changedFiles,
+                      drift: boundaryViolation,
+                      scopeCreep: boundaryViolation,
+                      summary: `${agent} executed task "${planTask.title}". Status: ${performanceStatus}. Exit code: ${exitCode}. Duration: ${durationMs}ms.`,
+                      errorMessage: exitCode !== 0 || boundaryViolation ? `Exit code: ${exitCode}. Boundary violation: ${boundaryViolation}.` : undefined,
+                      recommendReuse: exitCode === 0 && !boundaryViolation,
+                      recommendRetire: false,
+                    };
+
+                    await writeSubagentPerformanceRecord(performanceRecord);
+                  } catch (error) {
+                    // Log but don't fail execution
+                    controller.enqueue(encode(`[WARNING] Failed to record subagent performance: ${error instanceof Error ? error.message : String(error)}`, "system"));
                   }
 
                   controller.enqueue(encode(`[DONE] Exit code: ${exitCode}`, "system"));

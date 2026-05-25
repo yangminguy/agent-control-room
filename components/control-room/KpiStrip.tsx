@@ -52,10 +52,10 @@ export function KpiStrip({
         return (
           <div
             key={index}
-            className={`group relative overflow-hidden rounded-xl border border-border bg-surface p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-primary/30 ${card.bgGlow}`}
+            className={`group relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-primary/30 ${card.bgGlow}`}
           >
             <div className="flex items-center gap-4">
-              <div className="p-2.5 bg-surface-2 rounded-lg border border-border/80 group-hover:border-pink-primary/10 transition-colors">
+              <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200 group-hover:border-pink-primary/10 transition-colors">
                 <Icon className={`w-5 h-5 ${card.iconColor}`} />
               </div>
               <div>

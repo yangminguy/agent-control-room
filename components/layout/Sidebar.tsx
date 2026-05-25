@@ -34,7 +34,7 @@ export function Sidebar() {
 
   const renderNavGroup = (title: string, items: typeof CORE_ITEMS) => (
     <div className="space-y-2">
-      <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-text-secondary/60">
+      <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
         {title}
       </p>
       <div className="space-y-1">
@@ -47,12 +47,12 @@ export function Sidebar() {
               href={item.href}
               className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:translate-x-1 ${
                 isActive
-                  ? "bg-pink-primary/10 text-pink-primary border border-pink-primary/20"
-                  : "text-text-secondary hover:text-text-primary hover:bg-surface border border-transparent"
+                  ? "bg-pink-50/60 text-pink-600 border border-pink-200"
+                  : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent"
               }`}
             >
               <Icon className={`w-4 h-4 shrink-0 transition-transform ${
-                isActive ? "text-pink-primary" : "text-text-secondary group-hover:text-text-primary"
+                isActive ? "text-pink-600" : "text-zinc-400 group-hover:text-zinc-500"
               }`} />
               <span>{item.label}</span>
             </Link>
@@ -63,13 +63,13 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-[240px] flex flex-col bg-surface border-r border-border min-h-[calc(100vh-57px)]">
+    <aside className="w-[240px] flex flex-col bg-white border-r border-zinc-200 min-h-[calc(100vh-57px)]">
       <nav className="flex-1 py-6 px-4 space-y-6">
         {renderNavGroup("Core Tools", CORE_ITEMS)}
         {renderNavGroup("Advanced Tools", ADVANCED_ITEMS)}
       </nav>
-      <div className="p-4 border-t border-border">
-        <p className="text-xs text-text-secondary/50 text-center">
+      <div className="p-4 border-t border-zinc-200">
+        <p className="text-xs text-zinc-400 text-center">
           Agent Control Room v1.0
         </p>
       </div>
