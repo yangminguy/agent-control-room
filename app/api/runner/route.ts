@@ -12,6 +12,8 @@ import { getAgentRuntime } from "@/lib/agents/runtime-registry";
 import { parseQuotaError, applyQuotaParseResult } from "@/lib/agents/quota-parser";
 import { updateRuntimeDecisionStatus } from "@/lib/storage/runtime-decision-store";
 import { notifyExecutionResult } from "@/lib/monitor/hermes-packet-notifier";
+import { updateWorkspaceStatus, addChangedFile } from "@/lib/workspace/workspace-store";
+import { resolveWorkspace } from "@/lib/workspace/workspace-resolver";
 
 /**
  * /api/runner — Internal Local Runner Endpoint
@@ -128,6 +130,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // Phase B: Workspace 생성 또는 기존 workspace 조회
+    let workspace;
+    try {
+      workspace = await resolveWorkspace(taskId, agent as "claude-code" | "codex" | "antigravity");
+      await updateWorkspaceStatus(workspace.id, "running");
+    } catch (error) {
+      return new Response(
+        textEncoder.encode(`data: ${JSON.stringify({ log: `[ERROR] Failed to resolve/update workspace: ${error instanceof Error ? error.message : String(error)}`, type: "system" })}\n\n`),
+        { status: 500, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }
+
     // SSE 스트림 생성
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -232,6 +246,28 @@ export async function POST(request: Request) {
                         `[BOUNDARY] Next action: ${boundaryCheck.nextAction}`,
                       ]
                     : [];
+
+                  // Phase B: Workspace에 changed files 추가
+                  try {
+                    const changedFiles = collectChangedFiles(cwd);
+                    for (const filePath of changedFiles) {
+                      await addChangedFile(workspace.id, filePath);
+                    }
+                  } catch (error) {
+                    controller.enqueue(encode(`[WARNING] Failed to record changed files in workspace: ${error instanceof Error ? error.message : String(error)}`, "system"));
+                  }
+
+                  // Phase B: Workspace 상태 업데이트
+                  const workspaceStatus = boundaryViolation
+                    ? "needs_review"
+                    : exitCode === 0
+                      ? "needs_review"
+                      : "qa_failed";
+                  try {
+                    await updateWorkspaceStatus(workspace.id, workspaceStatus);
+                  } catch (error) {
+                    controller.enqueue(encode(`[WARNING] Failed to update workspace status: ${error instanceof Error ? error.message : String(error)}`, "system"));
+                  }
 
                   // ExecutionLog 업데이트
                   await updateExecutionLog(executionLog.id, {

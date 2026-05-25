@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
+import { createWorkspace, listWorkspacesByTask } from "./workspace-store";
+import type { AgentWorkspace } from "./agent-workspace-types";
 
 // ─── Result type ─────────────────────────────────────────────────────────────
 
@@ -130,4 +132,31 @@ export async function getWorktreePathCandidates(baseDir: string): Promise<Result
       error: `Failed to list worktree candidates in "${worktreesDir}": ${String(error)}`,
     };
   }
+}
+
+// ─── High-level workspace resolution ──────────────────────────────────────────
+
+/**
+ * Resolve a workspace for a given task.
+ * If a workspace already exists for this task, return it.
+ * Otherwise, create a new one.
+ *
+ * Phase B: Every execution must have a mandatory workspace.
+ */
+export async function resolveWorkspace(
+  taskId: string,
+  primaryAgent: "claude-code" | "codex" | "antigravity",
+): Promise<AgentWorkspace> {
+  // Try to find existing workspace for this task
+  const existingResult = await listWorkspacesByTask(taskId);
+  if (existingResult.success && existingResult.data.length > 0) {
+    return existingResult.data[0];
+  }
+
+  // Create new workspace
+  const createResult = await createWorkspace(taskId, primaryAgent);
+  if (!createResult.success) {
+    throw new Error(`Failed to create workspace: ${createResult.error}`);
+  }
+  return createResult.data;
 }
