@@ -231,6 +231,12 @@ export type PlanTask = {
   doNotTouchFiles?: string[];          // 실행 경계: 수정 금지 파일/패턴
   lastSessionReportId?: string | null; // 실행 결과 링크
   branchName?: string | null;          // 이 태스크용 git branch
+  dependsOn?: string[];                // Phase 16.5: 이 task가 완료를 기다리는 task id 목록
+  clarificationAnswers?: Array<{       // Phase 18: CTO가 답변한 clarification Q&A 누적
+    question: string;
+    answer: string;
+    answeredAt: string;
+  }>;
 
   // ── 실행 후 채워지는 KanbanCard 필드 ──
   changedFiles?: string[] | null;                // 변경 파일

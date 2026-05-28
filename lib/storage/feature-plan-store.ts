@@ -230,6 +230,35 @@ export async function updateKanbanCardResult(
   return persistPlan(updatedPlan);
 }
 
+/**
+ * Phase 18: append CTO clarification Q&A pairs to a PlanTask.
+ * Idempotent on (question, answer) duplicates within the same call.
+ */
+export async function appendPlanTaskClarification(
+  planId: string,
+  taskId: string,
+  items: Array<{ question: string; answer: string }>,
+): Promise<FeaturePlan> {
+  const plan = await getFeaturePlanById(planId);
+  if (!plan) throw new Error(`FeaturePlan not found: ${planId}`);
+  const now = new Date().toISOString();
+  const updatedTasks: PlanTask[] = plan.tasks.map((task) => {
+    if (task.id !== taskId) return task;
+    const existing = task.clarificationAnswers ?? [];
+    const additions = items.map((it) => ({
+      question: it.question,
+      answer: it.answer,
+      answeredAt: now,
+    }));
+    return {
+      ...task,
+      clarificationAnswers: [...existing, ...additions],
+      updatedAt: now,
+    };
+  });
+  return persistPlan({ ...plan, tasks: updatedTasks, updatedAt: now });
+}
+
 export async function prepareLoopContinuation(
   planId: string,
   currentTaskId: string,
