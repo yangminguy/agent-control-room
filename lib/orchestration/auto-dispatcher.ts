@@ -29,6 +29,12 @@ import { getProjectById } from "@/lib/storage/project-actions";
 import { getExecutionLogByTaskId } from "@/lib/storage/execution-log-store";
 import { getDiffSummary, getLogTail } from "@/lib/runner/git-utils";
 import { replanNextPrompt } from "@/lib/orchestration/llm-replanner";
+import {
+  checkPendingClarifications,
+  reassessRisk,
+  sendClarificationRequest,
+  sendRiskReassessment,
+} from "@/lib/orchestration/pre-dispatch-checks";
 import type { PlanTask } from "@/lib/types";
 
 const SUPPORTED_RUNTIMES = new Set<CTOTaskMetadata["runtime"]>(["claude", "codex", "antigravity"]);
@@ -155,6 +161,17 @@ export async function dispatchNextTask(
     };
   }
 
+  // Phase 18.1 pre-flight #1: clarification gate.
+  const clar = checkPendingClarifications(nextTask);
+  if (clar.pending) {
+    await sendClarificationRequest({
+      l5_task_id: meta.l5_task_id,
+      phase: nextTask.title,
+      questions: clar.questions,
+    });
+    return { taskId: nextTask.id, status: "skipped", reason: "needs_clarification" };
+  }
+
   const agent = runtimeToAgent(meta.runtime);
   const token = issueApprovalToken({ planId, taskId: nextTask.id, agent, cwd });
   const basePrompt = nextTask.generatedPrompt ?? nextTask.description ?? nextTask.title;
@@ -165,6 +182,23 @@ export async function dispatchNextTask(
     basePrompt,
     priorContext,
   });
+
+  // Phase 18.1 pre-flight #2: risk re-assessment on final prompt.
+  // Escalation past the original D-level is treated as a gate change; we notify
+  // L5 and skip auto-dispatch when escalated to D3+ so the approval queue
+  // governs the next attempt.
+  const risk = reassessRisk(prompt, meta.risk_level);
+  if (risk.escalated) {
+    await sendRiskReassessment({
+      l5_task_id: meta.l5_task_id,
+      phase: nextTask.title,
+      fromLevel: risk.fromLevel,
+      newLevel: risk.newLevel,
+    });
+    if (risk.newLevel === "D3" || risk.newLevel === "D4" || risk.newLevel === "D5") {
+      return { taskId: nextTask.id, status: "skipped", reason: `risk_escalated:${risk.fromLevel}->${risk.newLevel}` };
+    }
+  }
 
   const base = process.env.ACR_BASE_URL ?? "http://localhost:3001";
   try {

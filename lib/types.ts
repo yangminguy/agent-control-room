@@ -232,6 +232,7 @@ export type PlanTask = {
   lastSessionReportId?: string | null; // 실행 결과 링크
   branchName?: string | null;          // 이 태스크용 git branch
   dependsOn?: string[];                // Phase 16.5: 이 task가 완료를 기다리는 task id 목록
+  clarifyingQuestions?: string[];      // Phase 18.1: dispatch 전에 L5 CTO 답변이 필요한 질문 목록
   clarificationAnswers?: Array<{       // Phase 18: CTO가 답변한 clarification Q&A 누적
     question: string;
     answer: string;
