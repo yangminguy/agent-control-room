@@ -1,5 +1,6 @@
 import { checkUncommittedChanges, createBranch, generateBranchName, validateCwdSafety, getDiffSummary, getLogTail, commitAll } from "@/lib/runner/git-utils";
 import { runAgentWithVerification, promptExpectsFileChanges } from "@/lib/runner/spawn-with-verification";
+import { WARM_SESSIONS_ENABLED, getWarmSession, setWarmSession, newSessionId } from "@/lib/runner/warm-session-store";
 import { coordinateMerge, type MergeCoordinationResult } from "@/lib/runner/merge-coordinator";
 import { addExecutionLog, updateExecutionLog } from "@/lib/storage/execution-log-store";
 import { getFeaturePlanById, updatePlanTaskStatus } from "@/lib/storage/feature-plan-store";
@@ -255,6 +256,23 @@ export async function POST(request: Request) {
 
           // Phase 1: run with timeout + retry + empty-output verification.
           const expectsChanges = promptExpectsFileChanges(planTask.generatedPrompt || prompt);
+
+          // Warm session (claude only): reuse the plan's session across phases so
+          // later phases resume context instead of cold-starting. First claude
+          // phase assigns a new id; subsequent phases resume it.
+          let claudeSessionId: string | undefined;
+          let claudeResume = false;
+          if (WARM_SESSIONS_ENABLED && agent === "claude-code") {
+            const existing = await getWarmSession(planId);
+            if (existing) {
+              claudeSessionId = existing;
+              claudeResume = true;
+            } else {
+              claudeSessionId = newSessionId();
+              await setWarmSession(planId, claudeSessionId);
+            }
+          }
+
           // Phase 6 — accumulate measured token usage across attempts (capture
           // mode only; stays zeroed for plain runs / non-claude agents).
           let gotTokens = false;
@@ -265,6 +283,8 @@ export async function POST(request: Request) {
             cwd,
             expectsChanges,
             onLog: onLogLine,
+            claudeSessionId,
+            claudeResume,
             onTokens: (t) => {
               gotTokens = true;
               tokenAcc.input_tokens += t.input_tokens;

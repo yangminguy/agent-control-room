@@ -29,6 +29,9 @@ export interface RunWithVerificationOptions {
   /** Phase 6 — forwarded to spawnAgent; fires with measured token usage per run
    * (claude capture mode only). Caller accumulates across retries. */
   onTokens?: (tokens: import("@/lib/runner/claude-token-parser").TokenUsage) => void;
+  /** Warm-session id (claude) forwarded to spawnAgent. */
+  claudeSessionId?: string;
+  claudeResume?: boolean;
   /** 테스트 주입용. 기본은 실제 spawnAgent. */
   spawnFn?: (opts: SpawnAgentOptions) => Promise<void>;
   /** 테스트 주입용. 기본은 git 미커밋 변경 파일 수. */
@@ -100,6 +103,8 @@ export async function runAgentWithVerification(
     expectsChanges,
     onLog,
     onTokens,
+    claudeSessionId,
+    claudeResume,
   } = opts;
   const envAttempts = Number(process.env.ACR_MAX_ATTEMPTS);
   const defaultAttempts = Number.isFinite(envAttempts) && envAttempts >= 1 ? envAttempts : 2;
@@ -132,6 +137,8 @@ export async function runAgentWithVerification(
         timeoutMs,
         onLog,
         onTokens,
+        claudeSessionId,
+        claudeResume,
         onComplete: (code: number) => resolve(code),
       }).catch((err) => {
         onLog(`[ERROR] spawn failed: ${err instanceof Error ? err.message : String(err)}`);

@@ -22,6 +22,11 @@ export interface SpawnAgentOptions {
   /** Fires once with measured token usage when the claude result event is seen
    * (only in capture mode). Other agents / plain mode never call it. */
   onTokens?: (tokens: TokenUsage) => void;
+  /** Warm-session id for claude (assigned on the plan's first claude phase,
+   * resumed thereafter). Ignored for codex/antigravity. */
+  claudeSessionId?: string;
+  /** When true, `--resume <id>`; otherwise `--session-id <id>` (first phase). */
+  claudeResume?: boolean;
 }
 
 /** Default agent wall-clock limit (15 min) unless overridden per call or by env. */
@@ -37,7 +42,7 @@ export const DEFAULT_AGENT_TIMEOUT_MS = (() => {
  * - antigravity: `agy --sandbox --add-dir <cwd> -p "prompt"` (실제 agy CLI)
  */
 export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
-  const { agent, prompt, cwd, targetModel, onLog, onComplete, onTokens } = options;
+  const { agent, prompt, cwd, targetModel, onLog, onComplete, onTokens, claudeSessionId, claudeResume } = options;
   const timeoutMs = options.timeoutMs ?? DEFAULT_AGENT_TIMEOUT_MS;
   // Capture tokens only for claude (the only CLI with a parseable usage event)
   // and only when explicitly enabled — keeps the default plain-`-p` live stream.
@@ -87,7 +92,7 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
   let cmd: string;
   let args: string[];
   try {
-    [cmd, ...args] = buildCommand(agent, prompt, cwd, captureTokens);
+    [cmd, ...args] = buildCommand(agent, prompt, cwd, captureTokens, claudeSessionId, claudeResume);
   } catch (error) {
     onLog(`[ERROR] ${error instanceof Error ? error.message : String(error)}`);
     onComplete(1);
@@ -193,13 +198,22 @@ function buildCommand(
   prompt: string,
   cwd: string,
   captureTokens = false,
+  claudeSessionId?: string,
+  claudeResume?: boolean,
 ): string[] {
   if (agent === "claude-code") {
+    const args = ["claude", "-p", prompt];
+    // Warm session: resume the plan's session (context reuse) or assign its id on
+    // the first phase. `--session-id`/`--resume` are caller-controlled → parallel-safe.
+    if (claudeSessionId) {
+      args.push(claudeResume ? "--resume" : "--session-id", claudeSessionId);
+    }
     // stream-json keeps live output (one event per line) while exposing a final
     // result event with token usage. Plain `-p` otherwise (unchanged default).
-    return captureTokens
-      ? ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose"]
-      : ["claude", "-p", prompt];
+    if (captureTokens) {
+      args.push("--output-format", "stream-json", "--verbose");
+    }
+    return args;
   }
 
   if (agent === "codex") {
