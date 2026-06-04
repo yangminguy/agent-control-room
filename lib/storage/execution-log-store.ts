@@ -44,6 +44,11 @@ function rowToExecutionLog(row: DbRow): ExecutionLog {
     exitCode: row.exit_code != null ? (row.exit_code as number) : undefined,
     logLines: (row.log_lines as string[]) ?? [],
     status: row.status as ExecutionLog["status"],
+    input_tokens: row.input_tokens != null ? (row.input_tokens as number) : undefined,
+    output_tokens: row.output_tokens != null ? (row.output_tokens as number) : undefined,
+    total_tokens: row.total_tokens != null ? (row.total_tokens as number) : undefined,
+    estimated_cost_usd:
+      row.estimated_cost_usd != null ? (row.estimated_cost_usd as number) : undefined,
   };
 }
 
@@ -58,6 +63,10 @@ function executionLogToRow(log: ExecutionLog) {
     exit_code: log.exitCode ?? null,
     log_lines: log.logLines,
     status: log.status,
+    input_tokens: log.input_tokens ?? null,
+    output_tokens: log.output_tokens ?? null,
+    total_tokens: log.total_tokens ?? null,
+    estimated_cost_usd: log.estimated_cost_usd ?? null,
   };
 }
 

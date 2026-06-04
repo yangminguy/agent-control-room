@@ -255,12 +255,23 @@ export async function POST(request: Request) {
 
           // Phase 1: run with timeout + retry + empty-output verification.
           const expectsChanges = promptExpectsFileChanges(planTask.generatedPrompt || prompt);
+          // Phase 6 — accumulate measured token usage across attempts (capture
+          // mode only; stays zeroed for plain runs / non-claude agents).
+          let gotTokens = false;
+          const tokenAcc = { input_tokens: 0, output_tokens: 0, total_tokens: 0, estimated_cost_usd: 0 };
           const verify = await runAgentWithVerification({
             agent,
             prompt,
             cwd,
             expectsChanges,
             onLog: onLogLine,
+            onTokens: (t) => {
+              gotTokens = true;
+              tokenAcc.input_tokens += t.input_tokens;
+              tokenAcc.output_tokens += t.output_tokens;
+              tokenAcc.total_tokens += t.total_tokens;
+              tokenAcc.estimated_cost_usd += t.estimated_cost_usd ?? 0;
+            },
           });
           const exitCode = verify.exitCode;
           const emptyOutput = verify.emptyOutput;
@@ -328,12 +339,20 @@ export async function POST(request: Request) {
             controller.enqueue(encode(`[WARNING] Failed to update workspace status: ${error instanceof Error ? error.message : String(error)}`, "system"));
           }
 
-          // ExecutionLog 업데이트
+          // ExecutionLog 업데이트 (+ Phase 6 measured tokens when captured)
           await updateExecutionLog(executionLog.id, {
             completedAt: new Date().toISOString(),
             exitCode,
             logLines: [...logBuffer, ...boundaryLogLines],
             status: executionStatus,
+            ...(gotTokens
+              ? {
+                  input_tokens: tokenAcc.input_tokens,
+                  output_tokens: tokenAcc.output_tokens,
+                  total_tokens: tokenAcc.total_tokens,
+                  estimated_cost_usd: Number(tokenAcc.estimated_cost_usd.toFixed(4)),
+                }
+              : {}),
           });
 
           // 태스크 상태 업데이트

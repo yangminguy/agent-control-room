@@ -322,6 +322,11 @@ export type ExecutionLog = {
   exitCode?: number;
   logLines: string[];           // 캡처된 stdout/stderr
   status: "running" | "done" | "failed" | "review_blocked" | "boundary_violation";
+  // Phase 6 — measured token usage + cost (claude capture mode). Undefined otherwise.
+  input_tokens?: number;
+  output_tokens?: number;
+  total_tokens?: number;
+  estimated_cost_usd?: number;
 };
 
 /** Phase E: Per-check result value */

@@ -1,5 +1,9 @@
 import { spawn } from "child_process";
 import { runAntigravityPrint } from "@/lib/agents/antigravity-runner";
+import { parseClaudeStreamEvent, type TokenUsage } from "@/lib/runner/claude-token-parser";
+
+/** Phase 6 — capture measured claude tokens (opt-in; default keeps plain `-p`). */
+const CAPTURE_TOKENS = process.env.ACR_CAPTURE_TOKENS === "1";
 
 export interface SpawnAgentOptions {
   agent: "claude-code" | "codex" | "antigravity";
@@ -15,6 +19,9 @@ export interface SpawnAgentOptions {
   timeoutMs?: number;
   onLog: (line: string) => void;
   onComplete: (exitCode: number) => void;
+  /** Fires once with measured token usage when the claude result event is seen
+   * (only in capture mode). Other agents / plain mode never call it. */
+  onTokens?: (tokens: TokenUsage) => void;
 }
 
 /** Default agent wall-clock limit (15 min) unless overridden per call or by env. */
@@ -30,8 +37,11 @@ export const DEFAULT_AGENT_TIMEOUT_MS = (() => {
  * - antigravity: `agy --sandbox --add-dir <cwd> -p "prompt"` (실제 agy CLI)
  */
 export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
-  const { agent, prompt, cwd, targetModel, onLog, onComplete } = options;
+  const { agent, prompt, cwd, targetModel, onLog, onComplete, onTokens } = options;
   const timeoutMs = options.timeoutMs ?? DEFAULT_AGENT_TIMEOUT_MS;
+  // Capture tokens only for claude (the only CLI with a parseable usage event)
+  // and only when explicitly enabled — keeps the default plain-`-p` live stream.
+  const captureTokens = CAPTURE_TOKENS && agent === "claude-code";
 
   // Antigravity는 runAntigravityPrint()를 통해 agy CLI를 사용
   if (agent === "antigravity") {
@@ -77,7 +87,7 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
   let cmd: string;
   let args: string[];
   try {
-    [cmd, ...args] = buildCommand(agent, prompt, cwd);
+    [cmd, ...args] = buildCommand(agent, prompt, cwd, captureTokens);
   } catch (error) {
     onLog(`[ERROR] ${error instanceof Error ? error.message : String(error)}`);
     onComplete(1);
@@ -87,6 +97,9 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
   const child = spawn(cmd, args, {
     cwd,
     shell: false,
+    // stdin을 무시(=즉시 EOF)해야 한다. 파이프로 열어두면 codex 등 non-tty 입력을
+    // 기다리는 CLI가 EOF를 못 받아 무한 블록한다(claude는 자체 3s stdin 타임아웃으로 진행).
+    stdio: ["ignore", "pipe", "pipe"],
   });
 
   // Guard so onComplete fires exactly once across close/error/timeout races.
@@ -119,11 +132,33 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
     finish(124);
   }, timeoutMs);
 
+  // In capture mode claude emits stream-json (one JSON object per line, possibly
+  // split across data chunks) — buffer and parse complete lines, forwarding the
+  // human-readable text to the live log and the result event's usage to onTokens.
+  let stdoutBuf = "";
+  const handleStreamLine = (line: string) => {
+    if (!line.trim()) return;
+    const parsed = parseClaudeStreamEvent(line);
+    if (parsed.logText) {
+      parsed.logText.split("\n").forEach((l) => { if (l.trim()) onLog(l); });
+    }
+    if (parsed.tokens && onTokens) onTokens(parsed.tokens);
+  };
+
   child.stdout?.on("data", (data) => {
-    const lines = data.toString().split("\n");
-    lines.forEach((line: string) => {
-      if (line.trim()) onLog(line);
-    });
+    if (!captureTokens) {
+      data.toString().split("\n").forEach((line: string) => {
+        if (line.trim()) onLog(line);
+      });
+      return;
+    }
+    stdoutBuf += data.toString();
+    let idx: number;
+    while ((idx = stdoutBuf.indexOf("\n")) !== -1) {
+      const line = stdoutBuf.slice(0, idx);
+      stdoutBuf = stdoutBuf.slice(idx + 1);
+      handleStreamLine(line);
+    }
   });
 
   child.stderr?.on("data", (data) => {
@@ -134,6 +169,11 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<void> {
   });
 
   child.on("close", (code) => {
+    // Flush any trailing partial line (last JSON object without a newline).
+    if (captureTokens && stdoutBuf.trim()) {
+      handleStreamLine(stdoutBuf);
+      stdoutBuf = "";
+    }
     const exitCode = code ?? 1;
     if (!settled) onLog(`[DONE] Exit code: ${exitCode}`);
     finish(exitCode);
@@ -152,9 +192,14 @@ function buildCommand(
   agent: "claude-code" | "codex",
   prompt: string,
   cwd: string,
+  captureTokens = false,
 ): string[] {
   if (agent === "claude-code") {
-    return ["claude", "-p", prompt];
+    // stream-json keeps live output (one event per line) while exposing a final
+    // result event with token usage. Plain `-p` otherwise (unchanged default).
+    return captureTokens
+      ? ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose"]
+      : ["claude", "-p", prompt];
   }
 
   if (agent === "codex") {
