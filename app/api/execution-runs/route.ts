@@ -14,6 +14,8 @@ import {
   listExecutionRuns,
   listExecutionRunsByTask,
 } from "@/lib/storage/execution-run-store";
+import { triggerHarnessRun } from "@/lib/harness/live-runner";
+import { isRunnerAgent } from "@/lib/execution-run/runner-adapter";
 import type {
   ExecutionAgent,
   ExecutionComplexity,
@@ -93,6 +95,18 @@ export async function POST(request: Request) {
       mode: mode as ExecutionMode,
       riskLevel: body.risk_level as ExecutionRiskLevel | undefined,
     });
+
+    // §14.3 — live execution trigger. Default OFF: the API stays a thin store
+    // layer unless ACR_EXECUTION_TRIGGER=on explicitly opts into running the
+    // real CLI. Fire-and-forget: the run settles asynchronously and the result
+    // is fetched via GET /api/execution-runs/:run_id (§9.2). hermes (non-runner)
+    // is never triggered — it routes to human/monitor flows.
+    if (process.env.ACR_EXECUTION_TRIGGER === "on" && isRunnerAgent(run.agent)) {
+      void triggerHarnessRun(run).catch((err) => {
+        const reason = err instanceof Error ? err.message : String(err);
+        console.error(`[execution-runs] harness trigger failed for ${run.id}: ${reason}`);
+      });
+    }
 
     return Response.json(
       {
