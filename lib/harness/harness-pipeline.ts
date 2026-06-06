@@ -67,6 +67,10 @@ import type {
   HarnessStatus,
   VerificationProfile,
 } from "@/lib/harness/types";
+import {
+  selectContextPack,
+  type SelectContextPackInput,
+} from "@/lib/harness/context-harness";
 
 // ─── injectable agent runner ─────────────────────────────────────────────────
 
@@ -144,7 +148,22 @@ export type RunHarnessOptions = {
    * non-interactive.
    */
   isApproved?: (input: HarnessInput) => boolean;
+  /**
+   * §14.7 Context Harness. When set, step 2 resolves the minimal context pack
+   * for this work type/domain via selectContextPack and uses it to fill an
+   * EMPTY input.contextPack (a pack already provided by pulk CTO is respected).
+   */
+  contextSelection?: SelectContextPackInput;
 };
+
+/** True when a context pack carries no rule/doc paths yet. */
+function isEmptyContextPack(p: HarnessInput["contextPack"]): boolean {
+  return (
+    p.globalRules.length === 0 &&
+    p.pathRules.length === 0 &&
+    p.docsIndex.length === 0
+  );
+}
 
 // ─── §14.4 — harness mode rails ──────────────────────────────────────────────
 
@@ -360,8 +379,15 @@ export async function runHarness(
   const logParts: string[] = [];
   const log = (s: string) => logParts.push(s);
 
-  // Step 2 — Select Context Pack (already resolved by pulk CTO; we just record
-  // it into the log so the handoff is self-contained).
+  // Step 2 — Select Context Pack (§14.7). pulk CTO may pre-resolve it; when it
+  // is empty and a contextSelection is given, we resolve the minimal pack here.
+  if (options.contextSelection && isEmptyContextPack(input.contextPack)) {
+    const selected = selectContextPack(options.contextSelection);
+    input = {
+      ...input,
+      contextPack: { ...input.contextPack, ...selected },
+    };
+  }
   log(
     `# context\nglobalRules: ${input.contextPack.globalRules.length}` +
       ` pathRules: ${input.contextPack.pathRules.length}` +
