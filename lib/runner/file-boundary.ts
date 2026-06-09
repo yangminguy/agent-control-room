@@ -41,6 +41,35 @@ export function collectChangedFiles(cwd: string): string[] {
     .sort();
 }
 
+/**
+ * Count how many *pre-existing* tracked files were modified (not newly created),
+ * from `git status --porcelain`. Used by the L5 verifier to detect the "orphaned
+ * deliverable" failure mode of an integrate phase: new files added but no
+ * existing entry point touched, i.e. the work was never wired in.
+ *
+ * porcelain status (first two chars `XY`): `??` = untracked (new), `A` in the
+ * index column = staged addition (new). Anything else (M/D/R/C, staged or not)
+ * touches a file that already existed in the tree → counts as modified-existing.
+ * Must be read at the same point as collectChangedFiles (before the phase commit),
+ * since after the commit the working tree is clean and porcelain is empty.
+ */
+export function countModifiedExistingFiles(cwd: string): number {
+  const output = execSync("git status --porcelain", {
+    cwd,
+    encoding: "utf8",
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+
+  return output
+    .split("\n")
+    .filter((line) => line.trim().length > 0)
+    .filter((line) => {
+      if (line.startsWith("??")) return false; // untracked = new file
+      if (line[0] === "A") return false; // staged addition = new file
+      return true; // M/D/R/C → a pre-existing file was touched
+    }).length;
+}
+
 export function extractFileBoundariesFromPrompt(prompt: string): FileBoundaryConfig {
   return {
     allowedFiles: extractMarkdownListSection(prompt, [
